@@ -15,11 +15,25 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | Gate | Status |
 |------|--------|
 | G0, final M2 technical plan | **Approved** (Revision 5.1 is the approved M2 technical baseline) |
-| G0b, documentation-only commit | Not authorised |
+| G0b, documentation-only commit of the approved plan | **Complete** (commit `8f920ff`) |
+| Documentation-only commit of the CI and acceptance-test planning reference | One commit authorised. Push requires a separate decision |
 | G1, dependency installation | Not authorised |
 | G2, implementation branch and commit permissions | Not authorised |
 | SG-A, SG-B, SG-C, SG-D | Not authorised |
 | G5, final release | Not authorised |
+
+## CI and acceptance-test planning reference
+
+[CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md) is the frozen, authoritative test register and validator specification for the M2 acceptance criteria. It incorporates the criteria and stage allocation of the approved baseline (`8f920ff`) by reference.
+
+| Coverage field | Value |
+|----------------|-------|
+| Planned | True |
+| Implemented | False |
+| Executed | False |
+| Accepted | False |
+
+It is a planning reference only. It does not authorise tests, workflows, dependency installation or implementation.
 
 ## M1: what is completed
 
@@ -46,8 +60,8 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | `5d00d7f` | Portfolio architecture and content inventory |
 | `e958b17` | Owner decisions recorded (naming, Matrix 360%, privacy) |
 | `5492223` | M1 documentation complete: portfolio areas A to F, progress and QA documents, M2 plan |
-
-A commit that only updates this progress record follows `5492223`. It changes no other file.
+| `d852ab4` | Progress record: commit history and CI results for `5492223` |
+| `8f920ff` | M2 technical baseline approved (Revision 5.1, G0) |
 
 ## CI results
 
@@ -57,3 +71,5 @@ A commit that only updates this progress record follows `5492223`. It changes no
 | `5d00d7f` | pass | pass |
 | `e958b17` | pass | pass |
 | `5492223` | pass | pass |
+| `d852ab4` | pass | pass |
+| `8f920ff` | pass | pass |
