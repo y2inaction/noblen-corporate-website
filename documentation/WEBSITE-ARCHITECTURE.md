@@ -1,128 +1,163 @@
 # Website Architecture & Technical Decisions
 
-_Status: M1, revision 2. Proposal for owner review. No implementation has started._
+_Status: M1, revision 3 (owner-approved structure, consolidated instructions applied). Planning only. No implementation has started._
 
-## 1. Technical decisions
+## 1. Positioning
+
+The site represents **Noblen Technologies Limited**, the parent company and corporate identity of the Noblen ecosystem: a diversified technology, media, property and business solutions group serving organisations, institutions, businesses and communities.
+
+- Creative direction: "Building Businesses. Enabling Innovation. Creating Opportunities."
+- Noblen AI Solutions, Noblen Media Services and Noblen Property Limited are presented as **distinct operating units** that keep their own identity under the parent.
+- No unsupported claims about size, revenue, clients, market share or achievements.
+
+### Standing rules
+
+- The marketplace platform is named **only** "OnlineMart" or "Online Marketplace" in all content, code comments, metadata and SEO text.
+- Clearance records are stored as private fields inside WordPress. They are never committed to this repository, and no seed file contains them.
+- Logos, photographs and client materials are published only with recorded permission.
+- Project names follow the exact brochure wording unless verified evidence supports a correction ("Matrix 360%" is retained).
+- No gold or yellow as a dominant brand colour.
+- Nothing is published where status or evidence is not established. Such entries remain unpublished drafts.
+
+## 2. Technical decisions
 
 | # | Decision | Rationale |
 |---|----------|-----------|
 | 1 | Custom classic PHP WordPress theme (`noblen-corporate`) | Requested deliverable: an installable theme, not static HTML |
-| 2 | Custom post types and taxonomies for group content and the portfolio | Editable by non-technical admins, with no code changes |
+| 2 | Custom post types and taxonomies for all business content | A real CMS. No hardcoded portfolio cards |
 | 3 | No page builder and no required plugin (ACF excluded) | Maintainability, security, hosting compatibility |
 | 4 | Native meta boxes and a theme options page for structured fields | Same, with no external dependency |
-| 5 | Nothing published without a recorded clearance (section 4) | Protects clients, individuals and the group's credibility |
-| 6 | CI validates PHP syntax and coding standards | Keeps `main` stable |
+| 5 | Publication gate: no clearance, no publication | Protects clients, individuals and credibility |
+| 6 | CI validates PHP syntax, coding standards and doc links | Keeps `main` stable |
+| 7 | Business content lives in the database, not in templates | Admins can extend the site without code changes |
 
-### Standing rules
-
-- The marketplace platform is named **only** "OnlineMart" or "Online Marketplace" in all content, code comments and metadata.
-- Clearance records are stored as private fields inside WordPress. They are never committed to this repository.
-- Logos, photographs and client materials are published only with recorded permission.
-- Project names follow the exact brochure wording unless verified evidence supports a correction ("Matrix 360%" is retained).
-
-## 2. Proposed sitemap
+## 3. Sitemap
 
 ```
 Home
-About
-  Company (profile, vision and mission, values)  |  Why Noblen  |  Leadership (only if approved)
+About Noblen            (company, vision and mission, values, why Noblen)
 Group
-  Group directory (interactive structure)
-  Noblen AI Solutions
-  Noblen Media Services
-  Noblen Property Limited
-Industries                                (10 industry pages)
-  each tagged: Active operation | Available service | Strategic growth area
-Solutions                                 (technology, media, property, business)
-Portfolio                                 /projects/   (filterable archive)
-  Media, Broadcasting & Communications
-  ICT, Software & Digital Transformation
-  Climate, Agriculture & Development Technology
-  Real Estate & Property Development
-  Corporate & Strategic Projects
-  Project case-study pages                /projects/{project}/
-Products & Platforms                      /products/   (separate section)
-  Product pages                           /products/{product}/
-Insights                                  (news and editorial)
-Partner With Noblen                       (partnership enquiry)
-Contact                                   (contact enquiry)
+  Group directory       (interactive structure)
+  {Business unit pages} (Noblen AI Solutions, Noblen Media Services, Noblen Property Limited, and any added later)
+Industries              (10 industry pages, each tagged Active operation | Available service | Strategic growth area)
+Solutions and Services
+Portfolio               /projects/      (filterable archive, areas A to E)
+  Project case-study pages
+Products & Platforms    /products/      (area F, separate)
+  Product pages
+Insights                (news, articles, corporate announcements)
+Partnerships            (partnership enquiry)
+Contact                 (contact enquiry)
 Search
-Legal: Privacy | Terms
+Privacy Policy | Terms
 404
 ```
 
-## 3. Portfolio architecture
+## 4. Portfolio architecture
 
-### 3.1 Content types
+### 4.1 Areas
+
+| Area | Name | Content type |
+|------|------|--------------|
+| A | Media, Broadcasting & Communications | Project |
+| B | ICT, Software & Digital Transformation | Project |
+| C | Climate, Agriculture & Development Technology | Project |
+| D | Real Estate & Property Development | Project |
+| E | Corporate & Strategic Projects | Project |
+| F | Products & Digital Platforms | Product |
+
+Projects and products are **separate content types with separate status vocabularies**, so a product is never confused with a completed client assignment.
+
+### 4.2 Content types
 
 | Type | Purpose | URL |
 |------|---------|-----|
-| `noblen_project` | A project, engagement or assignment, with an optional case study | `/projects/{slug}/` |
-| `noblen_product` | A Noblen-built product or platform | `/products/{slug}/` |
-| `noblen_company` | The group companies | `/group/{slug}/` |
+| `noblen_project` | A project or engagement, with an optional case study | `/projects/{slug}/` |
+| `noblen_product` | A Noblen-built product or platform (area F) | `/products/{slug}/` |
+| `noblen_company` | Subsidiaries and business units | `/group/{slug}/` |
 | `noblen_industry` | Industry pages | `/industries/{slug}/` |
 | `noblen_service` | Services and solutions | `/solutions/{slug}/` |
-| `post` | Insights | `/insights/{slug}/` |
+| `post` | Insights: news, articles, announcements | `/insights/{slug}/` |
 
-Projects and products are separate types because their lifecycles differ. A project is a piece of work. A product is something Noblen builds and operates.
+### 4.3 Taxonomies and extensibility
 
-### 3.2 Taxonomies (all editable in the dashboard)
+| Taxonomy | Applies to | How it is managed |
+|----------|------------|-------------------|
+| Portfolio area | project, product | Starter terms A to F, editable |
+| Business unit | project, product | **Auto-synced from `noblen_company` posts.** Adding a subsidiary in the dashboard makes it available as a business unit with no code change |
+| Industry | project, product | Auto-synced from `noblen_industry` posts |
+| Service type | project | Auto-synced from `noblen_service` posts |
 
-| Taxonomy | Applies to | Values (starter set) |
-|----------|------------|----------------------|
-| Portfolio area | project, product | The five areas above |
-| Business unit | project, product | Noblen AI Solutions, Noblen Media Services, Noblen Property Limited, Noblen Technologies Limited |
-| Industry | project, product | The ten industries |
-| Service type | project | Video production, Documentary, Web development, Data analysis, Branding, Event coverage, Consultancy, and so on |
-| Project type | project | Client assignment, Own initiative, Strategic initiative |
+Adding a subsidiary, industry or service is therefore an ordinary dashboard action, and filters pick it up automatically.
 
-### 3.3 Status models
+### 4.4 Status models
 
-**Project status:** Completed assignment | Ongoing engagement | Strategic initiative.
+- **Projects:** Completed Assignment | Ongoing Engagement | Strategic Initiative.
+- **Products:** Concept | In Development | Pilot | Live.
 
-**Product stage (separate):** Concept | In development | Pilot | Live. A product shows "Live" only when its stage field and an evidence note are both set.
+Status is a visible badge on cards and detail pages. A product shows **Live** only when its stage field and an evidence note are both set. If status is not established, the entry stays an unpublished draft.
 
-Status is a visible badge on every card and detail page.
+### 4.5 Case-study fields
 
-### 3.4 Project fields
+Each project has these structured fields. **Each section is displayed only if it is filled in and marked verified and approved.** Empty sections render nothing.
 
-Public fields:
-- Title, summary, featured image, gallery
-- Responsible Noblen entity (links to a group company)
-- Client name (optional)
-- **Noblen's role**: a plain statement of the actual contribution, for example "Videography production for DW"
-- Period (free text) and location
-- Status
-- Optional case-study sections: Brief, Approach, Outcome. Each section is shown only if it is filled in and marked verified.
-- Related industry, product and project links
+| # | Field | Visibility |
+|---|-------|------------|
+| 1 | Project overview | Public when approved |
+| 2 | Client or commissioning organisation | Public when approved |
+| 3 | Responsible Noblen business unit | Public (links to the business unit) |
+| 4 | Industry | Public |
+| 5 | Services delivered | Public when approved |
+| 6 | Project scope | Public when approved |
+| 7 | Noblen's contribution | Public when approved. Plain statement of the actual role (for example "videography production for [outlet]") |
+| 8 | Project approach | Public when approved |
+| 9 | Outcomes and impact | Public **only** when verified, never estimated |
+| 10 | Gallery | Public images only where an image release and client permission are recorded |
+| 11 | Project status | Public badge |
+| 12 | Supporting evidence and publication clearance | **Private**, never rendered |
 
-Private fields (never rendered):
-- **Clearance record**: client consent, logo permission, image release, confidentiality check
-- **Evidence source** and an internal note
+Products use the same pattern with the product stage in place of the project status.
 
-### 3.5 Publication safeguards
+### 4.6 Publication safeguards
 
-1. A project cannot be published unless all clearance boxes are ticked. The editor shows a clear notice and keeps it as a draft.
-2. Empty case-study sections render nothing. There is no filler text on the live site.
-3. Starter entries are installed as **drafts**, never as published pages.
-4. A QA check scans published content for placeholder tokens before release.
-5. Client logos are shown only where logo permission is ticked.
+1. A project or product cannot be published until its clearance record is complete. The editor shows why and keeps it as a draft.
+2. Clearance records are private WordPress fields. They are excluded from any export in the repository and from every public output.
+3. Starter entries ship as **drafts** and contain names only. No clearance data is shipped.
+4. Client logos, photographs and videos render only where their permission flag is set.
+5. A QA scan checks published content for placeholder tokens before every release.
+6. Dates, budgets, contract values, statistics, outcomes, awards and certifications have no automatic or default values. They display only when entered and approved.
 
-### 3.6 Portfolio experience
+## 5. Dashboard capabilities (CMS requirements)
 
-- Project cards: image, title, area, business unit, status badge and a short summary.
-- Filters by portfolio area, business unit, industry, service type and status. They are accessible, work through the URL, and also function without JavaScript through taxonomy archive pages.
-- Detail page: hero, facts panel (entity, client, role, period, status), narrative sections, gallery, related items and an enquiry call to action.
-- The homepage portfolio section shows featured, cleared projects only, and hides itself if there are none.
+Authorised administrators can, without developer help:
 
-## 4. Starter entries (drafts)
+- add and edit projects and products separately;
+- upload approved photographs, and add videos and other media (video embeds load on click, to avoid third-party tracking before consent);
+- assign business units and industries, and set status;
+- write project descriptions and case studies;
+- add subsidiaries and business units, industries and services;
+- publish news, articles and corporate announcements;
+- edit homepage sections, contact details, social links and SEO metadata.
 
-Level A items from [the content inventory](CONTENT-INVENTORY.md) become draft projects. Level B items become draft entries with only the owner's one-line label and **no** description or status. All stay unpublished until the clearance record is complete.
+Custom capabilities allow separating "edit content" from "approve for publication" if the owner wants two roles.
 
-## 5. Other technical architecture (unchanged)
+## 6. Design direction
+
+- **Palette:** deep navy, electric blue, white, light grey, plus restrained complementary accents (for example a muted teal or green). No gold or yellow as a dominant colour. The brochure's gold accent is not carried over.
+- **Style:** modern, corporate and sophisticated, with generous spacing, strong hierarchy and storytelling-led layouts.
+- **Motion:** elegant, restrained, CSS-first, with a reduced-motion fallback.
+- **Photography:** relevant, quality images that have permission. Placeholders are clearly marked, and none ship on live pages.
+- **Responsive and accessible:** desktop, tablet and mobile, with WCAG-minded contrast, keyboard navigation and focus states.
+
+## 7. Cross-cutting concerns
 
 - **Forms:** nonce, sanitisation, honeypot and rate limiting, sent through `wp_mail`. Delivery depends on hosting.
-- **SEO:** Schema.org Organization markup with subsidiaries, Open Graph tags, compatibility with WordPress's built-in sitemap.
-- **Performance:** vanilla JS, lazy loading, caching compatibility.
-- **Security:** escape on output, sanitise on input, capability checks.
-- **QA:** PHP lint and PHPCS in CI, Playwright screenshots, and a WordPress install test where the environment allows.
+- **SEO:** semantic markup, Open Graph, Schema.org Organization markup with subsidiaries, WordPress sitemap compatibility.
+- **Search:** native WordPress search extended to the custom types.
+- **Performance:** vanilla JS, lazy loading, self-hosted fonts, caching compatibility.
+- **Security:** escape on output, sanitise on input, capability checks, no secrets in the repo.
+- **Analytics:** readiness only (a configurable ID field). Nothing loads without configuration.
+
+## 8. Governance
+
+No production changes, DNS or hosting changes, live-database changes, production installs, deployment, merge to `main` or scheduled routines. Every milestone records its exact commit and test evidence. See [PROJECT-PROGRESS.md](PROJECT-PROGRESS.md) and [QA-REPORT.md](QA-REPORT.md).

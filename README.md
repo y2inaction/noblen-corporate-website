@@ -2,7 +2,7 @@
 
 Official corporate website and custom WordPress theme for Noblen Technologies Limited, showcasing its subsidiaries, industries, solutions, projects and corporate ecosystem.
 
-> Status: **M1 in progress** — repository scaffold and website audit. See the roadmap below.
+> Status: **M1 documentation complete, awaiting owner sign-off.** The M2 plan is prepared and not approved. See [PROJECT-PROGRESS.md](documentation/PROJECT-PROGRESS.md).
 
 ## Repository layout
 
@@ -16,8 +16,8 @@ Official corporate website and custom WordPress theme for Noblen Technologies Li
 
 | Milestone | Scope | Status |
 |-----------|-------|--------|
-| M1 | Repository creation and website audit | In progress |
-| M2 | Brand identity and WordPress theme foundation | Pending |
+| M1 | Repository creation, audit and planning | Documentation complete, awaiting sign-off |
+| M2 | Brand identity and WordPress theme foundation | Plan ready, not approved ([plan](documentation/M2-IMPLEMENTATION-PLAN.md)) |
 | M3 | Homepage and corporate navigation | Pending |
 | M4 | Subsidiary websites and group structure | Pending |
 | M5 | Industries, solutions and services | Pending |

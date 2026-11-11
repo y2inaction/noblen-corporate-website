@@ -37,20 +37,32 @@ _Status: M1, revision 2. Internal planning document. It lists names only: no cer
 - **Vision, mission and values** are stated in the brochure and are reusable once approved: Excellence, Innovation, Integrity, Social Responsibility.
 - **Services:** documentary filmmaking, radio and TV production, online content, business branding, web development, data management, events coverage and live streaming.
 - **Founder biography** exists in the brochure. It needs the founder's approval before use.
-- **Branding:** the blue-to-cyan "N" mark, a charcoal palette with gold accents, and bold condensed headings.
+- **Branding:** the blue-to-cyan "N" mark and bold condensed headings. The brochure also uses a charcoal palette with gold accents. **The gold is not carried into the website**: the owner has directed a navy / electric-blue / white / light-grey identity and no gold or yellow as a dominant colour.
 
 ## 3. Portfolio areas
 
-The portfolio is organised into **five portfolio areas**, plus a separate **Products & Platforms** section. These sit alongside, and do not replace, the three group companies and ten industries.
+The portfolio has **six areas (A to F)**. Areas A to E hold projects and engagements. **Area F holds products and platforms and is kept separate**, because a product must never be confused with a completed client assignment. These areas sit alongside, and do not replace, the group companies and ten industries.
 
-| # | Portfolio area | Typical responsible entity |
-|---|----------------|----------------------------|
-| 1 | Media, Broadcasting & Communications | Noblen Media Services |
-| 2 | ICT, Software & Digital Transformation | Noblen AI Solutions / Noblen Technologies (to confirm per project) |
-| 3 | Climate, Agriculture & Development Technology | To confirm per project |
-| 4 | Real Estate & Property Development | Noblen Property Limited |
-| 5 | Corporate & Strategic Projects | Noblen Technologies Limited |
-| - | Products & Platforms (separate section) | To confirm per product |
+| Area | Name | Holds | Typical responsible entity |
+|------|------|-------|----------------------------|
+| A | Media, Broadcasting & Communications | Projects | Noblen Media Services |
+| B | ICT, Software & Digital Transformation | Projects | Noblen AI Solutions / Noblen Technologies (confirm per project) |
+| C | Climate, Agriculture & Development Technology | Projects | Confirm per project |
+| D | Real Estate & Property Development | Projects | Noblen Property Limited |
+| E | Corporate & Strategic Projects | Projects | Noblen Technologies Limited |
+| F | Products & Digital Platforms | Products | Confirm per product |
+
+### Area D business areas (capability scope, no projects asserted)
+
+Real estate development, property investment, joint-venture development, residential and commercial property, property management, land acquisition and development, property marketing and consultancy. Individual projects stay as placeholders until verified.
+
+### Area E scope
+
+Group-level assignments, strategic partnerships, business development, technology infrastructure and other corporate engagements. No entries are asserted.
+
+### Business units
+
+Noblen AI Solutions, Noblen Media Services and Noblen Property Limited are presented as distinct operating units under Noblen Technologies Limited. New subsidiaries or business units are added in the dashboard (see the architecture document).
 
 ## 4. Project register: Level A (documented in the brochure)
 
@@ -124,17 +136,17 @@ These are listed as **drafts only**. **No description, date, status or outcome i
 | Enterprise software solutions, digital platforms, cloud and digital infrastructure | ICT | Capabilities (owner-stated) | Named engagements |
 | Weather station and agricultural information engagements, climate information services, digital agriculture | Climate | Capabilities (owner-stated; the IFAD weather-station item in 4.1 is the documented part) | Further named engagements |
 | Climate resilience initiatives, seasonal forecast communication, digital solutions supporting development programmes | Climate | Capabilities (owner-stated) | Named initiatives, status |
-| Property projects | Real estate | Owner stated that space is needed | Project name, location, land size, partners, status |
+| Property projects (real estate development, property investment, joint-venture development, residential and commercial property, property management, land acquisition and development, property marketing and consultancy) | Real estate | Business areas (owner-stated) | Project name, location, land size, partners, status |
+| Digital solutions for development programmes, stakeholder capacity development | Climate | Capabilities (owner-stated) | Named programmes, status |
+| Cloud and digital infrastructure projects | Corporate / ICT | Capabilities (owner-stated) | Named initiatives, status |
 | Corporate, digital infrastructure and business development projects | Corporate | Owner-stated | Named initiatives and status |
 
 ### Status vocabulary (to be assigned per item, never assumed)
 
-- **Completed assignment**
-- **Ongoing engagement**
-- **Product: concept / in development / pilot / live** (separate vocabulary for products)
-- **Strategic initiative**
+- **Projects:** Completed Assignment, Ongoing Engagement, Strategic Initiative.
+- **Products:** Concept, In Development, Pilot, Live (a separate vocabulary).
 
-Nothing is shown as "live" or "production-ready" without recorded evidence.
+An item whose status is not established stays an **unpublished draft** pending verification. Nothing is shown as Completed or Live because it appears in this inventory. No project dates, client relationships, budgets, contract values, performance statistics, outcomes, awards, partnerships, certifications or deployment status are invented.
 
 ## 6. Group-level content gaps
 
