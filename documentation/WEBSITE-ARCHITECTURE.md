@@ -13,6 +13,13 @@ _Status: M1, revision 2. Proposal for owner review. No implementation has starte
 | 5 | Nothing published without a recorded clearance (section 4) | Protects clients, individuals and the group's credibility |
 | 6 | CI validates PHP syntax and coding standards | Keeps `main` stable |
 
+### Standing rules
+
+- The marketplace platform is named **only** "OnlineMart" or "Online Marketplace" in all content, code comments and metadata.
+- Clearance records are stored as private fields inside WordPress. They are never committed to this repository.
+- Logos, photographs and client materials are published only with recorded permission.
+- Project names follow the exact brochure wording unless verified evidence supports a correction ("Matrix 360%" is retained).
+
 ## 2. Proposed sitemap
 
 ```

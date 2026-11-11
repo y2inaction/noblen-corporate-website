@@ -2,6 +2,14 @@
 
 _Status: M1, revision 2. Internal planning document. It lists names only: no certificate numbers, staff names or photographs, and no client documents._
 
+## 0. Owner decisions in force
+
+- **Project naming:** use the exact brochure wording for project names unless verified evidence supports a correction.
+- **Platform naming restriction:** the marketplace platform is referred to **only** as "OnlineMart" or "Online Marketplace", everywhere: website copy, documentation, code comments, metadata, SEO content and portfolio entries. No other name is to be used.
+- **Public repository:** this inventory records client and project names that are explicitly documented in the brochure. That does not grant permission to publish client logos, photographs or restricted materials on the live website.
+- **Clearance records are private.** They live in the WordPress dashboard (private fields), never in this repository.
+- **Licence:** proprietary, unchanged.
+
 ## 1. Source status
 
 | Source | Status |
@@ -56,8 +64,8 @@ The portfolio is organised into **five portfolio areas**, plus a separate **Prod
 | Call Masking and Refiling | Nigerian Communications Commission | "Call Masking and Refiling" | An invitation for the 85th Telecom Consumer Parliament (27 Sep 2018) is shown. That date is the event's. It is **not** necessarily the engagement date. |
 | Project documentation | IFAD | "Documentation" | A Kogi State 2024 event banner appears in the imagery. Scope and date to be confirmed. |
 | Adding Value to Livelihood | Fadama III Additional Financing | "Adding Value to Livelihood" | Field and interview footage shown. |
-| Weather stations documentation | IFAD | "Automated Weather Stations (AWS) and Simple Weather Recording (SWR)" | Documentation of community engagements. Also relevant to the Climate area. |
-| Matrix 360% media engagement campaign | Salam Takaful Insurance | "Matrix 360% Media Engagement Campaign" | Brochure text says "360%". The owner's message says "360°". **Confirm the correct form.** |
+| Automated Weather Stations (AWS) and Simple Weather Recording (SWR) | IFAD | "Automated Weather Stations (AWS) and Simple Weather Recording (SWR)" | Documentation of community engagements. Also relevant to the Climate area. |
+| Matrix 360% media engagement campaign | Salam Takaful Insurance | "Matrix 360% Media Engagement Campaign" | **Decision: retain the brochure wording "Matrix 360%"** until evidence supports a correction. |
 | Groundbreaking of mega project | Qatar Charity | "The Ground Breaking Of Mega Project" | Event coverage. |
 | The General with a Difference | Profile film, Gen. Ibrahim Babangida | Title as shown | Private-individual consent to be confirmed. |
 | The Footsteps That Reflect | Profile film, Comrade Tajudeen Bashir Baba | Title as shown | As above. |
@@ -112,7 +120,10 @@ These are listed as **drafts only**. **No description, date, status or outcome i
 | Climate information services, digital agriculture | Climate | Engagements (owner-stated) | Clients, roles, dates, status |
 | Seasonal forecast communication, climate resilience | Climate | Digital support initiatives (owner-stated) | Clients, roles, dates, status |
 | Capacity development, stakeholder engagement | Climate / Corporate | Owner-stated | Programmes, dates, participants (only if verified) |
-| Business process automation, AI solutions, ICT consultancy | ICT | Service lines (owner-stated) | Named engagements |
+| Business process automation, AI and intelligent systems, ICT consultancy, digital transformation | ICT | Capabilities (owner-stated) | Named engagements |
+| Enterprise software solutions, digital platforms, cloud and digital infrastructure | ICT | Capabilities (owner-stated) | Named engagements |
+| Weather station and agricultural information engagements, climate information services, digital agriculture | Climate | Capabilities (owner-stated; the IFAD weather-station item in 4.1 is the documented part) | Further named engagements |
+| Climate resilience initiatives, seasonal forecast communication, digital solutions supporting development programmes | Climate | Capabilities (owner-stated) | Named initiatives, status |
 | Property projects | Real estate | Owner stated that space is needed | Project name, location, land size, partners, status |
 | Corporate, digital infrastructure and business development projects | Corporate | Owner-stated | Named initiatives and status |
 
@@ -156,7 +167,7 @@ Never published: certificate and registration numbers, tax identifiers, private 
 2. Two addresses appear: the brochure's Wuse Zone 5 address and the registration documents' Utako address. Which is the current public address?
 3. A second phone number appears on "Noblen Studio" branded items. Is it current?
 4. Canonical brand names: Noblen Media Services, Noblen Productions or Noblen Studio?
-5. Confirm "Matrix 360%" versus "360°".
+5. ~~Matrix 360% wording~~ Resolved: keep "Matrix 360%".
 6. Confirm which programmes in 4.2 were produced by Noblen.
 7. Supply the status, evidence and clearance for every item in section 5.
 8. Provide the live website content or a WordPress export for the audit.
