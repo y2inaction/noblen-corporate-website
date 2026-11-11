@@ -34,8 +34,9 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | `96b888a` | M1 scaffold, documentation skeleton, CI |
 | `5d00d7f` | Portfolio architecture and content inventory |
 | `e958b17` | Owner decisions recorded (naming, Matrix 360%, privacy) |
+| `5492223` | M1 documentation complete: portfolio areas A to F, progress and QA documents, M2 plan |
 
-The final M1 documentation commit and its CI result are recorded in the completion report and in the section below once CI finishes.
+A commit that only updates this progress record follows `5492223`. It changes no other file.
 
 ## CI results
 
@@ -44,3 +45,4 @@ The final M1 documentation commit and its CI result are recorded in the completi
 | `96b888a` | pass | pass |
 | `5d00d7f` | pass | pass |
 | `e958b17` | pass | pass |
+| `5492223` | pass | pass |
