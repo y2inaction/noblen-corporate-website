@@ -7,7 +7,7 @@ _Status: M1, revision 2. Internal planning document. It lists names only: no cer
 - **Project naming:** use the exact brochure wording for project names unless verified evidence supports a correction.
 - **Platform naming restriction:** the marketplace platform is referred to **only** as "OnlineMart" or "Online Marketplace", everywhere: website copy, documentation, code comments, metadata, SEO content and portfolio entries. No other name is to be used.
 - **Public repository:** this inventory records client and project names that are explicitly documented in the brochure. That does not grant permission to publish client logos, photographs or restricted materials on the live website.
-- **Clearance records are private.** They live in the WordPress dashboard (private fields), never in this repository.
+- **Clearance records are private.** They live in private storage inside WordPress (owned by the core plugin), never in this repository.
 - **Licence:** proprietary, unchanged.
 
 ## 1. Source status

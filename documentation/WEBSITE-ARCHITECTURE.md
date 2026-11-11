@@ -1,6 +1,6 @@
 # Website Architecture & Technical Decisions
 
-_Status: M1, revision 3 (owner-approved structure, consolidated instructions applied). Planning only. No implementation has started._
+_Status: M1, revision 5. Planning only. No implementation has started. Aligned with M2 plan Revision 5.1 (theme and core plugin separated, no taxonomy synchronisation, private clearance storage, classic editor with structured meta boxes). See [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md)._
 
 ## 1. Positioning
 
@@ -13,7 +13,7 @@ The site represents **Noblen Technologies Limited**, the parent company and corp
 ### Standing rules
 
 - The marketplace platform is named **only** "OnlineMart" or "Online Marketplace" in all content, code comments, metadata and SEO text.
-- Clearance records are stored as private fields inside WordPress. They are never committed to this repository, and no seed file contains them.
+- Clearance, approval and audit data are stored in **dedicated private storage owned by the core plugin**, not in posts or post meta. They are never committed to this repository, and no seed file contains them.
 - Logos, photographs and client materials are published only with recorded permission.
 - Project names follow the exact brochure wording unless verified evidence supports a correction ("Matrix 360%" is retained).
 - No gold or yellow as a dominant brand colour.
@@ -24,9 +24,9 @@ The site represents **Noblen Technologies Limited**, the parent company and corp
 | # | Decision | Rationale |
 |---|----------|-----------|
 | 1 | Custom classic PHP WordPress theme (`noblen-corporate`) | Requested deliverable: an installable theme, not static HTML |
-| 2 | Custom post types and taxonomies for all business content | A real CMS. No hardcoded portfolio cards |
-| 3 | No page builder and no required plugin (ACF excluded) | Maintainability, security, hosting compatibility |
-| 4 | Native meta boxes and a theme options page for structured fields | Same, with no external dependency |
+| 2 | Custom post types, taxonomies and CMS logic live in a **companion core plugin**, not the theme | Content survives theme changes. Presentation stays separate from content |
+| 3 | No page builder and no third-party plugin required (ACF excluded). Two Noblen components only: theme and core plugin | Maintainability, security, hosting compatibility |
+| 4 | Native meta boxes and a plugin settings page for structured fields. **Classic Editor** for the custom content types in M2, with no Gutenberg dependency | Same, with no external dependency. Keeps these types off the REST API |
 | 5 | Publication gate: no clearance, no publication | Protects clients, individuals and credibility |
 | 6 | CI validates PHP syntax, coding standards and doc links | Keeps `main` stable |
 | 7 | Business content lives in the database, not in templates | Admins can extend the site without code changes |
@@ -68,7 +68,7 @@ Privacy Policy | Terms
 
 Projects and products are **separate content types with separate status vocabularies**, so a product is never confused with a completed client assignment.
 
-### 4.2 Content types
+### 4.2 Content types (registered by the core plugin)
 
 | Type | Purpose | URL |
 |------|---------|-----|
@@ -81,14 +81,14 @@ Projects and products are **separate content types with separate status vocabula
 
 ### 4.3 Taxonomies and extensibility
 
+Company, industry and service **records are the single source of truth** for subsidiaries, industries and services. Projects and products reference those records by ID. Each relationship is classified **required** or **optional**: a missing or unavailable required relationship restricts publication, and an optional one degrades gracefully without unpublishing anything. There is **no synchronisation** into taxonomies, so there are no competing sources of truth. Taxonomies are used only for genuine classification:
+
 | Taxonomy | Applies to | How it is managed |
 |----------|------------|-------------------|
-| Portfolio area | project, product | Starter terms A to F, editable |
-| Business unit | project, product | **Auto-synced from `noblen_company` posts.** Adding a subsidiary in the dashboard makes it available as a business unit with no code change |
-| Industry | project, product | Auto-synced from `noblen_industry` posts |
-| Service type | project | Auto-synced from `noblen_service` posts |
+| Portfolio area | project | Starter terms A to E, editable |
+| Product type | product | Starter terms "Platform" and "Operating system", editable |
 
-Adding a subsidiary, industry or service is therefore an ordinary dashboard action, and filters pick it up automatically.
+Adding a subsidiary, industry or service is an ordinary dashboard action, and filters use the relationships. Area F (products) is the product content type itself.
 
 ### 4.4 Status models
 
@@ -120,8 +120,8 @@ Products use the same pattern with the product stage in place of the project sta
 
 ### 4.6 Publication safeguards
 
-1. A project or product cannot be published until its clearance record is complete. The editor shows why and keeps it as a draft.
-2. Clearance records are private WordPress fields. They are excluded from any export in the repository and from every public output.
+1. A gated record (all five custom types, with the full clearance checklist for projects and products) cannot be published until its clearance is complete, its related records and images are valid, and an authorised approver has approved **the exact version of the content**. Publication and WordPress status, business status, private clearance status and approval status are four separate data concepts. The check is enforced **server-side on every write path** through a single authorised publication path, not only in the editor, and the record stays a draft otherwise.
+2. Clearance records live in private plugin-owned storage that no public WordPress interface reads. They are not post meta and are absent from exports and public output.
 3. Starter entries ship as **drafts** and contain names only. No clearance data is shipped.
 4. Client logos, photographs and videos render only where their permission flag is set.
 5. A QA scan checks published content for placeholder tokens before every release.
@@ -139,7 +139,7 @@ Authorised administrators can, without developer help:
 - publish news, articles and corporate announcements;
 - edit homepage sections, contact details, social links and SEO metadata.
 
-Custom capabilities allow separating "edit content" from "approve for publication" if the owner wants two roles.
+Separate capabilities split editing, clearance management and publication approval. The detail is in the M2 plan.
 
 ## 6. Design direction
 

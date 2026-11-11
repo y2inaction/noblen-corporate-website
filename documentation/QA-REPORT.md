@@ -11,14 +11,14 @@ Scope: **M1 (documentation and planning only).** There is no code, theme or webs
 | Required theme files | CI job `theme` | Theme not added yet, so the check is skipped by design |
 | Long numeric identifiers (certificate, tax, phone-length numbers) absent from the repository | Local scan (`[0-9]{7,}`) | None found |
 | Private staff names, photographs, certificate documents absent | Manual review of all files | None present |
-| Clearance records absent | Manual review | None present. The design keeps them as private WordPress fields |
+| Clearance records absent | Manual review | None present. The design keeps them in private plugin-owned storage |
 | Marketplace naming | Manual review | Only "OnlineMart" appears. See limitation below |
 | Licence unchanged | Diff review | Unchanged (proprietary) |
 | PR #1 still a draft and unmerged | GitHub state | Confirmed |
 
 ### Limitation
 
-The restricted business name has not been disclosed to this project, so it cannot be searched for. What has been verified is that the only marketplace names used anywhere are "OnlineMart" and "Online Marketplace". The M2 plan adds an automated CI check driven by a blocked-term list held outside the repository.
+The restricted business name has not been disclosed to this project, so it cannot be searched for. What has been verified is that the only marketplace names used anywhere are "OnlineMart" and "Online Marketplace". The revised M2 plan specifies an owner-controlled local scan driven by a blocked-term list that stays outside the repository, and an optional hosted check that returns only pass or fail. Until the owner runs the scan, naming compliance for the restricted term is unverified.
 
 ## Test plan for later milestones
 

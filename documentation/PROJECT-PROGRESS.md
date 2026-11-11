@@ -7,8 +7,19 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | M1 Audit, content extraction and planning | **Documentation complete, awaiting owner sign-off** | Live-site audit not possible by crawling (see below) |
-| M2 Brand system and theme foundation | **Plan prepared, not approved, not started** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
+| M2 Brand system, theme, core plugin and publication gate | **Plan: G0 approved. Revision 5.1 is the approved technical baseline. No implementation authorized. Not started** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
 | M3 to M9 | Not started | |
+
+## Approval status
+
+| Gate | Status |
+|------|--------|
+| G0, final M2 technical plan | **Approved** (Revision 5.1 is the approved M2 technical baseline) |
+| G0b, documentation-only commit | Not authorised |
+| G1, dependency installation | Not authorised |
+| G2, implementation branch and commit permissions | Not authorised |
+| SG-A, SG-B, SG-C, SG-D | Not authorised |
+| G5, final release | Not authorised |
 
 ## M1: what is completed
 
