@@ -1,0 +1,50 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  theme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: phpcs
+
+      - name: PHP syntax check
+        run: |
+          files=$(find wordpress-theme -name '*.php')
+          if [ -z "$files" ]; then echo "No PHP files yet"; exit 0; fi
+          echo "$files" | xargs -n1 php -l
+
+      - name: Required theme files
+        run: |
+          dir=wordpress-theme/noblen-corporate
+          if [ ! -f "$dir/style.css" ]; then echo "Theme not added yet"; exit 0; fi
+          for f in style.css index.php functions.php header.php footer.php; do
+            test -f "$dir/$f" || { echo "Missing $f"; exit 1; }
+          done
+
+  markdown-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check relative links in docs
+        run: |
+          status=0
+          for f in README.md documentation/*.md; do
+            dir=$(dirname "$f")
+            grep -oE '\]\(([^)#:]+)\)' "$f" | sed -E 's/\]\((.*)\)/\1/' | while read -r link; do
+              [ -e "$dir/$link" ] || { echo "Broken link in $f: $link"; exit 1; }
+            done || status=1
+          done
+          exit $status
