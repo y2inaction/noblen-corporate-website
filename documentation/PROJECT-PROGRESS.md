@@ -7,7 +7,7 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | M1 Audit, content extraction and planning | **Documentation complete, awaiting owner sign-off** | Live-site audit not possible by crawling (see below) |
-| M2 Brand system, theme, core plugin and publication gate | **Release-candidate work, local only (not pushed). See [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md). Nothing is accepted** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
+| M2 Brand system, theme, core plugin and publication gate | **Release-candidate work, pushed to `feature/m2-implementation` (no pull request); hosted CI run 6 is fully green. See [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md). Nothing is accepted** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
 | M3 to M9 | Not started | |
 
 ## Approval status
@@ -30,12 +30,12 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 |----------------|-------|
 | Planned | True |
 | Implemented | Partly: see [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml) |
-| Executed | Partly, mostly **local**; one hosted run exists (partly red, corrections pending a second run) |
+| Executed | Partly, mostly **local**; six hosted CI runs and one Classic Editor capture run exist, and CI run 6 is fully green |
 | Accepted | False |
 
 It is a planning reference only. It did not itself authorise tests, workflows, dependency installation or implementation; those were authorised separately and are recorded in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md).
 
-**Dependency decision:** Classic Editor 1.7.0 is approved as the intended **test** dependency for Configuration A of criterion 21, with verification pending ([DEPENDENCIES.md](DEPENDENCIES.md)). C26-003 to C26-006 are deferred to M2-D, not waived.
+**Dependency decision:** Classic Editor 1.7.0 is approved as the intended **test** dependency for Configuration A of criterion 21. The pin is **verified** and C21-021 and C21-022 are **EVIDENCED — AWAITING OWNER ACCEPTANCE** ([DEPENDENCIES.md](DEPENDENCIES.md)). C26-003 to C26-006 are deferred to M2-D, not waived.
 
 ## M1: what is completed
 

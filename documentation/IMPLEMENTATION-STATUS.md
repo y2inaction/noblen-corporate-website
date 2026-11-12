@@ -1,8 +1,8 @@
 # M2 Implementation Status
 
-Branch `feature/m2-implementation` (local, **not pushed**). Baseline `5739f75`. Specification: [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) Revision 5.1 and the frozen [CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md). Per-criterion detail: [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml), generated from the actual test results.
+Branch `feature/m2-implementation` (pushed; no pull request). Baseline `5739f75`. Specification: [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) Revision 5.1 and the frozen [CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md). Per-criterion detail: [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml), generated from the actual test results.
 
-Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. Three hosted CI runs exist (below). Run 3 (`c690450`) is green except the PHP 8.4 host job and the non-blocking Configuration A job; the PHP 8.4 correction exists locally and has not been run on GitHub.
+Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. Six CI runs and one Classic Editor capture run exist on this branch (below). CI run 6 (`ec38d89`) is fully green, including the strict Configuration A job. **C21-021 and C21-022 are evidenced and awaiting owner acceptance.**
 
 ## Local test evidence
 
@@ -55,6 +55,17 @@ Also corrected: root-owned mapping directories blocking cleanup, an empty diagno
 
 *Local verification of the PHP 8.4 correction* is listed in `UPSTREAM-PHP84-DEPRECATION.md`. It is not hosted evidence.
 
+## Fourth to sixth CI runs and the Classic Editor capture run
+
+| Run | Commit | Result |
+|-----|--------|--------|
+| CI run 4, 43283195271 | `606a4fa` | All jobs green except Configuration A (by design). The PHP 8.4 host job passed with the one exact WordPress 6.4.3 core deprecation set aside and printed (`UPSTREAM-PHP84-DEPRECATION.md`); PHP 8.3 stayed strict |
+| CI run 5, 43286920209 | `cb211fc` | Green overall. Configuration A failed at the pin gate by design (pin unverified) |
+| Classic Editor capture run 1, 43286920565 | `cb211fc` | Success. Official package SHA-256 `7cc7799b0b7d820fbb7528dbff8027c736e52513992416cb37279f44d3d9dd77`; WP-CLI checksums verified; Configuration A suite 13/13; record `CAPTURE`, C21-021 NOT SATISFIED; artifact 13974709232 |
+| CI run 6, 43316091579 | `ec38d89` | **Fully green.** Strict Configuration A job passed (installer 14/14, suite 13/13); record artifact 13988531774 inspected by the owner: `STRICT`, C21-021 satisfied by this run. The wp-env job and all other jobs passed |
+
+The Classic Editor pin was verified by the reviewed change `ec38d89` after the independent review of 2026-11-12 (reference `NOBLEN-CORP-CE-INDEPENDENT-REVIEW-2026-11-12`). Known remaining limits: whole-ZIP stability seen on one day only, SVN revision not recorded, checksums URL reachability not independently confirmed. The Configuration A job name still reads "non-blocking until the pin is verified" although the job is blocking (cosmetic; unchanged by decision).
+
 ## CI workflow review
 
 - Every action is pinned to a verified full commit SHA with a version comment (checkout v5.1.0, setup-node v5.0.0, upload-artifact v6.0.0, setup-php 2.40.0, all declaring the Node 24 runtime). Each SHA was fetched from its official repository and confirmed to be a commit. Workflow permissions are `contents: read`; checkout does not persist credentials; there are no secrets.
@@ -72,7 +83,7 @@ Also corrected: root-owned mapping directories blocking cleanup, an empty diagno
 | C06-002 (company, industry, service through the UI) | Implemented for all five types (also C06-001 product). Passes locally in a real browser. Not yet run in wp-env |
 | C11-002 (partial data) | Implemented. Passes through a shim. Not yet run in wp-env |
 | C12-001 (full-site crawl) | Implemented. Passes locally; sitemap seed needs Apache, so it is required only in the wp-env job |
-| C21 Configuration A (Classic Editor plugin) | Classic Editor 1.7.0 is approved as the **intended test dependency, verification pending** ([DEPENDENCIES.md](DEPENDENCIES.md)). The Configuration A tests and the installer are implemented, and the installer refuses to run in strict mode until the pin is verified. **The pin is unverified: no WordPress.org package, no SHA-256, and no tie between the GitHub commit and the published package.** C21-021 and C21-022 are unverified and not satisfied. The stand-in tests (13 of 13 plus a sensitivity check) are engineering evidence about the test logic only, not release evidence. Configuration B still passes (13 of 13) |
+| C21 Configuration A (Classic Editor plugin) | Classic Editor 1.7.0 is approved as the **intended test dependency** ([DEPENDENCIES.md](DEPENDENCIES.md)). The Configuration A tests and the installer are implemented, and the installer refuses to run in strict mode unless the pin is verified. **The pin is verified** (independent review 2026-11-12; strict hosted run 43316091579). **C21-021 and C21-022 are EVIDENCED — AWAITING OWNER ACCEPTANCE** and are not accepted; C21-M01 (manual editor check) is pending. Configuration A ran 13 of 13 against the real package in hosted runs 43286920565 and 43316091579. The local stand-in tests (13 of 13 plus a sensitivity check) are engineering evidence about the test logic only, not release evidence. Configuration B passed (13 of 13 locally; hosted wp-env step passed) |
 | C26-001 (content hashing) | Implemented with a sensitivity check; C26-001 and C26-002 pass through a shim. C26-003 to C26-006 are not implemented |
 
 ## Test-harness finding
@@ -96,9 +107,9 @@ Clicking Save Draft while WordPress's permalink request is still in flight is si
 - Contact and partnership forms are deferred to M7 by the approved plan. Only a mailto call to action exists.
 - `get_posts()` and any query with `suppress_filters` bypass the read-time filter. Theme code must use the accessor. This is documented, not a defect in a listed interface.
 - No persistent object-cache drop-in test (criterion 31). Core object cache only.
-- Configuration A of criterion 21: owner-approved and pinned (1.7.0), but the WordPress.org package could not be reached from this environment, so its identity, checksums and SHA-256 are unverified until the first hosted run. The release was identified from the plugin's official GitHub repository, not from WordPress.org.
+- Configuration A of criterion 21: owner-approved and pinned (1.7.0), verified by independent review and a strict hosted run. C21-021 and C21-022 await the owner's acceptance decision; C21-M01 is still pending.
 - C26-003 to C26-006 are not implemented. They belong to M2-D, and the recommended boundary and prerequisites are in [C26-M2D-BOUNDARY-REVIEW.md](C26-M2D-BOUNDARY-REVIEW.md) (for owner review, not accepted).
-- Not executed anywhere: PHP 8.4 or 8.5, MySQL 8.4, the CI workflow itself.
+- What has actually been exercised on GitHub: **PHP 8.4** runs in hosted CI (static analysis and compatibility, PHPUnit, and the host WP-CLI and package-install jobs; on the host jobs one exact WordPress 6.4.3 core deprecation is set aside and printed, see `UPSTREAM-PHP84-DEPRECATION.md`). **PHP 8.5** has only the informational compatibility job (lint and PHPCompatibility 8.5), which passed; it is not a strict gate and PHP 8.5 is not run against WordPress. **MySQL 8.4** (digest-pinned service container) is used by the hosted PHPUnit and host WP-CLI jobs; the wp-env job runs PHP 8.3 with MariaDB, and the local runs use MariaDB 10.11. **The CI workflow** has been executed on GitHub, and CI run 6 (`ec38d89`) was fully green.
 - The WordPress download step cannot be exercised here (wordpress.org returns 403). Its checksum logic was tested against a local server for both a matching and a tampered checksum.
 - Hazard: `tests-cli/cli-integration.sh` runs `wp plugin uninstall`, which deletes the plugin directory. It copies the plugin into the target WordPress and refuses to run against a symlink, but running it against a development site replaces a symlinked plugin folder.
 
