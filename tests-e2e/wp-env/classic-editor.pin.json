@@ -4,9 +4,10 @@
   "slug": "classic-editor",
   "version": "1.7.0",
   "source": "https://downloads.wordpress.org/plugin/classic-editor.1.7.0.zip",
-  "official_checksums": "https://api.wordpress.org/plugin-checksums/classic-editor/1.7.0",
-  "zip_sha256": "",
-  "zip_sha256_note": "Deliberately blank. It is obtained only from the official WordPress.org package in a hosted capture run, reviewed by a person, and committed by a reviewed change. No script ever writes this file.",
+  "official_checksums": "https://downloads.wordpress.org/plugin-checksums/classic-editor/1.7.0.json",
+  "official_checksums_note": "URL form used by WP-CLI's WpOrgApi::get_plugin_checksums (WP-CLI 2.12.0 source). The hosted capture run 43286920565 reported WP-CLI per-file verification as successful, but the WP-CLI version and exact URL that run requested were not recorded, and no reviewer has independently fetched this URL. Live reachability of this endpoint has NOT been independently confirmed.",
+  "zip_sha256": "7cc7799b0b7d820fbb7528dbff8027c736e52513992416cb37279f44d3d9dd77",
+  "zip_sha256_note": "Captured from the official WordPress.org package by hosted run 43286920565 (attempt 1, commit cb211fc39b05ebfffe5ea9fd6574206b089d3500), reproduced by an independent reviewer in two separate downloads, and committed by a reviewed change. No script ever writes this file. A mismatch fails the run; the pin is never updated automatically.",
   "compatibility_basis": {
     "pinned_wordpress": "6.4.3",
     "plugin_requires_wordpress": "4.9",
@@ -20,8 +21,18 @@
     "commit": "bb8d0cc7bfafa7458d90503c44e3c7723cb7324c",
     "commit_date": "2026-05-27",
     "evidence": "readme.txt 'Stable tag: 1.7.0'; classic-editor.php header 'Version: 1.7.0'; changelog entry 1.7.0 present",
-    "limitation": "This is the plugin's official development repository, linked from its WordPress.org page. It is NOT the WordPress.org distribution. The repository has no tags, so the release commit could not be tied to the 1.7.0 package. The WordPress.org package itself was not reachable and has not been verified yet."
+    "limitation": "This is the plugin's development repository, not the WordPress.org distribution, and it has no tags. The release reference is the WordPress.org SVN tag (see release_reference). The only difference between the package and this commit is one comment line in classic-editor.php."
   },
+  "release_reference": {
+    "type": "WordPress.org SVN tag",
+    "url": "https://plugins.svn.wordpress.org/classic-editor/tags/1.7.0/",
+    "accepted_as_per_file_reference": "project decision recorded 2026-11-12",
+    "files_compared": 6,
+    "result": "All six distributed files are identical (SHA-256) to the package; the file lists are identical in both directions.",
+    "svn_revision": "not recorded",
+    "limitation": "The SVN revision at which tags/1.7.0 was compared was not recorded, so the comparison cannot be tied to a specific revision and a later change to the tag could not be told apart from the state reviewed. The WordPress.org per-file checksums API could not be reached by the reviewer, so the SVN tag is the per-file reference. SVN and the download host are both operated by WordPress.org (one trust anchor)."
+  },
+  "artifact_record_confirmed": "authenticated repository artifact inspection, 2026-11-12: classic-editor-record.json in artifact 13974709232 shows mode CAPTURE, c21_021 NOT SATISFIED, source_parity DIFFERENT (reviewer must inspect), and package_sha256 equal to zip_sha256. Inspector and time are not recorded.",
   "verification_in_ci": [
     "download the exact source URL above",
     "record the package SHA-256 (and compare with zip_sha256 once it is filled in)",
@@ -31,13 +42,14 @@
     "record the Classic Editor settings used for the run (C21-022)"
   ],
   "verification": {
-    "state": "unverified",
+    "state": "verified",
     "rule": "state may become 'verified' only through a reviewed change that fills every field below. While 'unverified', the strict install mode refuses to run, so C21-021 cannot be reported as satisfied.",
-    "zip_sha256_obtained_from": null,
-    "independent_download_sha256": null,
-    "source_parity_reviewed": null,
-    "reviewed_by": null,
-    "reviewed_utc": null,
-    "review_record": null
+    "zip_sha256_obtained_from": "GitHub Actions run 43286920565, attempt 1 (workflow classic-editor-capture.yml, job 131422642102, commit cb211fc39b05ebfffe5ea9fd6574206b089d3500, artifact 13974709232)",
+    "independent_download_sha256": "7cc7799b0b7d820fbb7528dbff8027c736e52513992416cb37279f44d3d9dd77",
+    "source_parity_reviewed": "Package compared file by file (SHA-256) with the WordPress.org SVN tag tags/1.7.0: six of six identical. Compared with the GitHub development commit bb8d0cc7bfafa7458d90503c44e3c7723cb7324c: five of six identical; classic-editor.php differs by one comment line ('// Back-compat with 1.6.6.' in the package, '// Back-compat' on GitHub) and no executable code differs. Explanation (the reviewer's inference from timestamps): the SVN release copy is ahead of the GitHub mirror. Package hash reproduced across two independent downloads.",
+    "reviewed_by": "owner-appointed independent reviewer",
+    "reviewed_utc": "2026-11-12",
+    "review_record": "Reference NOBLEN-CORP-CE-INDEPENDENT-REVIEW-2026-11-12, an assigned reference identifier for the independent verification review dated 2026-11-12. The reference does not assert that an archive copy exists; the owner holds the record.",
+    "reviewed_utc_note": "The review record establishes the review date but not a precise completion timestamp. No time of day is claimed."
   }
 }

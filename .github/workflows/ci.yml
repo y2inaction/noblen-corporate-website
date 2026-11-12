@@ -373,9 +373,9 @@ jobs:
     name: WE Configuration A, pinned Classic Editor (C21-021, C21-022; non-blocking until the pin is verified)
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    # While the pin in tests-e2e/wp-env/classic-editor.pin.json is 'unverified', strict mode refuses to run, so this job
-    # is red and must not block. scripts/check-pins.sh enforces that this line is removed in the same change that marks the pin verified.
-    continue-on-error: true
+    # The pin in tests-e2e/wp-env/classic-editor.pin.json is verified, so this job blocks. Strict mode requires the pinned
+    # SHA-256, the pinned version and WordPress.org's per-file checksums. scripts/check-pins.sh fails if this job is made
+    # non-blocking while the pin is verified.
     env:
       CI: 'true'
       BASE_URL: http://localhost:8888
