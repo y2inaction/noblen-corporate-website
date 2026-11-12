@@ -14,6 +14,8 @@ W()   { "$WP" --allow-root --path="$SITE" "$@" 2>/dev/null; }
 ( cd "$DIST" && sha256sum -c SHA256SUMS >/dev/null 2>&1 ) && ok "C19-001 checksums verify" || bad "checksums"
 cp -a "$WP_SRC" "$SITE"; rm -rf "$SITE/wp-content/plugins/noblen-corporate-core" "$SITE/wp-content/themes/noblen-corporate"
 LOG="$WORK/debug.log"; : > "$LOG"; export WP_DEBUG_LOG_FILE="$LOG"
+# Diagnostic only: when a PHP error-log check is about to run, show what is in the log (never changes a result).
+php_errors() { grep 'PHP \(Fatal\|Warning\|Notice\|Deprecated\|Parse\)' "$LOG" 2>/dev/null | cut -c1-300 | sed 's/^/  | /' | head -40 || true; }
 unzip -q "$DIST/noblen-corporate-core.zip" -d "$SITE/wp-content/plugins" && unzip -q "$DIST/noblen-corporate-theme.zip" -d "$SITE/wp-content/themes"
 eq "ZIP excludes tests and dev files" "$(find "$SITE/wp-content/plugins/noblen-corporate-core" "$SITE/wp-content/themes/noblen-corporate" \( -name tests -o -name 'phpunit*' -o -name 'composer.*' -o -name node_modules -o -name '*.sh' \) | wc -l)" "0"
 eq "packages contain no fixtures, test credentials or local paths" "$(grep -rIlE 'Dev Fixture|DEV FIXTURE|fx_(editor|officer|approver)|dev-only|/home/[a-z]+|/root/' "$SITE/wp-content/plugins/noblen-corporate-core" "$SITE/wp-content/themes/noblen-corporate" | wc -l)" "0"
@@ -28,6 +30,7 @@ W theme activate noblen-corporate >/dev/null;       eq "C19-002 theme activates 
 eq "C19-003 schema at current version" "$(W eval 'echo Noblen\Core\Database\Migrator::installed_version();')" "$(W eval 'echo Noblen\Core\Database\Schema::VERSION;')"
 eq "C19-003 front page renders from ZIP install" "$(W eval '$_SERVER["SERVER_NAME"]="localhost"; ob_start(); include get_template_directory()."/front-page.php"; echo strlen(ob_get_clean())>200?"rendered":"empty";')" "rendered"
 eq "C19-003 empty site shows no section headings" "$(W eval '$_SERVER["SERVER_NAME"]="localhost"; ob_start(); include get_template_directory()."/front-page.php"; $h=ob_get_clean(); echo preg_match("/Business units|Industries|Featured projects|Products and platforms/",$h)?"sections":"none";')" "none"
+php_errors
 eq "C19-003 no PHP errors logged" "$(grep -c 'PHP \(Fatal\|Warning\|Notice\|Deprecated\)' "$LOG" || true)" "0"
 echo "$pass passed, $fail failed"; rm -rf "$WORK"
 [ "$fail" -eq 0 ]

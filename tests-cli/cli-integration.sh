@@ -23,6 +23,8 @@ install_plugin
 [ -e "$WP_PATH/wp-content/themes/noblen-corporate" ] || ln -s "$REPO/wordpress-theme/noblen-corporate" "$WP_PATH/wp-content/themes/noblen-corporate"
 [ -L "$PLUG" ] && { echo "refusing to run: plugin dir is a symlink"; exit 2; }
 LOG="${WP_DEBUG_LOG_FILE:-$TMP_DIR/debug.log}"; : > "$LOG"; export WP_DEBUG_LOG_FILE="$LOG"
+# Diagnostic only: when a PHP error-log check is about to run, show what is in the log (never changes a result).
+php_errors() { grep 'PHP \(Fatal\|Warning\|Notice\|Deprecated\|Parse\)' "$LOG" 2>/dev/null | cut -c1-300 | sed 's/^/  | /' | head -40 || true; }
 
 # ---- C01/C02: clean install, theme and plugin activation via WP-CLI.
 W core install --url=http://127.0.0.1:8099 --title=CLI --admin_user=admin --admin_password=cli-pass-only --admin_email=cli@example.test --skip-email >/dev/null
@@ -34,6 +36,7 @@ W plugin activate noblen-corporate-core >/dev/null; eq "C02-001 plugin activates
 W theme activate noblen-corporate >/dev/null;       eq "C01-001 theme activates via WP-CLI" "$(W theme get noblen-corporate --field=status)" "active"
 eq "C02-003 schema version recorded" "$(W eval 'echo Noblen\Core\Database\Migrator::installed_version();')" "$(W eval 'echo Noblen\Core\Database\Schema::VERSION;')"
 eq "C02-003 all five private tables exist" "$(W eval 'echo count(array_filter(array("clearance","media_rights","approvals","epochs","audit"), fn($t)=>Noblen\Core\Database\Schema::exists($t)));')" "5"
+php_errors
 eq "C02-002 / C01-002 PHP error log empty after activation" "$(grep -c 'PHP \(Fatal\|Warning\|Notice\|Deprecated\)' "$LOG" || true)" "0"
 
 # ---- C10 / C24 WP-CLI write paths with incomplete clearance: must remain unpublished.
@@ -77,6 +80,7 @@ W plugin deactivate noblen-corporate-core >/dev/null
 W plugin uninstall noblen-corporate-core >/dev/null 2>&1 || true
 eq "C26 opt-in uninstall removes private tables" "$(private_tables)" "0"
 
+php_errors
 eq "no PHP errors logged during the whole run" "$(grep -c 'PHP \(Fatal\|Warning\|Notice\|Deprecated\)' "$LOG" || true)" "0"
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]
