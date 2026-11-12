@@ -30,7 +30,7 @@ jobs:
       matrix:
         php: ['8.3', '8.4']
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
@@ -86,7 +86,7 @@ jobs:
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
@@ -103,7 +103,7 @@ jobs:
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
         run: phpunit -c phpunit.xml.dist --log-junit "$RUNNER_TEMP/junit-${{ matrix.php }}.xml"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: junit-php${{ matrix.php }}
@@ -124,7 +124,7 @@ jobs:
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
@@ -162,6 +162,7 @@ jobs:
           WP_DEBUG_LOG_FILE: ${{ runner.temp }}/cli-debug.log
         run: tests-cli/cli-integration.sh
       - name: Package build and clean install (C19)
+        if: always()
         env:
           NOBLEN_DB_NAME: noblen_pkg
           WP: ${{ github.workspace }}/vendor/bin/wp
@@ -184,7 +185,7 @@ jobs:
     env:
       BASE_URL: http://127.0.0.1:8100
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
@@ -192,9 +193,10 @@ jobs:
           php-version: '8.3'
           extensions: mysqli, gd, mbstring
           tools: composer
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: '22'
+          package-manager-cache: false
       - run: composer install --no-interaction --prefer-dist
       - name: Disposable WordPress
         env:
@@ -210,7 +212,7 @@ jobs:
           $W option update home "$BASE_URL" && $W option update siteurl "$BASE_URL"
           $W plugin activate noblen-corporate-core && $W theme activate noblen-corporate
           $W rewrite structure '/%postname%/' --hard
-          $W eval-file tests-e2e/seed-e2e.php
+          $W eval-file tests-e2e/wp-env/seed-e2e.php
           PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8100 -t "$WP_DIR" > "$RUNNER_TEMP/php-server.log" 2>&1 &
           sleep 3; curl -fsS "$BASE_URL/" >/dev/null
       - name: Install browser tooling
@@ -243,7 +245,7 @@ jobs:
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: screenshots
@@ -258,12 +260,13 @@ jobs:
       BASE_URL: http://localhost:8888
       WE_ROOT: ${{ github.workspace }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: '22'
+          package-manager-cache: false
       - name: Install tooling (wp-env 12.1.0, Playwright, axe-core pinned in the lockfile)
         working-directory: tests-e2e
         run: |
@@ -298,6 +301,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           [ "$wpv" = "6.4.3" ] || { echo "::error::WordPress is '$wpv', expected 6.4.3"; exit 1; }
           case "$phpv" in 8.3.*) ;; *) echo "::error::PHP is '$phpv', expected 8.3.x"; exit 1;; esac
+      - name: Activate and verify the Noblen theme and plugin (wp-env does not activate themes)
+        run: tests-cli/we-site-state.sh
       - name: Set permalinks
         run: tests-e2e/node_modules/.bin/wp-env run cli wp rewrite structure '/%postname%/' --hard
       - name: WE empty and partial data on a pristine site (C11-001, C11-002)
@@ -335,16 +340,20 @@ jobs:
         env:
           CRAWL_REQUIRE_SITEMAP: '1'
         run: node crawl.js
-      - name: Collect the WordPress debug log
+      - name: Collect diagnostics (debug log, container state and container logs)
         if: always()
-        run: tests-e2e/node_modules/.bin/wp-env run cli cat wp-content/debug.log > "$RUNNER_TEMP/wp-debug.log" || true
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        run: |
+          mkdir -p "$RUNNER_TEMP/diag"
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/print-log.php > "$RUNNER_TEMP/diag/wp-debug.log" 2>&1 || echo "(wp-env was not running, so no debug log could be read)" > "$RUNNER_TEMP/diag/wp-debug.log"
+          docker ps -a --format '{{.Names}}  {{.Image}}  {{.Status}}' > "$RUNNER_TEMP/diag/containers.txt" 2>&1 || true
+          for c in $(docker ps -aq); do docker logs --tail 300 "$c" > "$RUNNER_TEMP/diag/container-$c.log" 2>&1 || true; done
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: we-artifacts
           path: |
             ${{ runner.temp }}/shots
-            ${{ runner.temp }}/wp-debug.log
+            ${{ runner.temp }}/diag
       - name: WE result summary
         if: always()
         run: |
@@ -354,6 +363,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Stop wp-env
         if: always()
+        # Directory mappings only (see .wp-env.json): a mapped single file made Docker create a root-owned parent directory in the
+        # checkout, which the runner user could not remove. Failure here must never mask a test result, but is no longer expected.
         run: tests-e2e/node_modules/.bin/wp-env destroy --force || true
 
   we-classic-editor-a:
@@ -367,12 +378,13 @@ jobs:
       CI: 'true'
       BASE_URL: http://localhost:8888
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: '22'
+          package-manager-cache: false
       - name: Install tooling
         working-directory: tests-e2e
         run: |
@@ -392,6 +404,8 @@ jobs:
               echo "- \`$img\` -> $(docker image inspect --format '{{join .RepoDigests ", "}}' "$img" 2>/dev/null)"
             done
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Activate and verify the Noblen theme and plugin (wp-env does not activate themes)
+        run: tests-cli/we-site-state.sh
       - name: Install the pinned Classic Editor and check C21-021 and C21-022
         env:
           CAPTURE: ${{ github.event.inputs.capture_classic_editor_hash }}
@@ -410,22 +424,31 @@ jobs:
       - name: Restore Configuration B
         if: always()
         run: tests-cli/classic-editor-config-a.sh cleanup
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - name: Collect diagnostics (debug log, container state and container logs)
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/diag"
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/print-log.php > "$RUNNER_TEMP/diag/wp-debug.log" 2>&1 || echo "(wp-env was not running, so no debug log could be read)" > "$RUNNER_TEMP/diag/wp-debug.log"
+          docker ps -a --format '{{.Names}}  {{.Image}}  {{.Status}}' > "$RUNNER_TEMP/diag/containers.txt" 2>&1 || true
+          for c in $(docker ps -aq); do docker logs --tail 300 "$c" > "$RUNNER_TEMP/diag/container-$c.log" 2>&1 || true; done
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: classic-editor-record
-          path: tests-e2e/wp-env/downloads/classic-editor-record.json
+          path: |
+            tests-e2e/wp-env/downloads/classic-editor-record.json
+            ${{ runner.temp }}/diag
           if-no-files-found: ignore
 
   packages:
     name: Package build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - run: scripts/build-packages.sh "$RUNNER_TEMP/dist"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: packages
           path: ${{ runner.temp }}/dist

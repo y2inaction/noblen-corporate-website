@@ -17,5 +17,29 @@ require_once ABSPATH . 'wp-settings.php';
 PHP
 ln -sfn "$PWD/wordpress-plugin/noblen-corporate-core" "$WP_DIR/wp-content/plugins/noblen-corporate-core"
 ln -sfn "$PWD/wordpress-theme/noblen-corporate" "$WP_DIR/wp-content/themes/noblen-corporate"
+# 1. Install WordPress (its own process, as WordPress's installer expects).
 php -r '$_SERVER["HTTP_HOST"]="localhost"; $_SERVER["REQUEST_URI"]="/"; define("WP_INSTALLING",true); require getenv("WP_DIR")."/wp-load.php"; require_once ABSPATH."wp-admin/includes/upgrade.php"; if(!is_blog_installed()) wp_install("CI","admin","ci@example.test",true,"","ci-pass-only","en_US");'
+# 2. Activate the plugin and the theme explicitly (a fresh install has neither active), in a normal request context.
+WP_DIR="$WP_DIR" php <<'PHP'
+<?php
+$_SERVER['HTTP_HOST'] = 'localhost'; $_SERVER['REQUEST_URI'] = '/';
+require getenv( 'WP_DIR' ) . '/wp-load.php';
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
+$r = activate_plugin( 'noblen-corporate-core/noblen-corporate-core.php' );
+if ( is_wp_error( $r ) ) { fwrite( STDERR, 'Plugin activation failed: ' . $r->get_error_message() . "\n" ); exit( 1 ); }
+switch_theme( 'noblen-corporate' );
+PHP
+# 3. Assert the state in a FRESH process, so a stale or partial activation cannot pass.
+WP_DIR="$WP_DIR" php <<'PHP'
+<?php
+$_SERVER['HTTP_HOST'] = 'localhost'; $_SERVER['REQUEST_URI'] = '/';
+require getenv( 'WP_DIR' ) . '/wp-load.php';
+$errors = array();
+if ( ! in_array( 'noblen-corporate-core/noblen-corporate-core.php', (array) get_option( 'active_plugins', array() ), true ) ) { $errors[] = 'plugin is not in active_plugins'; }
+if ( ! function_exists( 'noblen_core_api_version' ) ) { $errors[] = 'plugin code is not loaded'; }
+elseif ( Noblen\Core\Database\Migrator::installed_version() !== Noblen\Core\Database\Schema::VERSION ) { $errors[] = 'database schema is not at the current version'; }
+if ( 'noblen-corporate' !== get_option( 'stylesheet' ) || 'noblen-corporate' !== get_option( 'template' ) ) { $errors[] = 'theme is not active (stylesheet=' . get_option( 'stylesheet' ) . ')'; }
+if ( $errors ) { fwrite( STDERR, "CI site state is wrong: " . implode( '; ', $errors ) . "\n" ); exit( 1 ); }
+echo "CI site state verified: plugin active and loaded, schema current, theme active\n";
+PHP
 echo "WP_PATH=$WP_DIR" >> "${GITHUB_ENV:-/dev/null}"

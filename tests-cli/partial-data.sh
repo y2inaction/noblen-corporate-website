@@ -30,6 +30,9 @@ expect() { # expect <label> <companies> <industries> <solutions> <projects> <pro
 }
 step() { W option update noblen_probe_step "$1" >/dev/null; P partial-data.php; }
 
+# The intended theme MUST be active, otherwise "no sections" would pass for the wrong reason (C11-001 would be vacuous).
+if [ "$(W theme get "${EXPECT_THEME:-noblen-corporate}" --field=status | tail -1)" != "active" ]; then echo "FAIL precondition: theme ${EXPECT_THEME:-noblen-corporate} is not active. Run tests-cli/we-site-state.sh first."; exit 2; fi
+if ! curl -fsS "$BASE/" | grep -q "noblen-main-css"; then echo "FAIL precondition: the front page is not rendered by the Noblen theme."; exit 2; fi
 P reset-log.php >/dev/null
 existing=$(P count-records.php | cut -d' ' -f1)
 if [ "$existing" != "0" ]; then echo "FAIL precondition: site must have no Noblen records (found $existing). Run before seeding."; exit 2; fi

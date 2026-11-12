@@ -6,6 +6,9 @@ WP="${WP:-wp}"; WP_PATH="${WP_PATH:?set WP_PATH}"
 TMP_DIR="$(mktemp -d)"; trap 'rm -rf "$TMP_DIR"' EXIT
 W() { "$WP" --allow-root --path="$WP_PATH" "$@" 2>"$TMP_DIR/stderr.txt"; }
 pass=0; fail=0
+# Count the plugin's private tables through WordPress itself (database host, port and credentials come from wp-config),
+# so no direct database client, socket or credentials are assumed.
+private_tables() { W eval 'global $wpdb; echo count( $wpdb->get_col( $wpdb->prepare( "SHOW TABLES LIKE %s", $wpdb->esc_like( $wpdb->prefix . "noblen_" ) . "%" ) ) );' | tail -1; }
 ok()   { pass=$((pass+1)); echo "ok   $1"; }
 bad()  { fail=$((fail+1)); echo "FAIL $1 :: ${2:-}"; }
 eq()   { if [ "$2" = "$3" ]; then ok "$1"; else bad "$1" "expected [$3] got [$2]"; fi; }
@@ -51,7 +54,7 @@ BEFORE=$(W post list --post_type=noblen_project,noblen_company --post_status=any
 W plugin deactivate noblen-corporate-core >/dev/null
 W eval '$_SERVER["SERVER_NAME"]="localhost"; ob_start(); include get_template_directory()."/front-page.php"; $h=ob_get_clean(); echo strlen($h)>0?"rendered":"empty";' > $TMP_DIR/render.txt 2>>"$LOG"
 eq "C03-003 theme front page renders with plugin inactive" "$(cat $TMP_DIR/render.txt)" "rendered"
-eq "C26-002 database tables retained after deactivation" "$(mysql -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${NOBLEN_DB_NAME:-noblen_cli}' AND table_name LIKE '%noblen\_%'")" "5"
+eq "C26-002 database tables retained after deactivation" "$(private_tables)" "5"
 W plugin activate noblen-corporate-core >/dev/null
 eq "C26-002 records still present after reactivation" "$(W post list --post_type=noblen_project,noblen_company --post_status=any --format=count)" "$BEFORE"
 
@@ -64,7 +67,7 @@ W theme activate noblen-corporate >/dev/null
 W plugin deactivate noblen-corporate-core >/dev/null
 W plugin uninstall noblen-corporate-core --deactivate >/dev/null 2>&1 || true
 install_plugin  # wp plugin uninstall removes the plugin files
-eq "C26 uninstall keeps private tables by default" "$(mysql -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${NOBLEN_DB_NAME:-noblen_cli}' AND table_name LIKE '%noblen\_%'")" "5"
+eq "C26 uninstall keeps private tables by default" "$(private_tables)" "5"
 W plugin activate noblen-corporate-core >/dev/null
 eq "C26 records survive uninstall" "$(W post list --post_type=noblen_project,noblen_company --post_status=any --format=count)" "$BEFORE"
 
@@ -72,7 +75,7 @@ eq "C26 records survive uninstall" "$(W post list --post_type=noblen_project,nob
 W option update noblen_core_remove_data_on_uninstall 1 >/dev/null
 W plugin deactivate noblen-corporate-core >/dev/null
 W plugin uninstall noblen-corporate-core >/dev/null 2>&1 || true
-eq "C26 opt-in uninstall removes private tables" "$(mysql -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${NOBLEN_DB_NAME:-noblen_cli}' AND table_name LIKE '%noblen\_%'")" "0"
+eq "C26 opt-in uninstall removes private tables" "$(private_tables)" "0"
 
 eq "no PHP errors logged during the whole run" "$(grep -c 'PHP \(Fatal\|Warning\|Notice\|Deprecated\)' "$LOG" || true)" "0"
 echo "$pass passed, $fail failed"

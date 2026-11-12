@@ -11,7 +11,7 @@ Branch `feature/m2-implementation`, local only. Baseline `5739f75`. The frozen M
 | partial / none | 2 |
 | partial / partial | 14 |
 
-Planned is true for all 34. **Executed means executed locally.** No hosted CI run exists, so no wp-env, PHP 8.4, PHP 8.5 or MySQL 8.4 execution exists either.
+Planned is true for all 34. **Executed means executed locally**, with one exception: the first hosted run (commit `de59ce1`) gave hosted evidence for lint, PHPCS and compatibility on PHP 8.3 and 8.4, the PHP 8.5 informational check, and package building. Everything else in that run failed for developer-owned reasons that are corrected locally ([IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md)) but not yet re-run. wp-env, PHPUnit on MySQL 8.4 and the host WP-CLI jobs have no passing hosted result yet.
 
 ## 2. Classic Editor (criterion 21)
 

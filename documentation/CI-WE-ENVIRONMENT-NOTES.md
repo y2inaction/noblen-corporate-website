@@ -14,7 +14,7 @@ WE-tagged tests include C01-001 to C01-003, C03-002 and C03-003, C04, C06-001 an
 
 - wp-env **12.1.0**, pinned exactly in `tests-e2e/package.json` and its lockfile (needs Node 22.13 or newer; the job uses Node 22).
 - WordPress core `WordPress/WordPress#6.4.3`, PHP 8.3.
-- The plugin and theme are mounted from the checkout. A test-only must-use plugin (`tests-e2e/wp-env/noblen-ci-config.php`) supplies a throwaway audit key and marks the site as disposable. The seed script refuses to run anywhere without that marker (or an explicit variable) and a loopback address.
+- The plugin and theme are mounted from the checkout. A test-only must-use plugin (`tests-e2e/wp-env/mu-plugins/noblen-ci-config.php`) supplies a throwaway audit key and marks the site as disposable. The seed script refuses to run anywhere without that marker (or an explicit variable) and a loopback address.
 - The job runs `tests-cli/we-integration.sh` (real WP-CLI inside the wp-env container plus HTTP checks), then the browser smoke, admin-workflow and accessibility suites against `http://localhost:8888`.
 - wp-env's tests environment is disabled (`testsEnvironment: false`), as wp-env itself recommends.
 
@@ -37,13 +37,25 @@ GitHub-hosted runners have unrestricted outbound access, so wp-env is expected t
 ## 5. Known risks of the first hosted run
 
 - Non-interactive `wp-env run cli` behaviour (no terminal) and its output format could differ from the shim; the script trims carriage returns and blank lines but this is untested against the real tool.
-- Apache rewrite rules and permalinks in the wp-env container (`rewrite --hard`) are untested.
+- Apache rewrite rules and permalinks in the wp-env container were untested; they are now exercised against an Apache replica, but not in wp-env itself.
 - The Docker Hub rate limit seen here could affect a runner on a shared address, although less likely.
 - wp-env uses MariaDB, not MySQL 8.4. Plugin behaviour on MySQL 8.4 is covered by the PU job only.
-- The WE job now also runs: all five content types through the admin UI (C06), partial data on a pristine site before seeding (C11), Classic Editor Configuration B (C21), and a site crawl including the core sitemap (C12-001). Content hashing for C26-001 and C26-002 is in the WE integration script. All of these were run locally only (real browser against PHP's built-in server, or a shim for the wp-env commands).
+- The WE job now also runs: all five content types through the admin UI (C06), partial data on a pristine site before seeding (C11), Classic Editor Configuration B (C21), and a site crawl including the core sitemap (C12-001). Content hashing for C26-001 and C26-002 is in the WE integration script. None of these has yet run inside wp-env on GitHub (the first hosted run stopped at the theme defect). They were run locally in real Chromium against PHP's built-in server and, after the correction, against the Apache replica described below.
 - C21 Configuration A runs in its **own** job (`we-classic-editor-a`), separate from the main WE job, so Configuration B never sees the plugin. That job is non-blocking and refuses to run in strict mode until the Classic Editor pin is verified; see [DEPENDENCIES.md](DEPENDENCIES.md) and [CLASSIC-EDITOR-VERIFICATION-PROCEDURE.md](CLASSIC-EDITOR-VERIFICATION-PROCEDURE.md). Nothing about it has been verified against the real WordPress.org package.
 - Still not covered: C26-003 to C26-006 (M2-D; see [C26-M2D-BOUNDARY-REVIEW.md](C26-M2D-BOUNDARY-REVIEW.md)).
-- Reviewed against wp-env 12.1.0 source: `wp-env run` adds `-T` without a terminal, passes arguments as an array (quoting survives), prints its notices on stderr, exits non-zero on failure, activates all plugins and the first theme, and the core tag `6.4.3` exists upstream. The shim did not model container start-up, Apache rewrite behaviour, the file-mount of the seed script, or Docker Hub rate limiting.
+- Reviewed against wp-env 12.1.0 source: `wp-env run` adds `-T` without a terminal, passes arguments as an array (quoting survives), prints its notices on stderr, exits non-zero on failure, **activates plugins but NOT themes**, and the core tag `6.4.3` exists upstream.
+- **Correction.** An earlier version of this note said wp-env also activates the first theme. That was wrong: it rested on a comment in wp-env's source, and the code has no theme activation. The first hosted run exposed it (see the next section).
+
+## 5a. First hosted run (commit `de59ce1`, run 43259095276) and what it established
+
+**Demonstrated on GitHub:** wp-env 12.1.0 starts (59 seconds), runs WordPress 6.4.3 on PHP 8.3 (asserted inside the container), and `wp-env run cli wp ...` works non-interactively. The empty-site check ran.
+
+**Defects found (all developer-owned, corrected locally, not yet re-run on GitHub):**
+- The Noblen theme was **never active** in the wp-env site (see the correction above). `tests-cli/we-site-state.sh` now activates it and proves it from the rendered front page; both WE jobs run it before any test, and `partial-data.sh` refuses to run without it, because "no sections" passed for the wrong reason.
+- Single-file mappings made Docker create **root-owned parent directories** inside the checkout, so `wp-env destroy` could not remove the mapped file. Reproduced locally with a non-root user; directory mappings (`wp-content/mu-plugins`, `wp-content/noblen-e2e`) remove cleanly.
+- The debug-log artifact was empty when WordPress logged nothing. A probe now prints an explicit message, and container state and logs are collected as well.
+
+**Local reproduction of the wp-env topology (not wp-env itself):** an Apache container (`wordpress:php8.3`), a separate WP-CLI container (`wordpress:cli-php8.3`) with the same directory mounts, and MariaDB 12.3, with `wp-env run cli` replaced by a shim. This exercised real Apache rewrite rules and the core sitemap, which PHP's built-in server cannot. It found a gap in my replica (missing `mod_rewrite` hint), not in the product. It cannot show how wp-env itself behaves.
 
 ## 6. Contingency proposal (to use only if wp-env proves infeasible on hosted runners)
 

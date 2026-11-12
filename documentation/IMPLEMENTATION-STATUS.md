@@ -2,7 +2,7 @@
 
 Branch `feature/m2-implementation` (local, **not pushed**). Baseline `5739f75`. Specification: [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) Revision 5.1 and the frozen [CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md). Per-criterion detail: [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml), generated from the actual test results.
 
-Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Every execution is local; no hosted CI run exists.
+Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. One hosted CI run exists (commit `de59ce1`, below); it was partly red, and its failures are corrected locally but not yet re-run on GitHub.
 
 ## Local test evidence
 
@@ -27,9 +27,26 @@ Environment: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, PHPUnit 9
 
 The browser recipe was also run end to end on a freshly installed, freshly seeded database (as CI will), with the same results.
 
-## CI workflow review (not yet run on GitHub)
+## First hosted CI run (commit `de59ce1`, run 43259095276): 6 of 11 jobs green
 
-- Every action is pinned to a verified full commit SHA with a version comment (checkout v4.4.0, setup-node v4.4.0, upload-artifact v4.6.2, setup-php 2.40.0). Each SHA was fetched from its official repository and confirmed to be a commit. Workflow permissions are `contents: read`; checkout does not persist credentials; there are no secrets.
+| Job | Result | Cause and correction |
+|-----|--------|----------------------|
+| Static analysis PHP 8.3 and 8.4, PHP 8.5 compatibility (informational), package build, non-WE parity browser suites (informational) | pass | |
+| PHPUnit PHP 8.3 and 8.4 | fail | The CI setup never activated the plugin. `scripts/ci-setup-wordpress.sh` now activates the plugin and theme and asserts the state in a fresh process |
+| Host WP-CLI and package install PHP 8.3 and 8.4 | fail | Three table counts called the bare `mysql` client over a socket. They now count tables through WP-CLI. The package step now runs even if the integration step fails |
+| WE (wp-env) | fail | The Noblen theme was never active (wp-env activates plugins, not themes). Corrected with `we-site-state.sh` and a refusal in `partial-data.sh` |
+| WE Configuration A (non-blocking) | fail, by design | Strict mode refused the unverified Classic Editor pin. The gate is preserved |
+
+Also corrected: root-owned mapping directories blocking cleanup, an empty diagnostics artifact, and Node 20 action warnings.
+
+**Local verification of the corrections** (labelled by what actually ran):
+- *Real, local:* PHPUnit 146 of 146 on the pinned MySQL 8.4.13 image through the real setup script; host WP-CLI 20 of 20 and package install 12 of 12 on that image with the workflow's own configuration and no database client; actionlint, pin checks, PHPCS.
+- *Real Apache and MariaDB 12.3 in containers, wp-env commands shimmed to a WP-CLI container:* the full WE sequence in CI order passed: partial data 13 of 13, integration 25 of 25, smoke, admin 21 of 21, content types 41 of 41, Configuration B 13 of 13, axe 43 of 43, and a crawl of 17 pages through the required core sitemap.
+- *Not run anywhere:* wp-env itself since the corrections, PHP 8.4, and any hosted run of the corrections.
+
+## CI workflow review
+
+- Every action is pinned to a verified full commit SHA with a version comment (checkout v5.1.0, setup-node v5.0.0, upload-artifact v6.0.0, setup-php 2.40.0, all declaring the Node 24 runtime). Each SHA was fetched from its official repository and confirmed to be a commit. Workflow permissions are `contents: read`; checkout does not persist credentials; there are no secrets.
 - Jobs: static analysis and compatibility (PHP 8.3 and 8.4), PHP 8.5 informational (`continue-on-error`; it must never be made a required status check in repository settings), PHPUnit (PHP 8.3 and 8.4, MySQL 8.4, WordPress 6.4.3 pinned and SHA-1 verified), WE on wp-env, host WP-CLI with package install and uninstall retention, an informational non-WE browser parity job, and package build.
 - WE environment: the plan names `wp-env`. The `we` job now uses wp-env 12.1.0 with WordPress 6.4.3 and PHP 8.3, and runs the WP-CLI, browser, admin and accessibility suites inside it. **It has not been run**: this sandbox cannot build wp-env's Docker images. The previous PHP built-in-server jobs are kept as informational parity checks. See [CI-WE-ENVIRONMENT-NOTES.md](CI-WE-ENVIRONMENT-NOTES.md), which also holds a contingency deviation proposal, not accepted.
 - Not implemented: the CI validator for the traceability register (rules 1-16), the E8, E9 and E11 evidence artefacts, and the C26-006 run-attempt evidence binding. The register is generated and valid YAML but is not yet checked by CI.

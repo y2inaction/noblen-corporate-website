@@ -9,10 +9,8 @@
     "./wordpress-theme/noblen-corporate"
   ],
   "mappings": {
-    "wp-content/mu-plugins/noblen-ci-config.php": "./tests-e2e/wp-env/noblen-ci-config.php",
-    "wp-content/noblen-e2e/seed-e2e.php": "./tests-e2e/seed-e2e.php",
-    "wp-content/noblen-e2e/probes": "./tests-e2e/wp-env/probes",
-    "wp-content/noblen-e2e/downloads": "./tests-e2e/wp-env/downloads"
+    "wp-content/mu-plugins": "./tests-e2e/wp-env/mu-plugins",
+    "wp-content/noblen-e2e": "./tests-e2e/wp-env"
   },
   "config": {
     "WP_DEBUG": true,

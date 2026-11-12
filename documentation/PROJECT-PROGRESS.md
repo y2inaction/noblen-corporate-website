@@ -30,7 +30,7 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 |----------------|-------|
 | Planned | True |
 | Implemented | Partly: see [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml) |
-| Executed | Partly, **local only**; no hosted run exists |
+| Executed | Partly, mostly **local**; one hosted run exists (partly red, corrections pending a second run) |
 | Accepted | False |
 
 It is a planning reference only. It did not itself authorise tests, workflows, dependency installation or implementation; those were authorised separately and are recorded in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md).
