@@ -14,7 +14,7 @@ Environment: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, PHPUnit 9
 | PHPCS WordPress-Core/Extra + PHPCompatibilityWP | 0 errors, 0 warnings |
 | PHPCompatibility static check, PHP 8.3-, 8.4-, 8.5- | clean (static only; PHP 8.4 and 8.5 were not executed) |
 | `tests-cli/cli-integration.sh`, real WP-CLI (activation, write paths, deactivate, theme switch, uninstall retention and opt-in removal, error log canary) | 20 of 20 |
-| `tests-cli/package-install.sh` (build ZIPs, install into a clean copy, activate, empty-site render) | 11 of 11 |
+| `tests-cli/package-install.sh` (build ZIPs, install into a clean copy, activate, empty-site render) | 12 of 12 |
 | `tests-e2e/admin.js` (real browser, editor, clearance officer, approver, administrator) | 21 of 21 |
 | `tests-e2e/a11y.js` (axe-core WCAG 2.0/2.1 A and AA on 11 pages at 2 widths, token contrast, keyboard) | 43 of 43 |
 | `tests-e2e/smoke.js` (360, 768, 1280 px, console, third-party requests, overflow, placeholder tokens) | pass |
@@ -22,6 +22,14 @@ Environment: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, PHPUnit 9
 | Markdown link check (CI logic, run locally) | pass |
 
 The browser recipe was also run end to end on a freshly installed, freshly seeded database (as CI will), with the same results.
+
+## CI workflow review (not yet run on GitHub)
+
+- Every action is pinned to a verified full commit SHA with a version comment (checkout v4.4.0, setup-node v4.4.0, upload-artifact v4.6.2, setup-php 2.40.0). Each SHA was fetched from its official repository and confirmed to be a commit. Workflow permissions are `contents: read`; checkout does not persist credentials; there are no secrets.
+- Jobs: static analysis and compatibility (PHP 8.3 and 8.4), PHP 8.5 informational (`continue-on-error`; it must never be made a required status check in repository settings), PHPUnit (PHP 8.3 and 8.4, MySQL 8.4, WordPress 6.4.3 pinned and SHA-1 verified), WP-CLI integration and clean package install, browser/admin/accessibility, and package build.
+- Deviation from the frozen plan: the plan names `wp-env` (Docker) as the "WE" environment. The workflow uses a disposable WordPress with PHP's built-in server and real WP-CLI instead. It is functionally equivalent for these tests but is a different environment from the one specified.
+- Not implemented: the CI validator for the traceability register (rules 1-16), the E8, E9 and E11 evidence artefacts, and the C26-006 run-attempt evidence binding. The register is generated and valid YAML but is not yet checked by CI.
+- Bugs found and fixed by reviewing the wiring before any push: the browser job's setup script targeted the wrong database, the WP-CLI job never installed the theme, and the WordPress download had no integrity check.
 
 ## Defects found and fixed during verification
 
@@ -42,8 +50,7 @@ The browser recipe was also run end to end on a freshly installed, freshly seede
 - No persistent object-cache drop-in test (criterion 31). Core object cache only.
 - Configuration A of criterion 21 (Classic Editor plugin installed) was not run: it is not an approved dependency.
 - Not executed anywhere: PHP 8.4 or 8.5, MySQL 8.4, the CI workflow itself.
-- The CI workflow downloads WordPress from wordpress.org, which this environment cannot reach, so its setup step is unverified here. Its other steps use the same scripts that ran locally.
-- GitHub Actions are referenced by major version tag, not by commit SHA. Pinning by SHA is recommended before merge.
+- The WordPress download step cannot be exercised here (wordpress.org returns 403). Its checksum logic was tested against a local server for both a matching and a tampered checksum.
 - Hazard: `tests-cli/cli-integration.sh` runs `wp plugin uninstall`, which deletes the plugin directory. It copies the plugin into the target WordPress and refuses to run against a symlink, but running it against a development site replaces a symlinked plugin folder.
 
 ## Manual records still required (none exist)

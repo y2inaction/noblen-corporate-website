@@ -3,7 +3,8 @@
 # Env: WP (wp binary), WP_PATH (WordPress dir), NOBLEN_DB_NAME must point at an empty disposable database.
 set -u
 WP="${WP:-wp}"; WP_PATH="${WP_PATH:?set WP_PATH}"
-W() { "$WP" --allow-root --path="$WP_PATH" "$@" 2>/tmp/cli-stderr.txt; }
+TMP_DIR="$(mktemp -d)"; trap 'rm -rf "$TMP_DIR"' EXIT
+W() { "$WP" --allow-root --path="$WP_PATH" "$@" 2>"$TMP_DIR/stderr.txt"; }
 pass=0; fail=0
 ok()   { pass=$((pass+1)); echo "ok   $1"; }
 bad()  { fail=$((fail+1)); echo "FAIL $1 :: ${2:-}"; }
@@ -15,8 +16,10 @@ PLUG="$WP_PATH/wp-content/plugins/noblen-corporate-core"
 [ -L "$PLUG" ] && rm "$PLUG"
 install_plugin() { rm -rf "$PLUG"; mkdir -p "$PLUG"; cp -a "$REPO/wordpress-plugin/noblen-corporate-core/." "$PLUG/"; rm -rf "$PLUG/tests"; }
 install_plugin
+# The theme must be present too (a pristine WordPress has none); a symlink is safe because nothing here deletes themes.
+[ -e "$WP_PATH/wp-content/themes/noblen-corporate" ] || ln -s "$REPO/wordpress-theme/noblen-corporate" "$WP_PATH/wp-content/themes/noblen-corporate"
 [ -L "$PLUG" ] && { echo "refusing to run: plugin dir is a symlink"; exit 2; }
-LOG="${WP_DEBUG_LOG_FILE:-/tmp/noblen-cli-debug.log}"; : > "$LOG"
+LOG="${WP_DEBUG_LOG_FILE:-$TMP_DIR/debug.log}"; : > "$LOG"; export WP_DEBUG_LOG_FILE="$LOG"
 
 # ---- C01/C02: clean install, theme and plugin activation via WP-CLI.
 W core install --url=http://127.0.0.1:8099 --title=CLI --admin_user=admin --admin_password=cli-pass-only --admin_email=cli@example.test --skip-email >/dev/null
@@ -46,8 +49,8 @@ eq "C24-009 import-style creation (wp post generate/import path) stays draft" "$
 # ---- C03-003 / C26-002: deactivate plugin, theme still renders; data preserved; reactivate.
 BEFORE=$(W post list --post_type=noblen_project,noblen_company --post_status=any --format=count)
 W plugin deactivate noblen-corporate-core >/dev/null
-W eval '$_SERVER["SERVER_NAME"]="localhost"; ob_start(); include get_template_directory()."/front-page.php"; $h=ob_get_clean(); echo strlen($h)>0?"rendered":"empty";' > /tmp/render.txt 2>>"$LOG"
-eq "C03-003 theme front page renders with plugin inactive" "$(cat /tmp/render.txt)" "rendered"
+W eval '$_SERVER["SERVER_NAME"]="localhost"; ob_start(); include get_template_directory()."/front-page.php"; $h=ob_get_clean(); echo strlen($h)>0?"rendered":"empty";' > $TMP_DIR/render.txt 2>>"$LOG"
+eq "C03-003 theme front page renders with plugin inactive" "$(cat $TMP_DIR/render.txt)" "rendered"
 eq "C26-002 database tables retained after deactivation" "$(mysql -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${NOBLEN_DB_NAME:-noblen_cli}' AND table_name LIKE '%noblen\_%'")" "5"
 W plugin activate noblen-corporate-core >/dev/null
 eq "C26-002 records still present after reactivation" "$(W post list --post_type=noblen_project,noblen_company --post_status=any --format=count)" "$BEFORE"

@@ -3,7 +3,7 @@
 # Env: WP_VERSION (default 6.4.3), DB_HOST, DB_NAME, DB_USER, DB_PASS, WP_DIR (default $RUNNER_TEMP/wp)
 set -euo pipefail
 WP_VERSION="${WP_VERSION:-6.4.3}"; WP_DIR="${WP_DIR:-${RUNNER_TEMP:-/tmp}/wp}"
-mkdir -p "$WP_DIR" && curl -fsSL "https://wordpress.org/wordpress-${WP_VERSION}.tar.gz" | tar -xz --strip-components=1 -C "$WP_DIR"
+"$(dirname "$0")/fetch-wordpress.sh" "$WP_VERSION" "$WP_DIR"
 cat > "$WP_DIR/wp-config.php" <<PHP
 <?php
 define( 'DB_NAME', '${DB_NAME:-noblen_test}' ); define( 'DB_USER', '${DB_USER:-root}' ); define( 'DB_PASSWORD', '${DB_PASS:-root}' );

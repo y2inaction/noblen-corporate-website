@@ -24,8 +24,10 @@ jobs:
       matrix:
         php: ['8.3', '8.4']
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: ${{ matrix.php }}
           tools: composer
@@ -41,14 +43,18 @@ jobs:
           vendor/bin/phpcs -q --standard=PHPCompatibility --runtime-set testVersion 8.4- --extensions=php --ignore='*/tests/*' wordpress-theme wordpress-plugin
       - name: No third-party hosts in sources (C18-002)
         run: scripts/check-no-third-party.sh
+      - name: Repository audit (artifacts, credentials, local paths, dev data)
+        run: scripts/audit-repo.sh
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.5'
           tools: composer
@@ -72,8 +78,10 @@ jobs:
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: ${{ matrix.php }}
           extensions: mysqli, gd, mbstring
@@ -87,7 +95,7 @@ jobs:
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
         run: phpunit -c phpunit.xml.dist --log-junit "$RUNNER_TEMP/junit-${{ matrix.php }}.xml"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: junit-php${{ matrix.php }}
@@ -108,8 +116,10 @@ jobs:
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: ${{ matrix.php }}
           extensions: mysqli, gd, mbstring
@@ -119,8 +129,7 @@ jobs:
         env:
           WP_DIR: ${{ runner.temp }}/wp
         run: |
-          mkdir -p "$WP_DIR"
-          curl -fsSL "https://wordpress.org/wordpress-${WP_VERSION}.tar.gz" | tar -xz --strip-components=1 -C "$WP_DIR"
+          scripts/fetch-wordpress.sh "$WP_VERSION" "$WP_DIR"
           cat > "$WP_DIR/wp-config.php" <<'PHP'
           <?php
           define( 'DB_NAME', getenv( 'NOBLEN_DB_NAME' ) ); define( 'DB_USER', 'root' ); define( 'DB_PASSWORD', 'root' );
@@ -163,26 +172,29 @@ jobs:
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
     env:
-      NOBLEN_DB_NAME: noblen_e2e
       BASE_URL: http://127.0.0.1:8100
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.3'
           extensions: mysqli, gd, mbstring
           tools: composer
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
       - run: composer install --no-interaction --prefer-dist
       - name: Disposable WordPress
         env:
           WP_DIR: ${{ runner.temp }}/wp
+          DB_NAME: noblen_e2e
         run: scripts/ci-setup-wordpress.sh
       - name: Activate, seed, serve
         env:
           WP_DIR: ${{ runner.temp }}/wp
+          NOBLEN_ALLOW_E2E_SEED: '1'
         run: |
           W="vendor/bin/wp --path=$WP_DIR"
           $W option update home "$BASE_URL" && $W option update siteurl "$BASE_URL"
@@ -207,7 +219,7 @@ jobs:
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: screenshots
@@ -217,9 +229,11 @@ jobs:
     name: Package build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - run: scripts/build-packages.sh "$RUNNER_TEMP/dist"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: packages
           path: ${{ runner.temp }}/dist

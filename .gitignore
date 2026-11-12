@@ -3,11 +3,14 @@
 # Local WordPress / environment
 # OS / editor
 *.log
+*.sql
+*.sqlite
 *.swp
 *.zip
 .DS_Store
 .env
 .idea/
+.phpunit.result.cache
 .vscode/
 .wp-env.override.json
 Thumbs.db

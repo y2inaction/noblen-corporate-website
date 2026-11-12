@@ -16,6 +16,7 @@ cp -a "$WP_SRC" "$SITE"; rm -rf "$SITE/wp-content/plugins/noblen-corporate-core"
 LOG="$WORK/debug.log"; : > "$LOG"; export WP_DEBUG_LOG_FILE="$LOG"
 unzip -q "$DIST/noblen-corporate-core.zip" -d "$SITE/wp-content/plugins" && unzip -q "$DIST/noblen-corporate-theme.zip" -d "$SITE/wp-content/themes"
 eq "ZIP excludes tests and dev files" "$(find "$SITE/wp-content/plugins/noblen-corporate-core" "$SITE/wp-content/themes/noblen-corporate" \( -name tests -o -name 'phpunit*' -o -name 'composer.*' -o -name node_modules -o -name '*.sh' \) | wc -l)" "0"
+eq "packages contain no fixtures, test credentials or local paths" "$(grep -rIlE 'Dev Fixture|DEV FIXTURE|fx_(editor|officer|approver)|dev-only|/home/[a-z]+|/root/' "$SITE/wp-content/plugins/noblen-corporate-core" "$SITE/wp-content/themes/noblen-corporate" | wc -l)" "0"
 eq "plugin file is a real file, not a symlink" "$([ -L "$SITE/wp-content/plugins/noblen-corporate-core" ] && echo link || echo real)" "real"
 W core install --url=http://127.0.0.1:8099 --title=Pkg --admin_user=admin --admin_password=pkg-pass-only --admin_email=pkg@example.test --skip-email >/dev/null
 # Canary: prove the PHP error log is wired up, otherwise "no errors" below would be vacuous.

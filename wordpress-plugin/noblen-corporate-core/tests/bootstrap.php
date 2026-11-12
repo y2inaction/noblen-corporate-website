@@ -6,7 +6,11 @@
  * Set NOBLEN_WP_PATH to the WordPress directory.
  */
 
-$wp_path = getenv( 'NOBLEN_WP_PATH' ) ?: '/home/user/wp-env/wordpress';
+$wp_path = getenv( 'NOBLEN_WP_PATH' );
+if ( ! $wp_path || ! is_readable( $wp_path . '/wp-load.php' ) ) {
+	fwrite( STDERR, "Set NOBLEN_WP_PATH to a disposable WordPress directory (see scripts/ci-setup-wordpress.sh).\n" );
+	exit( 2 );
+}
 if ( ! is_readable( $wp_path . '/wp-load.php' ) ) {
 	fwrite( STDERR, "WordPress not found at {$wp_path}. Set NOBLEN_WP_PATH.\n" );
 	exit( 1 );

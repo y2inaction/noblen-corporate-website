@@ -17,7 +17,7 @@ criteria:
     evidence:
       - "PHPUnit: 1/1 tests named test_C01_* pass (all)"
       - "tests-cli/cli-integration.sh (real WP-CLI 2.12.0): 20/20"
-      - "tests-cli/package-install.sh: 11/11"
+      - "tests-cli/package-install.sh: 12/12"
       - "tests-e2e/smoke.js (360/768/1280 px, console, third-party requests, overflow, placeholder tokens): PASS"
     gaps:
       - "Not run on the CI matrix (MySQL 8.4, PHP 8.4)"
@@ -31,7 +31,7 @@ criteria:
     evidence:
       - "PHPUnit: 1/1 tests named test_C02_* pass (all)"
       - "tests-cli/cli-integration.sh (real WP-CLI 2.12.0): 20/20"
-      - "tests-cli/package-install.sh: 11/11"
+      - "tests-cli/package-install.sh: 12/12"
     gaps:
       - "C02-004 covers the unsupported-WordPress path only; unsupported-PHP path cannot be exercised on PHP 8.3 without a constant override"
   - id: 3
@@ -131,7 +131,7 @@ criteria:
     accepted: false
     manual_records_pending: none
     evidence:
-      - "tests-cli/package-install.sh: 11/11 (empty site shows no section headings)"
+      - "tests-cli/package-install.sh: 12/12 (empty site shows no section headings)"
     gaps:
       - "Partial-data render (some sections filled) not asserted separately"
   - id: 12
@@ -220,7 +220,7 @@ criteria:
     accepted: false
     manual_records_pending: "C19-M01"
     evidence:
-      - "tests-cli/package-install.sh: 11/11"
+      - "tests-cli/package-install.sh: 12/12"
     gaps:
       - "Clean site is a copy of the local WordPress, not the CI-fetched release"
   - id: 20
