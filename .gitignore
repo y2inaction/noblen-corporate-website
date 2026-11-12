@@ -1,4 +1,5 @@
 
+!tests-e2e/wp-env/downloads/.gitkeep
 # Dependencies and build output
 # Local WordPress / environment
 # OS / editor
@@ -17,5 +18,6 @@ Thumbs.db
 build/
 dist/
 node_modules/
+tests-e2e/wp-env/downloads/*
 vendor/
 wp-config.php

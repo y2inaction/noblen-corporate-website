@@ -232,6 +232,17 @@ jobs:
       - name: Site crawl for placeholder tokens (C12-001; the built-in server cannot serve sitemaps)
         working-directory: tests-e2e
         run: node crawl.js
+      - name: Classic Editor, Configuration A on the built-in server (informational)
+        env:
+          WPCMD: vendor/bin/wp --path=${{ runner.temp }}/wp
+          DL_DIR: ${{ runner.temp }}/ce-download
+          SITE_DL_DIR: ${{ runner.temp }}/ce-download
+          CONFIG: A
+          CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
+        run: |
+          tests-cli/classic-editor-config-a.sh install
+          (cd tests-e2e && node classic-editor.js)
+          tests-cli/classic-editor-config-a.sh cleanup
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
@@ -319,6 +330,17 @@ jobs:
         env:
           CRAWL_REQUIRE_SITEMAP: '1'
         run: node crawl.js
+      - name: Install pinned Classic Editor, verify provenance, apply settings (Configuration A, C21-021, C21-022)
+        run: tests-cli/classic-editor-config-a.sh install
+      - name: Classic Editor, Configuration A (C21-001 to C21-005, C21-011, C21-013, C21-015, C21-017, C21-019)
+        working-directory: tests-e2e
+        env:
+          CONFIG: A
+          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node classic-editor.js
+      - name: Restore Configuration B (remove the test-only Classic Editor plugin)
+        if: always()
+        run: tests-cli/classic-editor-config-a.sh cleanup
       - name: Collect the WordPress debug log
         if: always()
         run: tests-e2e/node_modules/.bin/wp-env run cli cat wp-content/debug.log > "$RUNNER_TEMP/wp-debug.log" || true
@@ -329,6 +351,7 @@ jobs:
           path: |
             ${{ runner.temp }}/shots
             ${{ runner.temp }}/wp-debug.log
+            tests-e2e/wp-env/downloads/classic-editor-record.json
       - name: WE result summary
         if: always()
         run: |

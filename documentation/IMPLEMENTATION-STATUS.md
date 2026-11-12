@@ -11,7 +11,7 @@ Environment: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, PHPUnit 9
 | Suite | Result |
 |-------|--------|
 | PHPUnit (real WordPress, one transaction per test, leak guard) | 146 tests, all pass |
-| `tests-e2e/content-types.js` (real browser: all five types created and edited through the admin UI) | 40 of 40 |
+| `tests-e2e/content-types.js` (real browser: all five types created and edited through the admin UI) | 41 of 41, four consecutive runs |
 | `tests-e2e/classic-editor.js` Configuration B (real browser) | 13 of 13 |
 | `tests-e2e/crawl.js` (real browser, placeholder-token crawl) | pass, 11 pages (sitemap not exercised) |
 | `tests-cli/partial-data.sh` and `tests-cli/we-integration.sh` (**shim**, not wp-env) | 13 of 13 and 25 of 25 |
@@ -44,8 +44,12 @@ The browser recipe was also run end to end on a freshly installed, freshly seede
 | C06-002 (company, industry, service through the UI) | Implemented for all five types (also C06-001 product). Passes locally in a real browser. Not yet run in wp-env |
 | C11-002 (partial data) | Implemented. Passes through a shim. Not yet run in wp-env |
 | C12-001 (full-site crawl) | Implemented. Passes locally; sitemap seed needs Apache, so it is required only in the wp-env job |
-| C21 Configuration A (Classic Editor plugin) | **Blocked: needs owner approval of a new dependency and a verified version pin.** Configuration B implemented and passes |
+| C21 Configuration A (Classic Editor plugin) | Dependency **approved by the owner** and pinned to the official WordPress.org release 1.7.0 ([DEPENDENCIES.md](DEPENDENCIES.md)). Configuration A tests, the install and provenance script (C21-021, C21-022) and CI wiring are implemented. **Not yet verified against the real WordPress.org package**, which this environment cannot reach. Test logic validated locally with a stand-in package (13 of 13, plus a sensitivity check); that is not evidence. Configuration B still passes (13 of 13) |
 | C26-001 (content hashing) | Implemented with a sensitivity check; C26-001 and C26-002 pass through a shim. C26-003 to C26-006 are not implemented |
+
+## Test-harness finding
+
+Clicking Save Draft while WordPress's permalink request is still in flight is silently ignored. This made the browser tests stall intermittently. The tests now wait for that request and re-click without reloading, logging every re-click; the content-types suite counts them and fails above two. It is WordPress behaviour, not a plugin defect.
 
 ## Defects found and fixed during verification
 
@@ -64,8 +68,8 @@ The browser recipe was also run end to end on a freshly installed, freshly seede
 - Contact and partnership forms are deferred to M7 by the approved plan. Only a mailto call to action exists.
 - `get_posts()` and any query with `suppress_filters` bypass the read-time filter. Theme code must use the accessor. This is documented, not a defect in a listed interface.
 - No persistent object-cache drop-in test (criterion 31). Core object cache only.
-- Configuration A of criterion 21 (Classic Editor plugin installed) is not run: the plugin is not an approved dependency and its version cannot be verified from this environment.
-- C26-003 to C26-006 (plugin upgrade, transformation manifest, attestation, runtime binding) are not implemented. They need an earlier release to register and belong to M2-D.
+- Configuration A of criterion 21: owner-approved and pinned (1.7.0), but the WordPress.org package could not be reached from this environment, so its identity, checksums and SHA-256 are unverified until the first hosted run. The release was identified from the plugin's official GitHub repository, not from WordPress.org.
+- C26-003 to C26-006 are not implemented. They belong to M2-D, and the recommended boundary and prerequisites are in [C26-M2D-BOUNDARY-REVIEW.md](C26-M2D-BOUNDARY-REVIEW.md) (for owner review, not accepted).
 - Not executed anywhere: PHP 8.4 or 8.5, MySQL 8.4, the CI workflow itself.
 - The WordPress download step cannot be exercised here (wordpress.org returns 403). Its checksum logic was tested against a local server for both a matching and a tampered checksum.
 - Hazard: `tests-cli/cli-integration.sh` runs `wp plugin uninstall`, which deletes the plugin directory. It copies the plugin into the target WordPress and refuses to run against a symlink, but running it against a development site replaces a symlinked plugin folder.

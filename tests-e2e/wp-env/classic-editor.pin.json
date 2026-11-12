@@ -1,0 +1,33 @@
+{
+  "purpose": "Configuration A of acceptance criterion 21. DEVELOPMENT AND CI TEST ENVIRONMENT ONLY. Never a runtime dependency of the theme or plugin, never bundled in a package.",
+  "owner_approval": "Approved by the owner for M2 Configuration A, official WordPress.org plugin only, exact version pinned.",
+  "slug": "classic-editor",
+  "version": "1.7.0",
+  "source": "https://downloads.wordpress.org/plugin/classic-editor.1.7.0.zip",
+  "official_checksums": "https://api.wordpress.org/plugin-checksums/classic-editor/1.7.0",
+  "zip_sha256": "",
+  "zip_sha256_note": "Not known: this was prepared in an environment that cannot reach wordpress.org. The CI job records the downloaded package's SHA-256 in its summary. After the first verified hosted run, copy that value here; the job then fails on any difference.",
+  "compatibility_basis": {
+    "pinned_wordpress": "6.4.3",
+    "plugin_requires_wordpress": "4.9",
+    "plugin_requires_php": "5.2.4 (the test environment runs PHP 8.3)",
+    "plugin_tested_up_to": "7.0 (above the pinned WordPress; 'tested up to' is advisory, 'requires at least' is the limit)",
+    "release_date_note": "1.7.0 changelog: a hotfix for WordPress 7.0 publishing-actions styling; previous stable 1.6.7 fixed script translations in WordPress 6.7.1. Neither release is reported as dropping support for WordPress 6.4."
+  },
+  "identified_from": {
+    "repository": "https://github.com/WordPress/classic-editor",
+    "branch": "trunk",
+    "commit": "bb8d0cc7bfafa7458d90503c44e3c7723cb7324c",
+    "commit_date": "2026-05-27",
+    "evidence": "readme.txt 'Stable tag: 1.7.0'; classic-editor.php header 'Version: 1.7.0'; changelog entry 1.7.0 present",
+    "limitation": "This is the plugin's official development repository, linked from its WordPress.org page. It is NOT the WordPress.org distribution. The repository has no tags, so the release commit could not be tied to the 1.7.0 package. The WordPress.org package itself was not reachable and has not been verified yet."
+  },
+  "verification_in_ci": [
+    "download the exact source URL above",
+    "record the package SHA-256 (and compare with zip_sha256 once it is filled in)",
+    "check the plugin header version equals the pinned version",
+    "install it and run wp plugin verify-checksums against WordPress.org's published per-file checksums for that exact version",
+    "check the installed version equals the pinned version (C21-021)",
+    "record the Classic Editor settings used for the run (C21-022)"
+  ]
+}

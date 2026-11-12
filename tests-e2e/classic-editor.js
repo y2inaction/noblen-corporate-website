@@ -13,6 +13,14 @@ const id = (n) => `C21-${String(n).padStart(3, '0')}`;
 const off = CONFIG === 'A' ? 0 : 5; // criterion numbering: A = 001..005, B = 006..010
 const TYPES = [['noblen_project', 'project'], ['noblen_product', 'product'], ['noblen_company', 'company'], ['noblen_industry', 'industry'], ['noblen_service', 'service']];
 
+// Save Draft: wait for WordPress's in-flight permalink request, click, re-click (no reload) if the click was ignored.
+async function saveDraft(page) {
+  await page.waitForLoadState('networkidle').catch(() => {});
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try { await Promise.all([page.waitForNavigation({ timeout: 15000 }), page.click('#save-post')]); return; }
+    catch (e) { if (attempt === 3) throw e; console.log('note: Save Draft click was ignored, clicking again'); await page.waitForLoadState('networkidle').catch(() => {}); }
+  }
+}
 async function login(browser, user, pass) {
   const ctx = await browser.newContext(); const page = await ctx.newPage();
   page.on('dialog', (d) => d.accept());
@@ -52,10 +60,10 @@ async function login(browser, user, pass) {
   await editor.fill('#title', `C21 ${CONFIG} ${stamp}`);
   await editor.fill('#noblen_f_overview', `Overview ${stamp}`);
   await editor.selectOption('#noblen_f_status', 'completed_assignment');
-  await Promise.all([editor.waitForNavigation(), editor.click('#save-post')]);
+  await saveDraft(editor);
   check(await editor.inputValue('#noblen_f_overview') === `Overview ${stamp}` && await editor.inputValue('#noblen_f_status') === 'completed_assignment', `${id(CONFIG === 'A' ? 13 : 14)} structured fields save (Configuration ${CONFIG})`);
   await editor.fill('#noblen_f_video_url', 'javascript:alert(1)');
-  await Promise.all([editor.waitForNavigation(), editor.click('#save-post')]);
+  await saveDraft(editor);
   const notices = (await editor.locator('.notice').allInnerTexts()).join(' ');
   check(/valid http or https/i.test(notices) && (await editor.inputValue('#noblen_f_video_url')) === '', `${id(CONFIG === 'A' ? 15 : 16)} invalid input is rejected and not saved (Configuration ${CONFIG})`, notices.slice(0, 120));
   clearLocks();

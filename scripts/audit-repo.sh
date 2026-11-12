@@ -26,5 +26,9 @@ hits=$(git grep -InE 'Dev Fixture|DEV FIXTURE|fx_(editor|officer|approver)|dev-o
 hits=$(git grep -InE "define\( *'NOBLEN_AUDIT_KEYS'.*=> *'[^<'][^']{7,}'" -- . ':!tests-e2e' ':!scripts/ci-setup-wordpress.sh' ':!.github' ':!documentation/INSTALLATION.md' ':!wordpress-plugin/noblen-corporate-core/tests' || true)
 [ -n "$hits" ] && bad "audit key defined in shipped code" "$hits"
 
+# 6. The Classic Editor plugin is a development/CI test dependency only: no shipped code may require or load it.
+hits=$(git grep -InEi "Requires Plugins:|classic-editor/classic-editor|classic-editor\.php|WP_PLUGIN_DIR.*classic" -- wordpress-theme wordpress-plugin ':!wordpress-plugin/noblen-corporate-core/tests' || true)
+[ -n "$hits" ] && bad "shipped code depends on or references the Classic Editor plugin" "$hits"
+
 [ "$fail" -eq 0 ] && echo "PASS: repository audit clean"
 exit "$fail"

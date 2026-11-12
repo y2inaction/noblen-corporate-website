@@ -13,6 +13,17 @@ const TYPES = [
   ['noblen_company', 'C06-002', 'company'], ['noblen_industry', 'C06-002', 'industry'], ['noblen_service', 'C06-002', 'service'],
 ];
 
+let retries = 0;
+// Save Draft. WordPress ignores a click that lands while its permalink or autosave request is in flight, as a person
+// would notice and click again. So: wait for the in-flight request, click, and if the page has not reloaded, click once
+// more WITHOUT reloading (reloading would discard the typed fields). Every re-click is logged and counted.
+async function saveDraft(page) {
+  await page.waitForLoadState('networkidle').catch(() => {});
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try { await Promise.all([page.waitForNavigation({ timeout: 15000 }), page.click('#save-post')]); return; }
+    catch (e) { if (attempt === 3) throw e; retries++; console.log('note: Save Draft click was ignored, clicking again (#' + retries + ')'); await page.waitForLoadState('networkidle').catch(() => {}); }
+  }
+}
 async function fillFields(page, round) {
   const filled = {};
   for (const el of await page.locator('[id^="noblen_f_"]').all()) {
@@ -62,7 +73,7 @@ async function setBody(page, text) {
     await page.fill('#title', title);
     await setBody(page, `Body for ${label} ${stamp}`);
     const first = await fillFields(page, 1);
-    await Promise.all([page.waitForNavigation(), page.click('#save-post')]);
+    await saveDraft(page);
     const id = new URL(page.url()).searchParams.get('post');
     check(!!id, `${cid} ${label}: created as a draft (post ${id})`);
     check(await page.inputValue('#title') === title, `${cid} ${label}: title persisted`);
@@ -76,7 +87,7 @@ async function setBody(page, text) {
     // Edit and save again.
     await page.fill('#title', title + ' edited');
     const second = await fillFields(page, 2);
-    await Promise.all([page.waitForNavigation(), page.click('#save-post')]);
+    await saveDraft(page);
     check(await page.inputValue('#title') === title + ' edited', `${cid} ${label}: title edit persisted`);
     bad = [];
     for (const [fid, want] of Object.entries(second)) {
@@ -90,6 +101,7 @@ async function setBody(page, text) {
     check((await page.locator('table.wp-list-table').innerText()).includes(title + ' edited'), `${cid} ${label}: appears in the admin list`);
     clearLocks();
   }
+  check(retries <= 2, `stalled saves retried: ${retries} (at most 2 tolerated)`);
   await browser.close();
   console.log(`${passes} passed, ${failures} failed`);
   process.exit(failures ? 1 : 0);
