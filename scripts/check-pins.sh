@@ -71,6 +71,46 @@ if errs:
 print("workflow consistent with pin state")
 PY
 
+# 4b. Capture is separate from verification. The capture workflow may only capture, never write, never widen permissions,
+# and only the two named jobs may use the installer.
+python3 - "$PIN" <<'PY' || fail=1
+import glob,json,re,sys,yaml
+pin=json.load(open(sys.argv[1])); errs=[]
+CAP=".github/workflows/classic-editor-capture.yml"; MARK="tests-e2e/wp-env/capture-request.txt"
+allowed={".github/workflows/ci.yml":{"we-classic-editor-a"}, CAP:{"capture"}}
+for f in sorted(glob.glob(".github/workflows/*.y*ml")):
+    wf=yaml.safe_load(open(f))
+    for name,j in (wf.get("jobs") or {}).items():
+        if "classic-editor-config-a.sh" in json.dumps(j) and name not in allowed.get(f,set()):
+            errs.append("%s job %s uses the Classic Editor installer; only %s may"%(f,name,", ".join("%s:%s"%(k,",".join(sorted(v))) for k,v in allowed.items())))
+try: raw=open(CAP).read()
+except FileNotFoundError: raw=None
+if raw is not None:
+    wf=yaml.safe_load(raw); on=wf.get("on",wf.get(True)) or {}
+    if set(on.keys())-{"push","workflow_dispatch"}: errs.append("capture workflow may only trigger on push and workflow_dispatch, got %s"%sorted(on.keys()))
+    push=on.get("push") or {}
+    if push.get("branches")!=["feature/**"]: errs.append("capture push trigger must be exactly branches [feature/**], got %r"%push.get("branches"))
+    if push.get("paths")!=[MARK]: errs.append("capture push trigger must be exactly paths [%s], got %r"%(MARK,push.get("paths")))
+    if wf.get("permissions")!={"contents":"read"}: errs.append("capture workflow permissions must be exactly {contents: read}, got %r"%wf.get("permissions"))
+    for jn,j in (wf.get("jobs") or {}).items():
+        if "permissions" in j: errs.append("capture job %s must not set its own permissions"%jn)
+        for st in j.get("steps",[]):
+            r=st.get("run","") or ""
+            for m in re.finditer(r"classic-editor-config-a\.sh\s+(\S+)(\s+\S+)?",r):
+                if (m.group(1),(m.group(2) or "").strip())not in (("install","--capture"),("cleanup","")): errs.append("capture job may only run 'install --capture' or 'cleanup', found: %s"%m.group(0))
+            if re.search(r"git\s+(add|commit|push|checkout|apply)|contents:\s*write|pin\.json\s*(>|\|)|sed\s+-i[^\n]*pin\.json|tee[^\n]*pin\.json",r): errs.append("capture job must not write to the repository or the pin")
+    if "continue-on-error" in raw and "continue-on-error: false" not in raw: errs.append("capture workflow must not hide failures with continue-on-error")
+    try: marker=open(MARK).read().splitlines()[0].strip()
+    except FileNotFoundError: marker=None
+    want="classic-editor %s capture request"%pin.get("version")
+    if marker!=want: errs.append("%s must start with exactly %r, got %r"%(MARK,want,marker))
+    for u in re.findall(r"uses:\s*(\S+)",raw):
+        if not re.fullmatch(r"[^@\s]+@[0-9a-f]{40}",u): errs.append("capture workflow action not pinned to a full SHA: %s"%u)
+if errs:
+    print("FAIL: capture workflow breaks the capture/verification separation"); [print("  "+e) for e in errs]; sys.exit(1)
+print("capture workflow isolated (push on feature/** with marker path only, read-only, capture mode only)")
+PY
+
 # 5. Neither package may contain the Classic Editor plugin.
 hits=$(git ls-files wordpress-theme wordpress-plugin | grep -i "classic-editor" || true)
 [ -n "$hits" ] && bad "Classic Editor files tracked inside a package directory" "$hits"
