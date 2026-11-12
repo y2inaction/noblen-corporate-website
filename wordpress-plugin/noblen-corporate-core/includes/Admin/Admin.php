@@ -30,8 +30,7 @@ final class Admin {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'meta_boxes' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_fields' ), 10, 2 );
 		add_action( 'admin_post_noblen_workflow', array( __CLASS__, 'handle_workflow' ) );
-		add_action( 'admin_post_noblen_clearance', array( __CLASS__, 'handle_clearance' ) );
-		add_action( 'admin_post_noblen_media_rights', array( __CLASS__, 'handle_media_rights' ) );
+		add_action( 'save_post', array( __CLASS__, 'save_clearance' ), 20, 2 );
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
@@ -261,52 +260,56 @@ final class Admin {
 			return;
 		}
 		echo '<p class="description">Private. Stored in plugin-owned tables, never in post meta, and never output publicly. Record where evidence is held, not the evidence itself.</p>';
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-		wp_nonce_field( 'noblen_clearance_' . $post->ID );
-		echo '<input type="hidden" name="action" value="noblen_clearance"><input type="hidden" name="post" value="' . esc_attr( (string) $post->ID ) . '">';
+		// These fields live inside the main post form (forms cannot be nested) and are saved by save_clearance().
+		wp_nonce_field( 'noblen_clearance_' . $post->ID, 'noblen_clr_nonce' );
 		foreach ( Repository::items_for_type( $post->post_type ) as $item => $na ) {
 			$cur = $rec['items'][ $item ] ?? '';
-			echo '<p><label>' . esc_html( ucwords( str_replace( '_', ' ', $item ) ) ) . ' <select name="items[' . esc_attr( $item ) . ']"><option value="">Not confirmed</option><option value="yes"' . selected( $cur, 'yes', false ) . '>Yes</option>';
+			echo '<p><label>' . esc_html( ucwords( str_replace( '_', ' ', $item ) ) ) . ' <select name="noblen_clr[items][' . esc_attr( $item ) . ']"><option value="">Not confirmed</option><option value="yes"' . selected( $cur, 'yes', false ) . '>Yes</option>';
 			if ( $na ) {
 				echo '<option value="na"' . selected( $cur, 'na', false ) . '>Not applicable</option>';
 			}
 			echo '</select></label></p>';
 		}
 		if ( Repository::evidence_required( $post->post_type ) ) {
-			echo '<p><label>Evidence reference<br><input type="text" class="large-text" name="evidence_ref" value="' . esc_attr( (string) $rec['evidence_ref'] ) . '"></label></p>';
+			echo '<p><label>Evidence reference<br><input type="text" class="large-text" name="noblen_clr[evidence_ref]" value="' . esc_attr( (string) $rec['evidence_ref'] ) . '"></label></p>';
 		}
-		echo '<p><button class="button" type="submit">Save clearance</button> <em>Status: ' . esc_html( (string) $rec['status'] ) . '</em></p></form>';
+		echo '<p><em>Clearance status: ' . esc_html( (string) $rec['status'] ) . '. Saved when you save the record.</em></p>';
 		$gallery = (array) ( Store::get_all( $post->ID )['gallery'] ?? array() );
 		$thumb   = (int) get_post_thumbnail_id( $post->ID );
 		$images  = array_filter( array_unique( array_merge( $thumb ? array( $thumb ) : array(), $gallery ) ) );
 		foreach ( $images as $img ) {
-			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:8px">';
-			wp_nonce_field( 'noblen_media_rights_' . $img );
-			echo '<input type="hidden" name="action" value="noblen_media_rights"><input type="hidden" name="attachment" value="' . esc_attr( (string) $img ) . '"><input type="hidden" name="post" value="' . esc_attr( (string) $post->ID ) . '">';
-			echo 'Image #' . esc_html( (string) $img ) . ': ' . ( MediaRights::is_confirmed( (int) $img ) ? 'rights confirmed' : 'rights not confirmed' ) . ' <input type="text" name="basis_ref" placeholder="Rights evidence reference"> <button class="button">Confirm</button></form>';
+			echo '<p>Image #' . esc_html( (string) $img ) . ': ' . ( MediaRights::is_confirmed( (int) $img ) ? 'rights confirmed' : 'rights not confirmed' ) . '<br><label>Rights evidence reference <input type="text" name="noblen_media[' . esc_attr( (string) $img ) . ']" value=""></label> (enter a reference and save to confirm)</p>';
 		}
 	}
 
-	/** Clearance save handler. */
-	public static function handle_clearance(): void {
-		$id = isset( $_POST['post'] ) ? absint( $_POST['post'] ) : 0;
-		check_admin_referer( 'noblen_clearance_' . $id );
-		$items = isset( $_POST['items'] ) ? array_map( 'sanitize_key', (array) wp_unslash( $_POST['items'] ) ) : array();
-		$ref   = isset( $_POST['evidence_ref'] ) ? sanitize_text_field( wp_unslash( $_POST['evidence_ref'] ) ) : '';
-		self::flash( Repository::save( $id, $items, $ref ), 'Clearance saved.' );
-		wp_safe_redirect( (string) get_edit_post_link( $id, 'raw' ) );
-		exit;
-	}
-
-	/** Media rights handler. */
-	public static function handle_media_rights(): void {
-		$img = isset( $_POST['attachment'] ) ? absint( $_POST['attachment'] ) : 0;
-		$id  = isset( $_POST['post'] ) ? absint( $_POST['post'] ) : 0;
-		check_admin_referer( 'noblen_media_rights_' . $img );
-		$ref = isset( $_POST['basis_ref'] ) ? sanitize_text_field( wp_unslash( $_POST['basis_ref'] ) ) : '';
-		self::flash( MediaRights::confirm( $img, $ref ), 'Media rights confirmed.' );
-		wp_safe_redirect( (string) get_edit_post_link( $id, 'raw' ) );
-		exit;
+	/**
+	 * Save clearance and media-rights confirmations submitted with the record.
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post    Post.
+	 */
+	public static function save_clearance( int $post_id, \WP_Post $post ): void {
+		if ( ! Types::is_ours( $post->post_type ) || wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+		if ( ! isset( $_POST['noblen_clr_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['noblen_clr_nonce'] ) ), 'noblen_clearance_' . $post_id ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'noblen_manage_clearance' ) ) {
+			return;
+		}
+		$clr   = isset( $_POST['noblen_clr'] ) ? (array) wp_unslash( $_POST['noblen_clr'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitised below.
+		$items = isset( $clr['items'] ) ? array_map( 'sanitize_key', (array) $clr['items'] ) : array();
+		$ref   = isset( $clr['evidence_ref'] ) ? sanitize_text_field( (string) $clr['evidence_ref'] ) : '';
+		$res   = Repository::save( $post_id, $items, $ref );
+		$media = isset( $_POST['noblen_media'] ) ? (array) wp_unslash( $_POST['noblen_media'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitised below.
+		foreach ( $media as $img => $basis ) {
+			$basis = sanitize_text_field( (string) $basis );
+			if ( '' !== $basis && ! is_wp_error( $res ) ) {
+				$res = MediaRights::confirm( absint( $img ), $basis );
+			}
+		}
+		self::flash( $res, 'Clearance saved.' );
 	}
 
 	/** Settings menu. */
