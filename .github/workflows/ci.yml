@@ -53,6 +53,8 @@ jobs:
         run: scripts/audit-repo.sh
       - name: Dependency pins (exact versions, verification state, Configuration A and B isolation)
         run: scripts/check-pins.sh
+      - name: PHP error-log check regression tests (the single allowed upstream deprecation stays narrow)
+        run: tests-cli/php-log-check-test.sh
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)

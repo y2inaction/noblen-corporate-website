@@ -2,7 +2,7 @@
 
 Branch `feature/m2-implementation` (local, **not pushed**). Baseline `5739f75`. Specification: [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) Revision 5.1 and the frozen [CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md). Per-criterion detail: [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml), generated from the actual test results.
 
-Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. One hosted CI run exists (commit `de59ce1`, below); it was partly red, and its failures are corrected locally but not yet re-run on GitHub.
+Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. Three hosted CI runs exist (below). Run 3 (`c690450`) is green except the PHP 8.4 host job and the non-blocking Configuration A job; the PHP 8.4 correction exists locally and has not been run on GitHub.
 
 ## Local test evidence
 
@@ -43,6 +43,17 @@ Also corrected: root-owned mapping directories blocking cleanup, an empty diagno
 - *Real, local:* PHPUnit 146 of 146 on the pinned MySQL 8.4.13 image through the real setup script; host WP-CLI 20 of 20 and package install 12 of 12 on that image with the workflow's own configuration and no database client; actionlint, pin checks, PHPCS.
 - *Real Apache and MariaDB 12.3 in containers, wp-env commands shimmed to a WP-CLI container:* the full WE sequence in CI order passed: partial data 13 of 13, integration 25 of 25, smoke, admin 21 of 21, content types 41 of 41, Configuration B 13 of 13, axe 43 of 43, and a crawl of 17 pages through the required core sitemap.
 - *Not run anywhere:* wp-env itself since the corrections, PHP 8.4, and any hosted run of the corrections.
+
+## Second and third hosted CI runs (runs 43277471319 on `997faaf`, 43279338951 on `c690450`)
+
+| Job | Run 2 | Run 3 | Cause and correction |
+|-----|-------|-------|----------------------|
+| Static analysis, PHP 8.5 compatibility, package build, PHPUnit PHP 8.3 and 8.4 (MySQL 8.4), host WP-CLI and package install PHP 8.3, parity browser (informational) | pass | pass | |
+| WE (wp-env, WordPress 6.4.3, PHP 8.3) | fail | **pass** | Run 2: the browser steps run from `tests-e2e`, and wp-env resolves its environment from the current directory only, so post locks could not be cleared and a lock dialog blocked the click. The lock-clearing command now runs from the workspace root. Run 3 is the first green WE job: admin, all five content types, Configuration B, axe and the core-sitemap crawl all ran and passed on hosted wp-env |
+| Host WP-CLI and package install PHP 8.4 | fail | fail | Every functional check passes. The only entries in the PHP error log are one WordPress 6.4.3 core deprecation (see `UPSTREAM-PHP84-DEPRECATION.md`). Corrected locally, **not yet run on GitHub** |
+| WE Configuration A (non-blocking) | fail, by design | fail, by design | Strict mode refuses the unverified Classic Editor pin. The gate is preserved; C21-021 and C21-022 are not accepted |
+
+*Local verification of the PHP 8.4 correction* is listed in `UPSTREAM-PHP84-DEPRECATION.md`. It is not hosted evidence.
 
 ## CI workflow review
 
