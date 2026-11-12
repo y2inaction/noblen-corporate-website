@@ -168,7 +168,12 @@ final class Withdrawal {
 	private static function add_notice( int $post_id, string $reason, array $urls ): void {
 		$list   = get_option( 'noblen_core_notices', array() );
 		$list   = is_array( $list ) ? $list : array();
-		$list[] = array( 'post_id' => $post_id, 'reason' => $reason, 'urls' => $urls, 'time' => time() );
+		$list[] = array(
+			'post_id' => $post_id,
+			'reason'  => $reason,
+			'urls'    => $urls,
+			'time'    => time(),
+		);
 		update_option( 'noblen_core_notices', array_slice( $list, -20 ), false );
 	}
 }

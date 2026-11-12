@@ -15,9 +15,9 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Capabilities {
 
-	public const ROLE_EDITOR   = 'noblen_content_editor';
+	public const ROLE_EDITOR    = 'noblen_content_editor';
 	public const ROLE_CLEARANCE = 'noblen_clearance_officer';
-	public const ROLE_APPROVER = 'noblen_publication_approver';
+	public const ROLE_APPROVER  = 'noblen_publication_approver';
 
 	/** Post type => array( singular, plural ). */
 	public const TYPES = array(

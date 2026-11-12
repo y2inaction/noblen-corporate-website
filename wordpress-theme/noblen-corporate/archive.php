@@ -6,7 +6,10 @@ get_header();
 	<h1><?php the_archive_title(); ?></h1>
 	<?php if ( have_posts() ) : ?>
 		<div class="grid">
-		<?php while ( have_posts() ) : the_post(); ?>
+		<?php
+		while ( have_posts() ) :
+			the_post();
+			?>
 			<article <?php post_class( 'card' ); ?>>
 				<h2 class="card__title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
 				<p class="card__meta"><?php echo esc_html( get_the_date() ); ?></p>

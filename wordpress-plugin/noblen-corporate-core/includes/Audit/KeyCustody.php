@@ -74,7 +74,7 @@ final class KeyCustody {
 			return new \WP_Error( 'noblen_audit_state', 'Audit integrity must be verified before rotation.' );
 		}
 		$new_secret = Key::get( $new_id );
-		if ( '' === $new_secret || $new_id === Key::current_id() ) {
+		if ( '' === $new_secret || Key::current_id() === $new_id ) {
 			return new \WP_Error( 'noblen_key', 'The new key must be configured and different from the current key.' );
 		}
 		$report = Verifier::verify();
@@ -82,9 +82,9 @@ final class KeyCustody {
 			return new \WP_Error( 'noblen_audit_state', 'The chain does not verify.' );
 		}
 
-		$old_id  = Key::current_id();
-		$last    = AuditLog::last();
-		$detail  = array(
+		$old_id = Key::current_id();
+		$last   = AuditLog::last();
+		$detail = array(
 			'old_key_id'      => $old_id,
 			'old_fingerprint' => Key::fingerprint( Key::current_secret() ),
 			'new_key_id'      => $new_id,
@@ -99,16 +99,29 @@ final class KeyCustody {
 
 		// Test seam for an interrupted rotation.
 		if ( apply_filters( 'noblen_core_rotation_interrupt', false ) ) {
-			return array( 'started_id' => $started, 'confirmed_id' => 0, 'complete' => false );
+			return array(
+				'started_id'   => $started,
+				'confirmed_id' => 0,
+				'complete'     => false,
+			);
 		}
 
 		// Signed with the NEW key, proving both keys are held.
 		$confirmed = (int) AuditLog::append(
 			'key_rotation_confirmed',
-			array( 'detail' => array( 'started_id' => $started, 'new_key_id' => $new_id ) ),
+			array(
+				'detail' => array(
+					'started_id' => $started,
+					'new_key_id' => $new_id,
+				),
+			),
 			$new_id
 		);
-		return array( 'started_id' => $started, 'confirmed_id' => $confirmed, 'complete' => true );
+		return array(
+			'started_id'   => $started,
+			'confirmed_id' => $confirmed,
+			'complete'     => true,
+		);
 	}
 
 	/**
@@ -132,10 +145,19 @@ final class KeyCustody {
 		}
 		$confirmed = (int) AuditLog::append(
 			'key_rotation_confirmed',
-			array( 'detail' => array( 'started_id' => (int) $last['id'], 'new_key_id' => $new_id ) ),
+			array(
+				'detail' => array(
+					'started_id' => (int) $last['id'],
+					'new_key_id' => $new_id,
+				),
+			),
 			$new_id
 		);
-		return array( 'started_id' => (int) $last['id'], 'confirmed_id' => $confirmed, 'complete' => true );
+		return array(
+			'started_id'   => (int) $last['id'],
+			'confirmed_id' => $confirmed,
+			'complete'     => true,
+		);
 	}
 
 	/**
@@ -180,7 +202,7 @@ final class KeyCustody {
 		if ( '' === $sign_off || '' === $reason || ( ! $authority && '' === $auth_name ) ) {
 			return new \WP_Error( 'noblen_authorisation', 'A sign-off reference, a reason and a named recovery authority are required.' );
 		}
-		if ( Settings::separation_of_duties() && $authority && $authority === get_current_user_id() ) {
+		if ( Settings::separation_of_duties() && $authority && get_current_user_id() === $authority ) {
 			return new \WP_Error( 'noblen_separation', 'The recovery authority must be a different person from the executing administrator.' );
 		}
 		if ( ! Key::has_current() ) {
@@ -196,23 +218,26 @@ final class KeyCustody {
 		$comparison  = Export::compare( $export );
 
 		$detail = array(
-			'old_key_id'       => $last_signed ? (string) $last_signed['key_id'] : '',
-			'old_fingerprint'  => $last_signed ? (string) $last_signed['key_fingerprint'] : '',
-			'new_key_id'       => Key::current_id(),
-			'new_fingerprint'  => Key::fingerprint( Key::current_secret() ),
+			'old_key_id'         => $last_signed ? (string) $last_signed['key_id'] : '',
+			'old_fingerprint'    => $last_signed ? (string) $last_signed['key_fingerprint'] : '',
+			'new_key_id'         => Key::current_id(),
+			'new_fingerprint'    => Key::fingerprint( Key::current_secret() ),
 			'recovery_authority' => $authority ? $authority : $auth_name,
-			'sign_off_ref'     => $sign_off,
-			'executing_user'   => get_current_user_id(),
-			'timestamp'        => gmdate( 'c' ),
-			'db_chain_head'    => $head ? (string) $head['record_hash'] : Chain::GENESIS,
-			'export_ref'       => (string) ( $a['export_ref'] ?? '' ),
-			'comparison'       => $comparison,
-			'reason'           => $reason,
+			'sign_off_ref'       => $sign_off,
+			'executing_user'     => get_current_user_id(),
+			'timestamp'          => gmdate( 'c' ),
+			'db_chain_head'      => $head ? (string) $head['record_hash'] : Chain::GENESIS,
+			'export_ref'         => (string) ( $a['export_ref'] ?? '' ),
+			'comparison'         => $comparison,
+			'reason'             => $reason,
 		);
 		$marker = (int) AuditLog::append( 'key_recovery_marker', array( 'detail' => $detail ), Key::current_id() );
 		update_option( Verifier::OPT_RECOVERY, 'incomplete', false );
 		Verifier::flush_cache();
-		return array( 'marker_id' => $marker, 'comparison' => $comparison );
+		return array(
+			'marker_id'  => $marker,
+			'comparison' => $comparison,
+		);
 	}
 
 	/**
@@ -237,7 +262,15 @@ final class KeyCustody {
 		if ( ! $report['ok'] ) {
 			return new \WP_Error( 'noblen_audit_state', 'The new segment does not verify.' );
 		}
-		AuditLog::append( 'key_recovery_completed', array( 'detail' => array( 'completion_ref' => $completion_ref, 'marker_id' => (int) $marker['id'] ) ) );
+		AuditLog::append(
+			'key_recovery_completed',
+			array(
+				'detail' => array(
+					'completion_ref' => $completion_ref,
+					'marker_id'      => (int) $marker['id'],
+				),
+			)
+		);
 		update_option( Verifier::OPT_RECOVERY, 'complete', false );
 		Verifier::flush_cache();
 		return true;
@@ -259,7 +292,15 @@ final class KeyCustody {
 			return new \WP_Error( 'noblen_key', 'That key is not configured.' );
 		}
 		$counts = array_count_values( Verifier::classify() );
-		AuditLog::append( 'old_key_reclassified', array( 'detail' => array( 'key_id' => $key_id, 'classes' => $counts ) ) );
+		AuditLog::append(
+			'old_key_reclassified',
+			array(
+				'detail' => array(
+					'key_id'  => $key_id,
+					'classes' => $counts,
+				),
+			)
+		);
 		return $counts;
 	}
 }

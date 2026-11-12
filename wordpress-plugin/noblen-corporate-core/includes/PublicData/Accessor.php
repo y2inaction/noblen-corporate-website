@@ -56,30 +56,33 @@ final class Accessor {
 		$defs   = Registry::public_fields( $type );
 
 		$data = array(
-			'id'            => (int) $post->ID,
-			'type'          => $type,
-			'title'         => (string) $post->post_title,
-			'slug'          => (string) $post->post_name,
-			'url'           => (string) get_permalink( $post ),
-			'excerpt'       => (string) $post->post_excerpt,
-			'content_html'  => '' !== trim( (string) $post->post_content ) ? wpautop( wp_kses( (string) $post->post_content, Store::allowed_html() ) ) : '',
-			'status'        => null,
-			'client'        => '',
-			'sections'      => array(),
-			'tagline'       => '',
-			'featured_home' => ! empty( $values['featured_home'] ),
-			'video_url'     => (string) ( $values['video_url'] ?? '' ),
+			'id'             => (int) $post->ID,
+			'type'           => $type,
+			'title'          => (string) $post->post_title,
+			'slug'           => (string) $post->post_name,
+			'url'            => (string) get_permalink( $post ),
+			'excerpt'        => (string) $post->post_excerpt,
+			'content_html'   => '' !== trim( (string) $post->post_content ) ? wpautop( wp_kses( (string) $post->post_content, Store::allowed_html() ) ) : '',
+			'status'         => null,
+			'client'         => '',
+			'sections'       => array(),
+			'tagline'        => '',
+			'featured_home'  => ! empty( $values['featured_home'] ),
+			'video_url'      => (string) ( $values['video_url'] ?? '' ),
 			'featured_image' => self::image( (int) get_post_thumbnail_id( $post->ID ) ),
-			'gallery'       => array(),
-			'business_unit' => null,
-			'related'       => array(),
-			'terms'         => array(),
+			'gallery'        => array(),
+			'business_unit'  => null,
+			'related'        => array(),
+			'terms'          => array(),
 		);
 
 		$status_key = Registry::status_key( $type );
 		if ( $status_key && '' !== ( $values[ $status_key ] ?? '' ) ) {
 			$options        = $defs[ $status_key ]['options'] ?? array();
-			$data['status'] = array( 'key' => (string) $values[ $status_key ], 'label' => (string) ( $options[ $values[ $status_key ] ] ?? '' ) );
+			$data['status'] = array(
+				'key'   => (string) $values[ $status_key ],
+				'label' => (string) ( $options[ $values[ $status_key ] ] ?? '' ),
+			);
 		}
 		if ( isset( $values['tagline'] ) ) {
 			$data['tagline'] = (string) $values['tagline'];
@@ -90,13 +93,19 @@ final class Accessor {
 
 		foreach ( self::SECTIONS as $key ) {
 			if ( isset( $defs[ $key ] ) && ! empty( $values[ $key . '_approved' ] ) && '' !== trim( (string) ( $values[ $key ] ?? '' ) ) ) {
-				$data['sections'][ $key ] = array( 'label' => (string) $defs[ $key ]['label'], 'html' => wpautop( wp_kses( (string) $values[ $key ], Store::allowed_html() ) ) );
+				$data['sections'][ $key ] = array(
+					'label' => (string) $defs[ $key ]['label'],
+					'html'  => wpautop( wp_kses( (string) $values[ $key ], Store::allowed_html() ) ),
+				);
 			}
 		}
 		// Industry fields have no switch: they are part of the approved record.
 		foreach ( array( 'opportunities', 'capabilities' ) as $key ) {
 			if ( isset( $defs[ $key ] ) && '' !== trim( (string) ( $values[ $key ] ?? '' ) ) ) {
-				$data['sections'][ $key ] = array( 'label' => (string) $defs[ $key ]['label'], 'html' => wpautop( wp_kses( (string) $values[ $key ], Store::allowed_html() ) ) );
+				$data['sections'][ $key ] = array(
+					'label' => (string) $defs[ $key ]['label'],
+					'html'  => wpautop( wp_kses( (string) $values[ $key ], Store::allowed_html() ) ),
+				);
 			}
 		}
 
@@ -110,7 +119,12 @@ final class Accessor {
 		foreach ( Registry::relationships( $type ) as $field => $def ) {
 			$items = array();
 			foreach ( Relations::valid_targets( $post->ID, (string) $field ) as $rid ) {
-				$items[] = array( 'id' => $rid, 'title' => (string) get_the_title( $rid ), 'url' => (string) get_permalink( $rid ), 'type' => (string) get_post_type( $rid ) );
+				$items[] = array(
+					'id'    => $rid,
+					'title' => (string) get_the_title( $rid ),
+					'url'   => (string) get_permalink( $rid ),
+					'type'  => (string) get_post_type( $rid ),
+				);
 			}
 			if ( 'business_unit' === $field ) {
 				$data['business_unit'] = $items ? $items[0] : null; // Hidden while unavailable (grace state).
@@ -121,7 +135,12 @@ final class Accessor {
 
 		foreach ( get_object_taxonomies( $type ) as $tax ) {
 			foreach ( (array) wp_get_object_terms( $post->ID, $tax ) as $term ) {
-				$data['terms'][] = array( 'taxonomy' => $tax, 'id' => (int) $term->term_id, 'name' => (string) $term->name, 'url' => (string) get_term_link( $term ) );
+				$data['terms'][] = array(
+					'taxonomy' => $tax,
+					'id'       => (int) $term->term_id,
+					'name'     => (string) $term->name,
+					'url'      => (string) get_term_link( $term ),
+				);
 			}
 		}
 		return $data;
@@ -162,7 +181,18 @@ final class Accessor {
 		if ( ! Types::is_ours( $type ) ) {
 			return array();
 		}
-		$args  = wp_parse_args( $args, array( 'limit' => 12, 'business_unit' => 0, 'industry' => 0, 'area' => '', 'status' => '', 'featured_home' => false, 'orderby' => 'date' ) );
+		$args  = wp_parse_args(
+			$args,
+			array(
+				'limit'         => 12,
+				'business_unit' => 0,
+				'industry'      => 0,
+				'area'          => '',
+				'status'        => '',
+				'featured_home' => false,
+				'orderby'       => 'date',
+			)
+		);
 		$query = array(
 			'post_type'      => $type,
 			'post_status'    => 'publish',
@@ -171,24 +201,42 @@ final class Accessor {
 			'orderby'        => 'title' === $args['orderby'] ? 'title' : 'date',
 			'order'          => 'title' === $args['orderby'] ? 'ASC' : 'DESC',
 		);
-		$meta = array();
+		$meta  = array();
 		if ( $args['business_unit'] ) {
-			$meta[] = array( 'key' => Registry::rel_key( 'business_unit' ), 'value' => (string) (int) $args['business_unit'] );
+			$meta[] = array(
+				'key'   => Registry::rel_key( 'business_unit' ),
+				'value' => (string) (int) $args['business_unit'],
+			);
 		}
 		if ( $args['industry'] ) {
-			$meta[] = array( 'key' => Registry::rel_key( 'industries' ), 'value' => (string) (int) $args['industry'] );
+			$meta[] = array(
+				'key'   => Registry::rel_key( 'industries' ),
+				'value' => (string) (int) $args['industry'],
+			);
 		}
 		if ( '' !== $args['status'] ) {
-			$meta[] = array( 'key' => Registry::meta_key( Registry::status_key( $type ) ), 'value' => (string) $args['status'] );
+			$meta[] = array(
+				'key'   => Registry::meta_key( Registry::status_key( $type ) ),
+				'value' => (string) $args['status'],
+			);
 		}
 		if ( $args['featured_home'] ) {
-			$meta[] = array( 'key' => Registry::meta_key( 'featured_home' ), 'value' => '1' );
+			$meta[] = array(
+				'key'   => Registry::meta_key( 'featured_home' ),
+				'value' => '1',
+			);
 		}
 		if ( $meta ) {
 			$query['meta_query'] = $meta; // phpcs:ignore WordPress.DB.SlowDBQuery
 		}
 		if ( '' !== $args['area'] ) {
-			$query['tax_query'] = array( array( 'taxonomy' => Types::TAX_AREA, 'field' => is_numeric( $args['area'] ) ? 'term_id' : 'slug', 'terms' => $args['area'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+			$query['tax_query'] = array(
+				array(
+					'taxonomy' => Types::TAX_AREA,
+					'field'    => is_numeric( $args['area'] ) ? 'term_id' : 'slug',
+					'terms'    => $args['area'],
+				),
+			); // phpcs:ignore WordPress.DB.SlowDBQuery
 		}
 		$out = array();
 		foreach ( ( new \WP_Query( $query ) )->posts as $p ) {

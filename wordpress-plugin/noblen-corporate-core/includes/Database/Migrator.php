@@ -138,7 +138,15 @@ final class Migrator {
 
 		try {
 			for ( $n = $from + 1; $n <= Schema::VERSION; $n++ ) {
-				update_option( self::OPT_STATE, array( 'state' => 'running', 'step' => $n, 'error' => '' ), false );
+				update_option(
+					self::OPT_STATE,
+					array(
+						'state' => 'running',
+						'step'  => $n,
+						'error' => '',
+					),
+					false
+				);
 				// Test seam: a callback may throw to simulate a failing step.
 				apply_filters( 'noblen_core_migration_step', null, $n );
 				self::apply( $n );
@@ -147,12 +155,28 @@ final class Migrator {
 					AuditLog::append( 'migration_applied', array( 'detail' => array( 'version' => $n ) ) );
 				}
 			}
-			update_option( self::OPT_STATE, array( 'state' => 'idle', 'step' => 0, 'error' => '' ), false );
+			update_option(
+				self::OPT_STATE,
+				array(
+					'state' => 'idle',
+					'step'  => 0,
+					'error' => '',
+				),
+				false
+			);
 			self::unlock();
 			return self::result( true, '', 'migrated' );
 		} catch ( \Throwable $e ) {
 			$step = (int) ( self::state()['step'] );
-			update_option( self::OPT_STATE, array( 'state' => 'failed', 'step' => $step, 'error' => $e->getMessage() ), false );
+			update_option(
+				self::OPT_STATE,
+				array(
+					'state' => 'failed',
+					'step'  => $step,
+					'error' => $e->getMessage(),
+				),
+				false
+			);
 			self::unlock();
 			error_log( 'Noblen Core migration failed at step ' . $step . ': ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return self::result( false, 'Migration failed at step ' . $step . '.', 'failed' );
@@ -163,7 +187,15 @@ final class Migrator {
 	 * Clear a recorded failure so the migration can be run again explicitly.
 	 */
 	public static function clear_failure(): void {
-		update_option( self::OPT_STATE, array( 'state' => 'idle', 'step' => 0, 'error' => '' ), false );
+		update_option(
+			self::OPT_STATE,
+			array(
+				'state' => 'idle',
+				'step'  => 0,
+				'error' => '',
+			),
+			false
+		);
 	}
 
 	/**
@@ -178,7 +210,7 @@ final class Migrator {
 		if ( 1 === $n ) {
 			foreach ( Schema::table_names() as $name ) {
 				if ( ! Schema::exists( $name ) ) {
-					throw new \RuntimeException( 'Table ' . $name . ' was not created.' );
+					throw new \RuntimeException( 'Table ' . esc_html( $name ) . ' was not created.' );
 				}
 			}
 		}

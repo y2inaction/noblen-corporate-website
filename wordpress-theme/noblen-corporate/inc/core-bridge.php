@@ -8,6 +8,22 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/** Company name from settings, falling back to the site name. */
+function noblen_company_name(): string {
+	$name = noblen_setting( 'company_name' );
+	return '' !== $name ? $name : get_bloginfo( 'name' );
+}
+
+/**
+ * Archive link for a type, falling back to the home page.
+ *
+ * @param string $type Post type.
+ */
+function noblen_archive_url( string $type ): string {
+	$url = get_post_type_archive_link( $type );
+	return $url ? $url : home_url( '/' );
+}
+
 /** Whether a compatible core plugin is active. */
 function noblen_has_core(): bool {
 	return function_exists( 'noblen_core_api_version' ) && 1 === (int) noblen_core_api_version();

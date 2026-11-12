@@ -124,8 +124,11 @@ final class Verifier {
 		if ( null !== self::$cache && self::$cache['sig'] === $sig ) {
 			return self::$cache['state'];
 		}
-		$state        = self::compute();
-		self::$cache = array( 'sig' => $sig, 'state' => $state );
+		$state       = self::compute();
+		self::$cache = array(
+			'sig'   => $sig,
+			'state' => $state,
+		);
 		return $state;
 	}
 
@@ -158,7 +161,7 @@ final class Verifier {
 			$configured = Key::get( (string) $last_signed['key_id'] );
 			if ( '' === $configured
 				|| ! hash_equals( Key::fingerprint( $configured ), (string) $last_signed['key_fingerprint'] )
-				|| (string) $last_signed['key_id'] !== Key::current_id() ) {
+				|| Key::current_id() !== (string) $last_signed['key_id'] ) {
 				return 'key_invalid';
 			}
 		}

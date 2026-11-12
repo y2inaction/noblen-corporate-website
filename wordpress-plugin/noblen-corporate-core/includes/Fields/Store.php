@@ -27,7 +27,11 @@ final class Store {
 			'h3'         => array(),
 			'h4'         => array(),
 			'blockquote' => array(),
-			'a'          => array( 'href' => true, 'title' => true, 'rel' => true ),
+			'a'          => array(
+				'href'  => true,
+				'title' => true,
+				'rel'   => true,
+			),
 		);
 	}
 
@@ -54,7 +58,7 @@ final class Store {
 		foreach ( Registry::fields( $type ) as $key => $def ) {
 			$kind = (string) ( $def['kind'] ?? 'text' );
 			if ( 'rel' === $kind ) {
-				$ids = array_map( 'intval', (array) get_post_meta( $post_id, Registry::rel_key( $key ), false ) );
+				$ids         = array_map( 'intval', (array) get_post_meta( $post_id, Registry::rel_key( $key ), false ) );
 				$out[ $key ] = array_values( array_unique( $ids ) );
 				continue;
 			}
@@ -63,7 +67,7 @@ final class Store {
 				$out[ $key ] = is_array( $raw ) ? array_values( array_map( 'intval', $raw ) ) : array();
 				continue;
 			}
-			$val = (string) get_post_meta( $post_id, Registry::meta_key( $key ), true );
+			$val         = (string) get_post_meta( $post_id, Registry::meta_key( $key ), true );
 			$out[ $key ] = ( 'bool' === $kind ) ? ( '1' === $val ) : $val;
 			if ( ! empty( $def['switch'] ) ) {
 				$out[ $key . '_approved' ] = ( '1' === (string) get_post_meta( $post_id, Registry::switch_key( $key ), true ) );

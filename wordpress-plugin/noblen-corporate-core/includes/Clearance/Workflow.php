@@ -50,10 +50,22 @@ final class Workflow {
 		Approvals::mark_stale( $post_id, 'resubmitted' );
 		$snapshot = Snapshot::compute( $post_id );
 		$aid      = Approvals::insert( $post_id, $snapshot, (int) get_post_meta( $post_id, '_noblen_last_editor', true ), (int) Repository::raw( $post_id )['recorded_by'] );
-		AuditLog::append( 'approval_submitted', array( 'post_id' => $post_id, 'approval_id' => $aid, 'snapshot_hash' => $snapshot['hash'] ) );
+		AuditLog::append(
+			'approval_submitted',
+			array(
+				'post_id'       => $post_id,
+				'approval_id'   => $aid,
+				'snapshot_hash' => $snapshot['hash'],
+			)
+		);
 
 		if ( 'pending' !== get_post_status( $post_id ) ) {
-			wp_update_post( array( 'ID' => $post_id, 'post_status' => 'pending' ) );
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'pending',
+				)
+			);
 		}
 		return $aid;
 	}
@@ -94,9 +106,23 @@ final class Workflow {
 			return new \WP_Error( 'noblen_separation', 'Separation of duties prevents you approving this record.', array( 'failures' => $sep ) );
 		}
 
-		Approvals::set_status( (int) $a['id'], 'approved', array( 'approver_id' => $user_id, 'decided_at' => gmdate( 'Y-m-d H:i:s' ) ) );
+		Approvals::set_status(
+			(int) $a['id'],
+			'approved',
+			array(
+				'approver_id' => $user_id,
+				'decided_at'  => gmdate( 'Y-m-d H:i:s' ),
+			)
+		);
 		ReadCheck::flush( $post_id );
-		AuditLog::append( 'approval_approved', array( 'post_id' => $post_id, 'approval_id' => (int) $a['id'], 'snapshot_hash' => (string) $a['snapshot_hash'] ) );
+		AuditLog::append(
+			'approval_approved',
+			array(
+				'post_id'       => $post_id,
+				'approval_id'   => (int) $a['id'],
+				'snapshot_hash' => (string) $a['snapshot_hash'],
+			)
+		);
 		return (int) $a['id'];
 	}
 
@@ -129,13 +155,33 @@ final class Workflow {
 		if ( ! $a || ! in_array( $a['status'], array( 'submitted', 'approved' ), true ) ) {
 			return new \WP_Error( 'noblen_state', 'There is nothing to reject.' );
 		}
-		Approvals::set_status( (int) $a['id'], 'rejected', array( 'approver_id' => get_current_user_id(), 'decided_at' => gmdate( 'Y-m-d H:i:s' ), 'note' => sanitize_textarea_field( $note ) ) );
+		Approvals::set_status(
+			(int) $a['id'],
+			'rejected',
+			array(
+				'approver_id' => get_current_user_id(),
+				'decided_at'  => gmdate( 'Y-m-d H:i:s' ),
+				'note'        => sanitize_textarea_field( $note ),
+			)
+		);
 		ReadCheck::flush( $post_id );
-		AuditLog::append( 'approval_rejected', array( 'post_id' => $post_id, 'approval_id' => (int) $a['id'], 'snapshot_hash' => (string) $a['snapshot_hash'] ) );
+		AuditLog::append(
+			'approval_rejected',
+			array(
+				'post_id'       => $post_id,
+				'approval_id'   => (int) $a['id'],
+				'snapshot_hash' => (string) $a['snapshot_hash'],
+			)
+		);
 		if ( 'publish' === get_post_status( $post_id ) ) {
 			Withdrawal::run( $post_id, 'rejected', true, 'T03' );
 		} elseif ( 'pending' === get_post_status( $post_id ) ) {
-			wp_update_post( array( 'ID' => $post_id, 'post_status' => 'draft' ) );
+			wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'draft',
+				)
+			);
 		}
 		return true;
 	}
@@ -155,9 +201,24 @@ final class Workflow {
 		if ( ! $a || 'approved' !== $a['status'] ) {
 			return new \WP_Error( 'noblen_state', 'There is no approval to revoke.' );
 		}
-		Approvals::set_status( (int) $a['id'], 'revoked', array( 'decided_at' => gmdate( 'Y-m-d H:i:s' ), 'note' => sanitize_textarea_field( $note ) ) );
+		Approvals::set_status(
+			(int) $a['id'],
+			'revoked',
+			array(
+				'decided_at' => gmdate( 'Y-m-d H:i:s' ),
+				'note'       => sanitize_textarea_field( $note ),
+			)
+		);
 		ReadCheck::flush( $post_id );
-		AuditLog::append( 'approval_revoked', array( 'post_id' => $post_id, 'approval_id' => (int) $a['id'], 'snapshot_hash' => (string) $a['snapshot_hash'], 'detail' => array( 'reason' => 'revoked' ) ) );
+		AuditLog::append(
+			'approval_revoked',
+			array(
+				'post_id'       => $post_id,
+				'approval_id'   => (int) $a['id'],
+				'snapshot_hash' => (string) $a['snapshot_hash'],
+				'detail'        => array( 'reason' => 'revoked' ),
+			)
+		);
 		if ( 'publish' === get_post_status( $post_id ) ) {
 			Withdrawal::run( $post_id, 'revoked', true, 'T01' );
 		}
@@ -179,8 +240,23 @@ final class Workflow {
 		}
 		$a = Approvals::latest( $post_id );
 		if ( $a && 'approved' === $a['status'] ) {
-			Approvals::set_status( (int) $a['id'], 'revoked', array( 'decided_at' => gmdate( 'Y-m-d H:i:s' ), 'note' => 'unpublished' ) );
-			AuditLog::append( 'approval_revoked', array( 'post_id' => $post_id, 'approval_id' => (int) $a['id'], 'snapshot_hash' => (string) $a['snapshot_hash'], 'detail' => array( 'reason' => 'unpublished' ) ) );
+			Approvals::set_status(
+				(int) $a['id'],
+				'revoked',
+				array(
+					'decided_at' => gmdate( 'Y-m-d H:i:s' ),
+					'note'       => 'unpublished',
+				)
+			);
+			AuditLog::append(
+				'approval_revoked',
+				array(
+					'post_id'       => $post_id,
+					'approval_id'   => (int) $a['id'],
+					'snapshot_hash' => (string) $a['snapshot_hash'],
+					'detail'        => array( 'reason' => 'unpublished' ),
+				)
+			);
 		}
 		Withdrawal::run( $post_id, 'unpublished', true, 'T02' );
 		return true;

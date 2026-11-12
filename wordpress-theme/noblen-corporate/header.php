@@ -13,7 +13,12 @@ defined( 'ABSPATH' ) || exit;
 <header class="site-header">
 	<div class="wrap site-header__inner">
 		<a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-			<?php if ( has_custom_logo() ) { the_custom_logo(); } else { echo '<span class="brand__text">' . esc_html( get_bloginfo( 'name' ) ) . '</span>'; } ?>
+			<?php
+			if ( has_custom_logo() ) {
+				the_custom_logo();
+			} else {
+				echo '<span class="brand__text">' . esc_html( get_bloginfo( 'name' ) ) . '</span>'; }
+			?>
 		</a>
 		<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav"><span class="sr-only">Menu</span><span aria-hidden="true" class="nav-toggle__bars"></span></button>
 		<nav id="primary-nav" class="site-nav" aria-label="Primary">
@@ -24,7 +29,12 @@ defined( 'ABSPATH' ) || exit;
 					'container'      => false,
 					'fallback_cb'    => static function () {
 						echo '<ul class="menu">';
-						wp_list_pages( array( 'title_li' => '', 'depth' => 1 ) );
+						wp_list_pages(
+							array(
+								'title_li' => '',
+								'depth'    => 1,
+							)
+						);
 						echo '</ul>';
 					},
 				)

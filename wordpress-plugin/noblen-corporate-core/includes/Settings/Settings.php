@@ -20,22 +20,86 @@ final class Settings {
 	 */
 	public static function fields(): array {
 		return array(
-			'company_name'     => array( 'label' => 'Company name', 'kind' => 'text', 'public' => true ),
-			'tagline'          => array( 'label' => 'Tagline', 'kind' => 'text', 'public' => true ),
-			'contact_email'    => array( 'label' => 'Contact email', 'kind' => 'email', 'public' => true ),
-			'contact_phone'    => array( 'label' => 'Contact phone', 'kind' => 'text', 'public' => true ),
-			'contact_address'  => array( 'label' => 'Address', 'kind' => 'textarea', 'public' => true ),
-			'whatsapp_number'  => array( 'label' => 'WhatsApp number', 'kind' => 'text', 'public' => true ),
-			'social_linkedin'  => array( 'label' => 'LinkedIn URL', 'kind' => 'url', 'public' => true ),
-			'social_x'         => array( 'label' => 'X (Twitter) URL', 'kind' => 'url', 'public' => true ),
-			'social_facebook'  => array( 'label' => 'Facebook URL', 'kind' => 'url', 'public' => true ),
-			'social_instagram' => array( 'label' => 'Instagram URL', 'kind' => 'url', 'public' => true ),
-			'social_youtube'   => array( 'label' => 'YouTube URL', 'kind' => 'url', 'public' => true ),
-			'hero_headline'    => array( 'label' => 'Homepage headline', 'kind' => 'text', 'public' => true ),
-			'hero_intro'       => array( 'label' => 'Homepage introduction', 'kind' => 'textarea', 'public' => true ),
-			'group_intro'      => array( 'label' => 'Group introduction', 'kind' => 'textarea', 'public' => true ),
-			'cta_headline'     => array( 'label' => 'Closing call-to-action headline', 'kind' => 'text', 'public' => true ),
-			'analytics_id'     => array( 'label' => 'Analytics measurement ID (empty = no analytics)', 'kind' => 'analytics', 'public' => true ),
+			'company_name'     => array(
+				'label'  => 'Company name',
+				'kind'   => 'text',
+				'public' => true,
+			),
+			'tagline'          => array(
+				'label'  => 'Tagline',
+				'kind'   => 'text',
+				'public' => true,
+			),
+			'contact_email'    => array(
+				'label'  => 'Contact email',
+				'kind'   => 'email',
+				'public' => true,
+			),
+			'contact_phone'    => array(
+				'label'  => 'Contact phone',
+				'kind'   => 'text',
+				'public' => true,
+			),
+			'contact_address'  => array(
+				'label'  => 'Address',
+				'kind'   => 'textarea',
+				'public' => true,
+			),
+			'whatsapp_number'  => array(
+				'label'  => 'WhatsApp number',
+				'kind'   => 'text',
+				'public' => true,
+			),
+			'social_linkedin'  => array(
+				'label'  => 'LinkedIn URL',
+				'kind'   => 'url',
+				'public' => true,
+			),
+			'social_x'         => array(
+				'label'  => 'X (Twitter) URL',
+				'kind'   => 'url',
+				'public' => true,
+			),
+			'social_facebook'  => array(
+				'label'  => 'Facebook URL',
+				'kind'   => 'url',
+				'public' => true,
+			),
+			'social_instagram' => array(
+				'label'  => 'Instagram URL',
+				'kind'   => 'url',
+				'public' => true,
+			),
+			'social_youtube'   => array(
+				'label'  => 'YouTube URL',
+				'kind'   => 'url',
+				'public' => true,
+			),
+			'hero_headline'    => array(
+				'label'  => 'Homepage headline',
+				'kind'   => 'text',
+				'public' => true,
+			),
+			'hero_intro'       => array(
+				'label'  => 'Homepage introduction',
+				'kind'   => 'textarea',
+				'public' => true,
+			),
+			'group_intro'      => array(
+				'label'  => 'Group introduction',
+				'kind'   => 'textarea',
+				'public' => true,
+			),
+			'cta_headline'     => array(
+				'label'  => 'Closing call-to-action headline',
+				'kind'   => 'text',
+				'public' => true,
+			),
+			'analytics_id'     => array(
+				'label'  => 'Analytics measurement ID (empty = no analytics)',
+				'kind'   => 'analytics',
+				'public' => true,
+			),
 		);
 	}
 

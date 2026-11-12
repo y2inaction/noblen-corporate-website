@@ -1,19 +1,18 @@
-# OS / editor
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.swp
 
 # Dependencies and build output
+# Local WordPress / environment
+# OS / editor
+*.log
+*.swp
+*.zip
+.DS_Store
+.env
+.idea/
+.vscode/
+.wp-env.override.json
+Thumbs.db
+build/
+dist/
 node_modules/
 vendor/
-dist/
-build/
-*.zip
-
-# Local WordPress / environment
-.env
-.wp-env.override.json
 wp-config.php
-*.log

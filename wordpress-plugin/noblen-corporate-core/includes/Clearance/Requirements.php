@@ -101,18 +101,18 @@ final class Requirements {
 	public static function message( string $code ): string {
 		$base = explode( ':', $code )[0];
 		$map  = array(
-			'title_missing'                => 'A title is required.',
-			'field_required'               => 'A required field is empty.',
-			'password_protected'           => 'Password-protected records cannot be published.',
-			'required_relationship_missing' => 'A required relationship is missing.',
+			'title_missing'                     => 'A title is required.',
+			'field_required'                    => 'A required field is empty.',
+			'password_protected'                => 'Password-protected records cannot be published.',
+			'required_relationship_missing'     => 'A required relationship is missing.',
 			'required_relationship_unavailable' => 'A required related record is not published and approved.',
-			'clearance_incomplete'         => 'Clearance is incomplete.',
-			'media_rights_unconfirmed'     => 'An image has no current rights confirmation.',
-			'live_requires_evidence'       => 'A Live product needs an evidence reference.',
-			'approval_missing'             => 'There is no approval.',
-			'approval_stale'               => 'The content changed after approval.',
-			'separation_last_editor'       => 'The approver last edited this content.',
-			'separation_clearance'         => 'The approver recorded this clearance.',
+			'clearance_incomplete'              => 'Clearance is incomplete.',
+			'media_rights_unconfirmed'          => 'An image has no current rights confirmation.',
+			'live_requires_evidence'            => 'A Live product needs an evidence reference.',
+			'approval_missing'                  => 'There is no approval.',
+			'approval_stale'                    => 'The content changed after approval.',
+			'separation_last_editor'            => 'The approver last edited this content.',
+			'separation_clearance'              => 'The approver recorded this clearance.',
 		);
 		return $map[ $base ] ?? 'The requirements are not met.';
 	}

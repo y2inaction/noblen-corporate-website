@@ -29,7 +29,7 @@ final class Relations {
 			),
 			ARRAY_A
 		);
-		$out = array();
+		$out  = array();
 		foreach ( (array) $rows as $row ) {
 			$id   = (int) $row['post_id'];
 			$type = (string) get_post_type( $id );
@@ -41,7 +41,12 @@ final class Relations {
 			if ( ! isset( $defs[ $field ] ) ) {
 				continue;
 			}
-			$out[] = array( 'id' => $id, 'field' => $field, 'class' => (string) $defs[ $field ]['class'], 'type' => $type );
+			$out[] = array(
+				'id'    => $id,
+				'field' => $field,
+				'class' => (string) $defs[ $field ]['class'],
+				'type'  => $type,
+			);
 		}
 		return $out;
 	}

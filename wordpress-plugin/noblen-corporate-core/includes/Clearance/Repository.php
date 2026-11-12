@@ -52,7 +52,13 @@ final class Repository {
 	 */
 	public static function raw( int $post_id ): array {
 		global $wpdb;
-		$empty = array( 'status' => 'incomplete', 'items' => array(), 'evidence_ref' => '', 'recorded_by' => 0, 'updated_at' => '' );
+		$empty = array(
+			'status'       => 'incomplete',
+			'items'        => array(),
+			'evidence_ref' => '',
+			'recorded_by'  => 0,
+			'updated_at'   => '',
+		);
 		if ( ! Schema::exists( 'clearance' ) ) {
 			return $empty;
 		}
@@ -140,7 +146,7 @@ final class Repository {
 		}
 		$clean = array();
 		foreach ( array_keys( self::items_for_type( $type ) ) as $item ) {
-			$v             = isset( $items[ $item ] ) ? (string) $items[ $item ] : '';
+			$v              = isset( $items[ $item ] ) ? (string) $items[ $item ] : '';
 			$clean[ $item ] = in_array( $v, array( 'yes', 'na' ), true ) ? $v : '';
 		}
 		$evidence = sanitize_text_field( $evidence_ref );
@@ -157,7 +163,13 @@ final class Repository {
 				'updated_at'   => gmdate( 'Y-m-d H:i:s' ),
 			)
 		);
-		AuditLog::append( 'clearance_recorded', array( 'post_id' => $post_id, 'detail' => array( 'status' => $status ) ) );
+		AuditLog::append(
+			'clearance_recorded',
+			array(
+				'post_id' => $post_id,
+				'detail'  => array( 'status' => $status ),
+			)
+		);
 		return true;
 	}
 }

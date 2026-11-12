@@ -63,7 +63,11 @@ final class Cleanup {
 					'post_id'       => $dep,
 					'approval_id'   => (int) $a['id'],
 					'snapshot_hash' => $snapshot['hash'],
-					'detail'        => array( 'removed_reference' => $deleted_id, 'field' => $d['field'], 'previous_hash' => $before ),
+					'detail'        => array(
+						'removed_reference' => $deleted_id,
+						'field'             => $d['field'],
+						'previous_hash'     => $before,
+					),
 				)
 			);
 		}

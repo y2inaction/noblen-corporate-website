@@ -53,7 +53,10 @@ final class Dependencies {
 				}
 			}
 		}
-		return array( 'failures' => $failures, 'warnings' => $warnings );
+		return array(
+			'failures' => $failures,
+			'warnings' => $warnings,
+		);
 	}
 
 	/**

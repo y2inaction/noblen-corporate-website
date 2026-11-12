@@ -57,13 +57,13 @@ final class AuditLog {
 			'key_fingerprint' => '' === $secret ? '' : Key::fingerprint( $secret ),
 		);
 
-		$table    = Schema::table( 'audit' );
+		$table     = Schema::table( 'audit' );
 		$have_lock = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', 'noblen_audit_chain' ) ); // phpcs:ignore WordPress.DB
 		try {
-			$last           = self::last();
-			$row['prev_hash'] = $last ? (string) $last['record_hash'] : Chain::GENESIS;
+			$last               = self::last();
+			$row['prev_hash']   = $last ? (string) $last['record_hash'] : Chain::GENESIS;
 			$row['record_hash'] = Chain::hash( $secret, $row['prev_hash'], $row );
-			$ok = $wpdb->insert( $table, $row ); // phpcs:ignore WordPress.DB
+			$ok                 = $wpdb->insert( $table, $row ); // phpcs:ignore WordPress.DB
 		} finally {
 			if ( $have_lock ) {
 				$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', 'noblen_audit_chain' ) ); // phpcs:ignore WordPress.DB

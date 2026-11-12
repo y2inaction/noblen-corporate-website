@@ -109,7 +109,15 @@ final class Admin {
 	 */
 	private static function relationship_select( array $def, string $name, string $id, array $selected ): void {
 		$multiple = ! empty( $def['multiple'] );
-		$posts    = get_posts( array( 'post_type' => $def['target'], 'post_status' => array( 'publish', 'pending', 'draft', 'future', 'private' ), 'numberposts' => 200, 'orderby' => 'title', 'order' => 'ASC' ) );
+		$posts    = get_posts(
+			array(
+				'post_type'   => $def['target'],
+				'post_status' => array( 'publish', 'pending', 'draft', 'future', 'private' ),
+				'numberposts' => 100,
+				'orderby'     => 'title',
+				'order'       => 'ASC',
+			)
+		);
 		echo '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . ( $multiple ? '[]' : '' ) . '"' . ( $multiple ? ' multiple size="5"' : '' ) . '>';
 		if ( ! $multiple ) {
 			echo '<option value="">None</option>';
@@ -311,7 +319,11 @@ final class Admin {
 		register_setting(
 			'noblen_settings',
 			'noblen_core_settings',
-			array( 'type' => 'array', 'sanitize_callback' => array( Settings::class, 'sanitize' ), 'default' => array() )
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( Settings::class, 'sanitize' ),
+				'default'           => array(),
+			)
 		);
 	}
 

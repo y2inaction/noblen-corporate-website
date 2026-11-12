@@ -100,8 +100,23 @@ final class Invalidation {
 			// A manual change to draft or pending: recorded as a revocation.
 			$a = Approvals::latest( $id );
 			if ( $a && 'approved' === $a['status'] ) {
-				Approvals::set_status( (int) $a['id'], 'revoked', array( 'decided_at' => gmdate( 'Y-m-d H:i:s' ), 'note' => 'unpublished' ) );
-				AuditLog::append( 'approval_revoked', array( 'post_id' => $id, 'approval_id' => (int) $a['id'], 'snapshot_hash' => (string) $a['snapshot_hash'], 'detail' => array( 'reason' => 'unpublished' ) ) );
+				Approvals::set_status(
+					(int) $a['id'],
+					'revoked',
+					array(
+						'decided_at' => gmdate( 'Y-m-d H:i:s' ),
+						'note'       => 'unpublished',
+					)
+				);
+				AuditLog::append(
+					'approval_revoked',
+					array(
+						'post_id'       => $id,
+						'approval_id'   => (int) $a['id'],
+						'snapshot_hash' => (string) $a['snapshot_hash'],
+						'detail'        => array( 'reason' => 'unpublished' ),
+					)
+				);
 			}
 			Withdrawal::run( $id, 'unpublished', true, 'T02' );
 		}
@@ -127,7 +142,7 @@ final class Invalidation {
 	 */
 	public static function touch_editor( int $post_id ): void {
 		$hash = Snapshot::hash( $post_id );
-		if ( $hash !== (string) get_post_meta( $post_id, '_noblen_last_hash', true ) ) {
+		if ( (string) get_post_meta( $post_id, '_noblen_last_hash', true ) !== $hash ) {
 			update_post_meta( $post_id, '_noblen_last_hash', $hash );
 			update_post_meta( $post_id, '_noblen_last_editor', get_current_user_id() );
 		}

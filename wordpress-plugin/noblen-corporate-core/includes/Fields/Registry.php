@@ -42,29 +42,61 @@ final class Registry {
 	 */
 	public static function fields( string $type ): array {
 		$rich = static fn( string $label, bool $required = false ): array => array(
-			'label' => $label, 'kind' => 'richtext', 'public' => true, 'required' => $required, 'switch' => true,
+			'label'    => $label,
+			'kind'     => 'richtext',
+			'public'   => true,
+			'required' => $required,
+			'switch'   => true,
 		);
-		$rel = static fn( string $label, string $target, string $class_name, bool $multiple = true ): array => array(
-			'label' => $label, 'kind' => 'rel', 'public' => true, 'target' => $target, 'class' => $class_name, 'multiple' => $multiple,
+		$rel  = static fn( string $label, string $target, string $class_name, bool $multiple = true ): array => array(
+			'label'    => $label,
+			'kind'     => 'rel',
+			'public'   => true,
+			'target'   => $target,
+			'class'    => $class_name,
+			'multiple' => $multiple,
 		);
 
 		switch ( $type ) {
 			case Types::PROJECT:
 				$fields = array(
-					'client'           => array( 'label' => 'Client or commissioning organisation', 'kind' => 'text', 'public' => true, 'switch' => true ),
+					'client'           => array(
+						'label'  => 'Client or commissioning organisation',
+						'kind'   => 'text',
+						'public' => true,
+						'switch' => true,
+					),
 					'overview'         => $rich( 'Project overview', true ),
 					'scope'            => $rich( 'Project scope' ),
 					'contribution'     => $rich( "Noblen's contribution" ),
 					'approach'         => $rich( 'Project approach' ),
 					'outcomes'         => $rich( 'Outcomes and impact (verified only)' ),
-					'status'           => array( 'label' => 'Project status', 'kind' => 'enum', 'public' => true, 'required' => true, 'options' => self::PROJECT_STATUS ),
+					'status'           => array(
+						'label'    => 'Project status',
+						'kind'     => 'enum',
+						'public'   => true,
+						'required' => true,
+						'options'  => self::PROJECT_STATUS,
+					),
 					'business_unit'    => $rel( 'Responsible Noblen business unit', Types::COMPANY, 'required', false ),
 					'industries'       => $rel( 'Industry', Types::INDUSTRY, 'optional' ),
 					'services'         => $rel( 'Services delivered', Types::SERVICE, 'optional' ),
 					'related_products' => $rel( 'Related products', Types::PRODUCT, 'optional' ),
-					'gallery'          => array( 'label' => 'Gallery', 'kind' => 'gallery', 'public' => true ),
-					'video_url'        => array( 'label' => 'Video URL', 'kind' => 'url', 'public' => true ),
-					'featured_home'    => array( 'label' => 'Feature on the homepage', 'kind' => 'bool', 'public' => true ),
+					'gallery'          => array(
+						'label'  => 'Gallery',
+						'kind'   => 'gallery',
+						'public' => true,
+					),
+					'video_url'        => array(
+						'label'  => 'Video URL',
+						'kind'   => 'url',
+						'public' => true,
+					),
+					'featured_home'    => array(
+						'label'  => 'Feature on the homepage',
+						'kind'   => 'bool',
+						'public' => true,
+					),
 				);
 				break;
 			case Types::PRODUCT:
@@ -73,27 +105,62 @@ final class Registry {
 					'scope'            => $rich( 'Capabilities and scope' ),
 					'approach'         => $rich( 'Approach' ),
 					'outcomes'         => $rich( 'Outcomes (verified only)' ),
-					'stage'            => array( 'label' => 'Product stage', 'kind' => 'enum', 'public' => true, 'required' => true, 'options' => self::PRODUCT_STAGE ),
+					'stage'            => array(
+						'label'    => 'Product stage',
+						'kind'     => 'enum',
+						'public'   => true,
+						'required' => true,
+						'options'  => self::PRODUCT_STAGE,
+					),
 					'business_unit'    => $rel( 'Responsible Noblen business unit', Types::COMPANY, 'required', false ),
 					'industries'       => $rel( 'Industry', Types::INDUSTRY, 'optional' ),
 					'related_projects' => $rel( 'Related projects', Types::PROJECT, 'optional' ),
-					'gallery'          => array( 'label' => 'Gallery', 'kind' => 'gallery', 'public' => true ),
-					'video_url'        => array( 'label' => 'Video URL', 'kind' => 'url', 'public' => true ),
-					'featured_home'    => array( 'label' => 'Feature on the homepage', 'kind' => 'bool', 'public' => true ),
+					'gallery'          => array(
+						'label'  => 'Gallery',
+						'kind'   => 'gallery',
+						'public' => true,
+					),
+					'video_url'        => array(
+						'label'  => 'Video URL',
+						'kind'   => 'url',
+						'public' => true,
+					),
+					'featured_home'    => array(
+						'label'  => 'Feature on the homepage',
+						'kind'   => 'bool',
+						'public' => true,
+					),
 				);
 				break;
 			case Types::COMPANY:
 				$fields = array(
-					'tagline'    => array( 'label' => 'Tagline', 'kind' => 'text', 'public' => true ),
+					'tagline'    => array(
+						'label'  => 'Tagline',
+						'kind'   => 'text',
+						'public' => true,
+					),
 					'industries' => $rel( 'Industries', Types::INDUSTRY, 'optional' ),
 					'services'   => $rel( 'Services', Types::SERVICE, 'optional' ),
 				);
 				break;
 			case Types::INDUSTRY:
 				$fields = array(
-					'status'        => array( 'label' => 'Industry status', 'kind' => 'enum', 'public' => true, 'options' => self::INDUSTRY_STATUS ),
-					'opportunities' => array( 'label' => 'Business opportunities', 'kind' => 'richtext', 'public' => true ),
-					'capabilities'  => array( 'label' => "Noblen's capabilities", 'kind' => 'richtext', 'public' => true ),
+					'status'        => array(
+						'label'   => 'Industry status',
+						'kind'    => 'enum',
+						'public'  => true,
+						'options' => self::INDUSTRY_STATUS,
+					),
+					'opportunities' => array(
+						'label'  => 'Business opportunities',
+						'kind'   => 'richtext',
+						'public' => true,
+					),
+					'capabilities'  => array(
+						'label'  => "Noblen's capabilities",
+						'kind'   => 'richtext',
+						'public' => true,
+					),
 					'companies'     => $rel( 'Related business units', Types::COMPANY, 'optional' ),
 					'services'      => $rel( 'Related services', Types::SERVICE, 'optional' ),
 				);

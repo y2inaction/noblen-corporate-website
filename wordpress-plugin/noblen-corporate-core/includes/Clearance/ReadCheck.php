@@ -50,8 +50,8 @@ final class ReadCheck {
 		if ( isset( self::$memo[ $post->ID ] ) ) {
 			return self::$memo[ $post->ID ];
 		}
-		$a  = Approvals::latest( (int) $post->ID );
-		$ok = $a && 'approved' === $a['status'] && hash_equals( (string) $a['snapshot_hash'], Snapshot::hash( (int) $post->ID ) );
+		$a                       = Approvals::latest( (int) $post->ID );
+		$ok                      = $a && 'approved' === $a['status'] && hash_equals( (string) $a['snapshot_hash'], Snapshot::hash( (int) $post->ID ) );
 		self::$memo[ $post->ID ] = (bool) $ok;
 		return (bool) $ok;
 	}

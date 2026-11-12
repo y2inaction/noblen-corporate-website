@@ -51,7 +51,13 @@ final class Publisher {
 
 		Grant::issue( $post_id, (int) $approval['id'], $hash, $user_id );
 		try {
-			$result = wp_update_post( array( 'ID' => $post_id, 'post_status' => 'publish' ), true );
+			$result = wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => 'publish',
+				),
+				true
+			);
 		} finally {
 			Grant::clear();
 		}

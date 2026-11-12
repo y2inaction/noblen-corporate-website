@@ -7,7 +7,10 @@ get_header();
 	<?php get_search_form(); ?>
 	<?php if ( have_posts() ) : ?>
 		<ul class="results">
-		<?php while ( have_posts() ) : the_post(); ?>
+		<?php
+		while ( have_posts() ) :
+			the_post();
+			?>
 			<li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
 		<?php endwhile; ?>
 		</ul>

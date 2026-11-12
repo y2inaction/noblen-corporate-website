@@ -50,7 +50,7 @@ final class Grant {
 		if ( ! hash_equals( $g['hash'], Snapshot::hash( $post_id ) ) ) {
 			return false;
 		}
-		self::$active              = null; // Single use.
+		self::$active               = null; // Single use.
 		self::$consumed[ $post_id ] = true;
 		return true;
 	}

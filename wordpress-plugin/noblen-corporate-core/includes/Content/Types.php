@@ -77,7 +77,11 @@ final class Types {
 					'capability_type'     => $caps,
 					'capabilities'        => Capabilities::map( $caps[0], $caps[1] ),
 					'map_meta_cap'        => true,
-					'rewrite'             => array( 'slug' => $d[2], 'with_front' => false, 'feeds' => false ),
+					'rewrite'             => array(
+						'slug'       => $d[2],
+						'with_front' => false,
+						'feeds'      => false,
+					),
 					'delete_with_user'    => false,
 					'can_export'          => true,
 				)
@@ -88,12 +92,18 @@ final class Types {
 			self::TAX_AREA,
 			array( self::PROJECT ),
 			array(
-				'labels'            => array( 'name' => 'Portfolio Areas', 'singular_name' => 'Portfolio Area' ),
+				'labels'            => array(
+					'name'          => 'Portfolio Areas',
+					'singular_name' => 'Portfolio Area',
+				),
 				'public'            => true,
 				'hierarchical'      => false,
 				'show_in_rest'      => false,
 				'show_admin_column' => true,
-				'rewrite'           => array( 'slug' => 'portfolio-area', 'with_front' => false ),
+				'rewrite'           => array(
+					'slug'       => 'portfolio-area',
+					'with_front' => false,
+				),
 				'capabilities'      => array(
 					'manage_terms' => 'manage_noblen_taxonomies',
 					'edit_terms'   => 'manage_noblen_taxonomies',
@@ -106,12 +116,18 @@ final class Types {
 			self::TAX_PRODUCT_TYPE,
 			array( self::PRODUCT ),
 			array(
-				'labels'            => array( 'name' => 'Product Types', 'singular_name' => 'Product Type' ),
+				'labels'            => array(
+					'name'          => 'Product Types',
+					'singular_name' => 'Product Type',
+				),
 				'public'            => true,
 				'hierarchical'      => false,
 				'show_in_rest'      => false,
 				'show_admin_column' => true,
-				'rewrite'           => array( 'slug' => 'product-type', 'with_front' => false ),
+				'rewrite'           => array(
+					'slug'       => 'product-type',
+					'with_front' => false,
+				),
 				'capabilities'      => array(
 					'manage_terms' => 'manage_noblen_taxonomies',
 					'edit_terms'   => 'manage_noblen_taxonomies',

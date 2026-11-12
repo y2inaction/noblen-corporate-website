@@ -45,7 +45,11 @@ final class Export {
 	 */
 	public static function compare( ?array $export ): array {
 		if ( ! is_array( $export ) || empty( $export['entries'] ) ) {
-			return array( 'result' => 'no_export', 'first_difference_id' => null, 'compared' => 0 );
+			return array(
+				'result'              => 'no_export',
+				'first_difference_id' => null,
+				'compared'            => 0,
+			);
 		}
 		$db = array();
 		foreach ( AuditLog::all() as $row ) {
@@ -55,10 +59,18 @@ final class Export {
 		foreach ( $export['entries'] as $row ) {
 			$id = (int) $row['id'];
 			if ( ! isset( $db[ $id ] ) || ! hash_equals( (string) $db[ $id ]['record_hash'], (string) $row['record_hash'] ) ) {
-				return array( 'result' => 'differs', 'first_difference_id' => $id, 'compared' => $compared );
+				return array(
+					'result'              => 'differs',
+					'first_difference_id' => $id,
+					'compared'            => $compared,
+				);
 			}
 			++$compared;
 		}
-		return array( 'result' => 'matches_up_to_export_point', 'first_difference_id' => null, 'compared' => $compared );
+		return array(
+			'result'              => 'matches_up_to_export_point',
+			'first_difference_id' => null,
+			'compared'            => $compared,
+		);
 	}
 }
