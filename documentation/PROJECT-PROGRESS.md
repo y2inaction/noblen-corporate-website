@@ -7,7 +7,7 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | M1 Audit, content extraction and planning | **Documentation complete, awaiting owner sign-off** | Live-site audit not possible by crawling (see below) |
-| M2 Brand system, theme, core plugin and publication gate | **Plan: G0 approved. Revision 5.1 is the approved technical baseline. No implementation authorized. Not started** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
+| M2 Brand system, theme, core plugin and publication gate | **In progress locally (not pushed). See [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md). Nothing is accepted** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
 | M3 to M9 | Not started | |
 
 ## Approval status
@@ -17,8 +17,8 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | G0, final M2 technical plan | **Approved** (Revision 5.1 is the approved M2 technical baseline) |
 | G0b, documentation-only commit of the approved plan | **Complete** (commit `8f920ff`) |
 | Documentation-only commit of the CI and acceptance-test planning reference | One commit authorised. Push requires a separate decision |
-| G1, dependency installation | Not authorised |
-| G2, implementation branch and commit permissions | Not authorised |
+| G1, dependency installation | Authorised by the execution directive; completed locally from the signed Ubuntu archive |
+| G2, implementation branch and local commits | Authorised. Branch `feature/m2-implementation`, local only. **Pushing is not authorised** |
 | SG-A, SG-B, SG-C, SG-D | Not authorised |
 | G5, final release | Not authorised |
 

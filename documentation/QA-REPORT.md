@@ -1,6 +1,6 @@
 # QA Report
 
-Scope: **M1 (documentation and planning only).** There is no code, theme or website to test yet, so page, form, responsive, accessibility and performance testing start in M2 and run through M9.
+Scope: **M1 (documentation and planning).** M2 implementation evidence is in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md). There is no code, theme or website to test yet, so page, form, responsive, accessibility and performance testing start in M2 and run through M9.
 
 ## M1 checks
 
