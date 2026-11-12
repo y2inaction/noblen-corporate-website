@@ -319,18 +319,18 @@ jobs:
       - name: WordPress admin workflow in a real browser (C06, C09, C10, C24)
         working-directory: tests-e2e
         env:
-          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
         run: node admin.js
       - name: All five content types through the admin UI (C06-001, C06-002)
         working-directory: tests-e2e
         env:
-          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
         run: node content-types.js
       - name: Classic Editor, Configuration B (C21-006 to C21-010, C21-012, C21-014, C21-016, C21-018, C21-020)
         working-directory: tests-e2e
         env:
           CONFIG: B
-          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
         run: node classic-editor.js
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
@@ -419,7 +419,7 @@ jobs:
         working-directory: tests-e2e
         env:
           CONFIG: A
-          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
         run: node classic-editor.js
       - name: Restore Configuration B
         if: always()
