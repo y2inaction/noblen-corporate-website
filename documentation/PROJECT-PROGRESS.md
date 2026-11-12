@@ -7,7 +7,7 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | M1 Audit, content extraction and planning | **Documentation complete, awaiting owner sign-off** | Live-site audit not possible by crawling (see below) |
-| M2 Brand system, theme, core plugin and publication gate | **In progress locally (not pushed). See [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md). Nothing is accepted** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
+| M2 Brand system, theme, core plugin and publication gate | **Release-candidate work, local only (not pushed). See [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md). Nothing is accepted** | [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) |
 | M3 to M9 | Not started | |
 
 ## Approval status
