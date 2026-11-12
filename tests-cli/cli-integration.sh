@@ -20,6 +20,10 @@ LOG="${WP_DEBUG_LOG_FILE:-/tmp/noblen-cli-debug.log}"; : > "$LOG"
 
 # ---- C01/C02: clean install, theme and plugin activation via WP-CLI.
 W core install --url=http://127.0.0.1:8099 --title=CLI --admin_user=admin --admin_password=cli-pass-only --admin_email=cli@example.test --skip-email >/dev/null
+# Canary: prove the PHP error log is wired up, otherwise "no errors" below would be vacuous.
+W eval 'trigger_error("noblen-canary", E_USER_WARNING);' >/dev/null
+eq "error log is wired (canary recorded)" "$(grep -c noblen-canary "$LOG" || true)" "1"
+: > "$LOG"
 W plugin activate noblen-corporate-core >/dev/null; eq "C02-001 plugin activates via WP-CLI" "$(W plugin get noblen-corporate-core --field=status)" "active"
 W theme activate noblen-corporate >/dev/null;       eq "C01-001 theme activates via WP-CLI" "$(W theme get noblen-corporate --field=status)" "active"
 eq "C02-003 schema version recorded" "$(W eval 'echo Noblen\Core\Database\Migrator::installed_version();')" "$(W eval 'echo Noblen\Core\Database\Schema::VERSION;')"

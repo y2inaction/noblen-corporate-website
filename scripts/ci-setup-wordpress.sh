@@ -11,7 +11,7 @@ define( 'DB_HOST', '${DB_HOST:-127.0.0.1}' ); define( 'DB_CHARSET', 'utf8mb4' );
 foreach ( array( 'AUTH_KEY','SECURE_AUTH_KEY','LOGGED_IN_KEY','NONCE_KEY','AUTH_SALT','SECURE_AUTH_SALT','LOGGED_IN_SALT','NONCE_SALT' ) as \$k ) { define( \$k, 'ci-only-' . \$k ); }
 \$table_prefix = 'wp_';
 define( 'NOBLEN_AUDIT_KEYS', array( 'ci1' => 'ci-only-throwaway-key-0123456789abcdef' ) ); define( 'NOBLEN_AUDIT_KEY_ID', 'ci1' );
-define( 'WP_DEBUG', true ); define( 'WP_HTTP_BLOCK_EXTERNAL', true ); define( 'DISABLE_WP_CRON', true );
+define( 'WP_DEBUG', true ); define( 'WP_DEBUG_LOG', getenv( 'WP_DEBUG_LOG_FILE' ) ? getenv( 'WP_DEBUG_LOG_FILE' ) : false ); define( 'WP_DEBUG_DISPLAY', false ); define( 'WP_HTTP_BLOCK_EXTERNAL', true ); define( 'DISABLE_WP_CRON', true );
 if ( ! defined( 'ABSPATH' ) ) { define( 'ABSPATH', __DIR__ . '/' ); }
 require_once ABSPATH . 'wp-settings.php';
 PHP

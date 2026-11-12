@@ -4,7 +4,8 @@ const { chromium } = require('playwright');
 const base = process.env.BASE_URL || 'http://127.0.0.1:8099';
 const shots = process.argv[2];
 const paths = ['/', '/projects/', '/group/', '/industries/', '/solutions/', '/products/', '/?s=fixture', '/missing-page-check/'];
-const widths = [[1440, 900], [820, 1100], [375, 800]];
+const widths = [[1280, 900], [768, 1024], [360, 740]]; // C13: 360, 768 and 1280 px
+const tokens = /lorem ipsum|\bTODO\b|\bTBD\b|\bFIXME\b|\[placeholder|\{\{|\}\}|your (company|name) here|coming soon/i;
 (async () => {
   const browser = await chromium.launch();
   const host = new URL(base).host;
@@ -22,9 +23,11 @@ const widths = [[1440, 900], [820, 1100], [375, 800]];
       if (res.status() !== expected) fail(`${w} ${p} status ${res.status()}`);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
       if (overflow) fail(`${w} ${p} horizontal overflow`);
-      if (shots && p === '/') await page.screenshot({ path: `${shots}/home-${w}.png`, fullPage: true });
+      const body = await page.locator('body').innerText();
+      if (tokens.test(body)) fail(`${w} ${p} placeholder token in rendered text: ${body.match(tokens)[0]}`);
+      if (shots && (p === '/' || p.startsWith('/projects/'))) await page.screenshot({ path: `${shots}/${p === '/' ? 'home' : 'archive'}-${w}.png`, fullPage: true });
     }
-    if (w === 375) {
+    if (w === 360) {
       await page.goto(base + '/');
       const t = page.locator('.nav-toggle');
       await t.click();

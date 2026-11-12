@@ -31,6 +31,7 @@ final class Admin {
 		add_action( 'save_post', array( __CLASS__, 'save_fields' ), 10, 2 );
 		add_action( 'admin_post_noblen_workflow', array( __CLASS__, 'handle_workflow' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_clearance' ), 20, 2 );
+		add_action( 'admin_post_noblen_seed', array( __CLASS__, 'handle_seed' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
@@ -312,6 +313,18 @@ final class Admin {
 		self::flash( $res, 'Clearance saved.' );
 	}
 
+	/** Create the optional names-only starter drafts. */
+	public static function handle_seed(): void {
+		check_admin_referer( 'noblen_seed' );
+		if ( ! current_user_can( 'noblen_manage_settings' ) ) {
+			wp_die( 'You are not allowed to do this.', 403 );
+		}
+		$n = \Noblen\Core\Seed\DraftSeeder::seed();
+		self::flash( true, sprintf( '%d starter draft(s) created. They are names only and stay unpublished.', $n ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=noblen-settings' ) );
+		exit;
+	}
+
 	/** Settings menu. */
 	public static function menu(): void {
 		add_menu_page( 'Noblen', 'Noblen', 'noblen_manage_settings', 'noblen-settings', array( __CLASS__, 'settings_page' ), 'dashicons-building', 58 );
@@ -351,7 +364,9 @@ final class Admin {
 		}
 		echo '</table>';
 		submit_button();
-		echo '</form></div>';
+		echo '</form>';
+		echo '<h2>Starter drafts</h2><p>Creates unpublished, names-only drafts for the three business units and four products named in the brief. No content or clearance is added.</p>';
+		echo '<p><a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=noblen_seed' ), 'noblen_seed' ) ) . '">Create starter drafts</a></p></div>';
 	}
 
 	/** List columns. @param array<string,string> $cols Columns. @return array<string,string> */
