@@ -295,6 +295,7 @@ class CoverageTest extends NoblenTestCase {
 
 	// ---- C25 migrations: upgrade from a v1 fixture, failure state, lock.
 	public function test_C25_002_upgrade_from_v1_adds_the_index_and_is_idempotent(): void {
+		$this->expects_commit = true; // Schema changes implicitly commit; leaked rows are purged in tearDown.
 		global $wpdb;
 		$table = Schema::table( 'approvals' );
 		$wpdb->query( "ALTER TABLE `{$table}` DROP INDEX `post_status`" ); // phpcs:ignore WordPress.DB
@@ -316,6 +317,7 @@ class CoverageTest extends NoblenTestCase {
 	}
 
 	public function test_C25_004_failed_migration_blocks_publication_and_keeps_data(): void {
+		$this->expects_commit = true; // Schema changes implicitly commit; leaked rows are purged in tearDown.
 		$co = $this->published_company();
 		$id = $this->project( $co, 'Survives failed migration' );
 		global $wpdb;
@@ -345,6 +347,7 @@ class CoverageTest extends NoblenTestCase {
 	}
 
 	public function test_C25_005_concurrent_migration_is_refused_by_the_lock(): void {
+		$this->expects_commit = true; // Schema changes implicitly commit; leaked rows are purged in tearDown.
 		global $wpdb;
 		$wpdb->query( 'ALTER TABLE `' . Schema::table( 'approvals' ) . '` DROP INDEX `post_status`' ); // phpcs:ignore WordPress.DB
 		update_option( Migrator::OPT_VERSION, 1 );

@@ -50,9 +50,15 @@ final class PublicInterfaces {
 	 * @return int
 	 */
 	public static function oembed( $post_id, $url = '' ) {
-		$post = $post_id ? get_post( (int) $post_id ) : null;
+		if ( ! $post_id ) {
+			// The read-time filter already hid an ineligible record, or the address matched nothing.
+			// Not 0: get_post( 0 ) falls back to the global $post, which could be a different record.
+			return -1;
+		}
+		$post = get_post( (int) $post_id );
 		if ( $post && Types::is_ours( $post->post_type ) && ! ReadCheck::eligible( $post ) ) {
-			return 0;
+			// Not 0: get_post( 0 ) falls back to the global $post, which could be a different record.
+			return -1;
 		}
 		return $post_id;
 	}

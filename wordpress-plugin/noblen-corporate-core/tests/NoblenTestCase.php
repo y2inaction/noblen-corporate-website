@@ -19,11 +19,21 @@ abstract class NoblenTestCase extends PHPUnit\Framework\TestCase {
 	protected array $keys = array( 'k1' => 'test-secret-one-0000000000000000' );
 	protected string $key_id = 'k1';
 
+	/** Highest post and user IDs when the test started, to detect and purge leaked data. */
+	private int $base_post = 0;
+	private int $base_user = 0;
+
+	/** Tests that run DDL (which implicitly commits) set this and clean up through purge_leaks(). */
+	protected bool $expects_commit = false;
+
 	/** @var array<string,int> */
 	private array $users = array();
 
 	protected function setUp(): void {
 		global $wpdb;
+		$this->expects_commit = false;
+		$this->base_post      = (int) $wpdb->get_var( "SELECT COALESCE(MAX(ID),0) FROM {$wpdb->posts}" ); // phpcs:ignore WordPress.DB
+		$this->base_user      = (int) $wpdb->get_var( "SELECT COALESCE(MAX(ID),0) FROM {$wpdb->users}" ); // phpcs:ignore WordPress.DB
 		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB
 		wp_cache_flush();
 		ReadCheck::flush();
@@ -47,11 +57,37 @@ abstract class NoblenTestCase extends PHPUnit\Framework\TestCase {
 		remove_filter( 'noblen_core_audit_keys', array( $this, 'filter_keys' ) );
 		remove_filter( 'noblen_core_audit_key_id', array( $this, 'filter_key_id' ) );
 		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB
+		$leaked = $this->purge_leaks();
 		wp_cache_flush();
 		ReadCheck::flush();
 		Verifier::flush_cache();
 		Grant::clear();
 		wp_set_current_user( 0 );
+		if ( $leaked && ! $this->expects_commit ) {
+			$this->fail( "This test leaked {$leaked} committed row(s) past its rollback." );
+		}
+	}
+
+	/**
+	 * Delete posts and users created after setUp that survived the rollback.
+	 *
+	 * @return int Number of leaked rows removed.
+	 */
+	private function purge_leaks(): int {
+		global $wpdb;
+		$n   = 0;
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID > %d", $this->base_post ) ); // phpcs:ignore WordPress.DB
+		foreach ( $ids as $id ) {
+			wp_delete_post( (int) $id, true );
+			++$n;
+		}
+		$uids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->users} WHERE ID > %d", $this->base_user ) ); // phpcs:ignore WordPress.DB
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+		foreach ( $uids as $uid ) {
+			wp_delete_user( (int) $uid );
+			++$n;
+		}
+		return $n;
 	}
 
 	public function filter_keys( $keys ) {
