@@ -23,7 +23,6 @@ final class Snapshot {
 	public const FORMAT_VERSION = 1;
 
 	/** @var array<string,string> */
-	private static array $checksums = array();
 
 	/**
 	 * Compute the snapshot for a record.
@@ -130,11 +129,8 @@ final class Snapshot {
 		if ( ! $file || ! is_readable( $file ) ) {
 			return '';
 		}
-		$key = $attachment_id . '|' . $file . '|' . (int) filesize( $file ) . '|' . (int) filemtime( $file );
-		if ( ! isset( self::$checksums[ $key ] ) ) {
-			self::$checksums[ $key ] = (string) hash_file( 'sha256', $file );
-		}
-		return self::$checksums[ $key ];
+		// Always hash the current bytes: a size and time key can miss a same-size replacement made in the same second.
+		return (string) hash_file( 'sha256', $file );
 	}
 
 	/**
