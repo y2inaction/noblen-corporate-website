@@ -5,6 +5,12 @@ name: CI
 # Nothing is vendored. No secrets are used. Not pushed or run until the owner approves.
 
 on:
+  workflow_dispatch:
+    inputs:
+      capture_classic_editor_hash:
+        description: 'Classic Editor FIRST-RUN CAPTURE (pin unverified only). Records the package SHA-256 and a source-parity report for human review. This is NOT verification.'
+        type: boolean
+        default: false
   push:
     branches: [main, 'feature/**']
   pull_request:
@@ -45,6 +51,8 @@ jobs:
         run: scripts/check-no-third-party.sh
       - name: Repository audit (artifacts, credentials, local paths, dev data)
         run: scripts/audit-repo.sh
+      - name: Dependency pins (exact versions, verification state, Configuration A and B isolation)
+        run: scripts/check-pins.sh
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)
@@ -71,7 +79,7 @@ jobs:
         php: ['8.3', '8.4']
     services:
       db:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902 # MySQL 8.4 line, digest resolved 2026-11-12; refresh only by a reviewed change
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: noblen_test
@@ -85,7 +93,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: mysqli, gd, mbstring
-          tools: phpunit:9.6
+          tools: phpunit:9.6.17
       - name: Disposable WordPress ${{ env.WP_VERSION }}
         env:
           WP_DIR: ${{ runner.temp }}/wp
@@ -110,7 +118,7 @@ jobs:
         php: ['8.3', '8.4']
     services:
       db:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902 # MySQL 8.4 line, digest resolved 2026-11-12; refresh only by a reviewed change
         env:
           MYSQL_ROOT_PASSWORD: root
         ports: ['3306:3306']
@@ -167,7 +175,7 @@ jobs:
     continue-on-error: true
     services:
       db:
-        image: mysql:8.4
+        image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902 # MySQL 8.4 line, digest resolved 2026-11-12; refresh only by a reviewed change
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: noblen_e2e
@@ -232,17 +240,6 @@ jobs:
       - name: Site crawl for placeholder tokens (C12-001; the built-in server cannot serve sitemaps)
         working-directory: tests-e2e
         run: node crawl.js
-      - name: Classic Editor, Configuration A on the built-in server (informational)
-        env:
-          WPCMD: vendor/bin/wp --path=${{ runner.temp }}/wp
-          DL_DIR: ${{ runner.temp }}/ce-download
-          SITE_DL_DIR: ${{ runner.temp }}/ce-download
-          CONFIG: A
-          CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
-        run: |
-          tests-cli/classic-editor-config-a.sh install
-          (cd tests-e2e && node classic-editor.js)
-          tests-cli/classic-editor-config-a.sh cleanup
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
@@ -276,6 +273,14 @@ jobs:
         run: |
           tests-e2e/node_modules/.bin/wp-env start
           tests-e2e/node_modules/.bin/wp-env run cli wp core version
+      - name: Record container image digests (evidence of what ran; wp-env chooses these images, they are not pinned by this repository)
+        run: |
+          {
+            echo "### Container images used by wp-env"
+            for img in $(docker ps --format '{{.Image}}' | sort -u); do
+              echo "- \`$img\` -> $(docker image inspect --format '{{join .RepoDigests ", "}}' "$img" 2>/dev/null)"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Assert and record the WE environment (WordPress 6.4.3, PHP 8.3, inside wp-env)
         run: |
           WPENV=tests-e2e/node_modules/.bin/wp-env
@@ -330,17 +335,6 @@ jobs:
         env:
           CRAWL_REQUIRE_SITEMAP: '1'
         run: node crawl.js
-      - name: Install pinned Classic Editor, verify provenance, apply settings (Configuration A, C21-021, C21-022)
-        run: tests-cli/classic-editor-config-a.sh install
-      - name: Classic Editor, Configuration A (C21-001 to C21-005, C21-011, C21-013, C21-015, C21-017, C21-019)
-        working-directory: tests-e2e
-        env:
-          CONFIG: A
-          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
-        run: node classic-editor.js
-      - name: Restore Configuration B (remove the test-only Classic Editor plugin)
-        if: always()
-        run: tests-cli/classic-editor-config-a.sh cleanup
       - name: Collect the WordPress debug log
         if: always()
         run: tests-e2e/node_modules/.bin/wp-env run cli cat wp-content/debug.log > "$RUNNER_TEMP/wp-debug.log" || true
@@ -351,7 +345,6 @@ jobs:
           path: |
             ${{ runner.temp }}/shots
             ${{ runner.temp }}/wp-debug.log
-            tests-e2e/wp-env/downloads/classic-editor-record.json
       - name: WE result summary
         if: always()
         run: |
@@ -362,6 +355,67 @@ jobs:
       - name: Stop wp-env
         if: always()
         run: tests-e2e/node_modules/.bin/wp-env destroy --force || true
+
+  we-classic-editor-a:
+    name: WE Configuration A, pinned Classic Editor (C21-021, C21-022; non-blocking until the pin is verified)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # While the pin in tests-e2e/wp-env/classic-editor.pin.json is 'unverified', strict mode refuses to run, so this job
+    # is red and must not block. scripts/check-pins.sh enforces that this line is removed in the same change that marks the pin verified.
+    continue-on-error: true
+    env:
+      CI: 'true'
+      BASE_URL: http://localhost:8888
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Install tooling
+        working-directory: tests-e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Start wp-env
+        run: |
+          tests-e2e/node_modules/.bin/wp-env start
+          tests-e2e/node_modules/.bin/wp-env run cli wp rewrite structure '/%postname%/' --hard
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/seed-e2e.php
+          curl -fsS "$BASE_URL/" >/dev/null
+      - name: Record container image digests (evidence of what ran; wp-env chooses these images, they are not pinned by this repository)
+        run: |
+          {
+            echo "### Container images used by wp-env"
+            for img in $(docker ps --format '{{.Image}}' | sort -u); do
+              echo "- \`$img\` -> $(docker image inspect --format '{{join .RepoDigests ", "}}' "$img" 2>/dev/null)"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Install the pinned Classic Editor and check C21-021 and C21-022
+        env:
+          CAPTURE: ${{ github.event.inputs.capture_classic_editor_hash }}
+        run: |
+          if [ "$CAPTURE" = "true" ]; then
+            tests-cli/classic-editor-config-a.sh install --capture
+          else
+            tests-cli/classic-editor-config-a.sh install
+          fi
+      - name: Classic Editor, Configuration A suite (C21-001 to C21-005, C21-011, C21-013, C21-015, C21-017, C21-019)
+        working-directory: tests-e2e
+        env:
+          CONFIG: A
+          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node classic-editor.js
+      - name: Restore Configuration B
+        if: always()
+        run: tests-cli/classic-editor-config-a.sh cleanup
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: classic-editor-record
+          path: tests-e2e/wp-env/downloads/classic-editor-record.json
+          if-no-files-found: ignore
 
   packages:
     name: Package build

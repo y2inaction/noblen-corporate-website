@@ -54,3 +54,12 @@ C26-006 cannot pass without an approved attestation and a hosted run, and C26-00
 ## 6. Interaction with the validator rules
 
 Register validator rule 16 requires criterion 26 to pass only with C26-006 valid for every run attempt. The register validator itself (rules 1 to 16) is also not yet built; it is a separate M2-D item and should be built in the same stage.
+
+## 7. Decision record
+
+The owner has agreed the boundary recommended above: **C26-003 to C26-006 stay assigned to M2-D and are not implemented in the current stage.** No acceptance and no waiver is granted for any of them. They remain `implemented: none` in the traceability register.
+
+Constraints recorded with that decision:
+- **No synthetic earlier release.** No tag, version or package may be created to stand in for an earlier production release, and no document may say that schema version 1 was released. It was not. Any fixture built later must be described as a fixture.
+- **Independent controls stay independent.** The reviewer and the pre-run attestation must be genuine and separate from the implementer. An attestation written or approved by the person who built the manifest does not satisfy C26-006.
+- **Prerequisites** (all outstanding): the registered source and target; an independent reviewer and an agreed approval route; an approved pre-run attestation created before the comparison run; and an authorised hosted run.

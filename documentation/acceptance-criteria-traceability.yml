@@ -6,6 +6,8 @@ summary:
   phpunit_total_tests: 146
   environment: "local: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, Chromium (Playwright 1.63.0), axe-core 4.10.2"
   accepted_count: 0
+  classic_editor_pin: "unverified (1.7.0 approved as the intended test dependency, verification pending)"
+  c26_003_to_c26_006: "deferred to M2-D by owner decision; not implemented; not waived; not accepted"
 criteria:
   - id: 1
     title: "Theme installs and activates"
@@ -248,11 +250,12 @@ criteria:
     evidence:
       - "PHPUnit: 2/2 tests named test_C21_* pass (all)"
       - "tests-e2e/classic-editor.js CONFIG=B (real browser; Classic Editor plugin not active; PHP built-in server, not wp-env): 13/13"
-      - "tests-e2e/classic-editor.js CONFIG=A and tests-cli/classic-editor-config-a.sh run LOCALLY against a STAND-IN package built from the official GitHub source (commit bb8d0cc), with official-source checks switched off. This validates the test logic only and is NOT valid evidence for C21-021 or acceptance: 13/13, plus sensitivity check (wrong default editor makes C21-019 fail)"
+      - "ENGINEERING EVIDENCE ONLY, NOT RELEASE EVIDENCE: tests-e2e/classic-editor.js CONFIG=A and tests-cli/classic-editor-config-a.sh were run LOCALLY against a STAND-IN package built from the official GitHub source (commit bb8d0cc) with the official-source checks switched off. They validate the test logic. They say nothing about the WordPress.org package: 13/13 with a sensitivity check"
     gaps:
-      - "Configuration A is implemented against the owner-approved, pinned Classic Editor 1.7.0 (tests-e2e/wp-env/classic-editor.pin.json) but has NOT been run against the real WordPress.org package: this environment cannot reach wordpress.org"
-      - "C21-021 (installed version and source match the verified pin) and C21-022 (settings record) are implemented in the install script and are not yet executed; the package SHA-256 is not yet pinned"
-      - "Both configurations have not been run in wp-env"
+      - "Classic Editor 1.7.0 is the owner-approved INTENDED test dependency, verification pending. The pin (tests-e2e/wp-env/classic-editor.pin.json) is UNVERIFIED: no WordPress.org package has been retrieved, its SHA-256 is blank on purpose, and the GitHub commit is not tied to the published package"
+      - "C21-021 (version and source match the VERIFIED pin) cannot be satisfied until the pin is verified by the documented procedure (documentation/CLASSIC-EDITOR-VERIFICATION-PROCEDURE.md). Not satisfied"
+      - "C21-022 (record of settings used) is implemented in the installer but has not been executed in any hosted run, so it is not satisfied"
+      - "Configuration A tests C21-001 to C21-005, 011, 013, 015, 017, 019 have not been run against the real package; Configuration B has been run locally, not in wp-env"
   - id: 22
     title: "Private approval status isolation"
     planned: true

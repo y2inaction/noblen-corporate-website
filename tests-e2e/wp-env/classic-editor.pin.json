@@ -6,7 +6,7 @@
   "source": "https://downloads.wordpress.org/plugin/classic-editor.1.7.0.zip",
   "official_checksums": "https://api.wordpress.org/plugin-checksums/classic-editor/1.7.0",
   "zip_sha256": "",
-  "zip_sha256_note": "Not known: this was prepared in an environment that cannot reach wordpress.org. The CI job records the downloaded package's SHA-256 in its summary. After the first verified hosted run, copy that value here; the job then fails on any difference.",
+  "zip_sha256_note": "Deliberately blank. It is obtained only from the official WordPress.org package in a hosted capture run, reviewed by a person, and committed by a reviewed change. No script ever writes this file.",
   "compatibility_basis": {
     "pinned_wordpress": "6.4.3",
     "plugin_requires_wordpress": "4.9",
@@ -29,5 +29,15 @@
     "install it and run wp plugin verify-checksums against WordPress.org's published per-file checksums for that exact version",
     "check the installed version equals the pinned version (C21-021)",
     "record the Classic Editor settings used for the run (C21-022)"
-  ]
+  ],
+  "verification": {
+    "state": "unverified",
+    "rule": "state may become 'verified' only through a reviewed change that fills every field below. While 'unverified', the strict install mode refuses to run, so C21-021 cannot be reported as satisfied.",
+    "zip_sha256_obtained_from": null,
+    "independent_download_sha256": null,
+    "source_parity_reviewed": null,
+    "reviewed_by": null,
+    "reviewed_utc": null,
+    "review_record": null
+  }
 }

@@ -4,7 +4,7 @@ Branch `feature/m2-implementation` (local, **not pushed**). Baseline `5739f75`. 
 
 Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Every execution is local; no hosted CI run exists.
 
-## Verified evidence (local environment)
+## Local test evidence
 
 Environment: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, PHPUnit 9.6.17, Chromium with Playwright 1.63.0, axe-core 4.10.2, PHPCS with WPCS 3.x and PHPCompatibilityWP 2.1.
 
@@ -44,7 +44,7 @@ The browser recipe was also run end to end on a freshly installed, freshly seede
 | C06-002 (company, industry, service through the UI) | Implemented for all five types (also C06-001 product). Passes locally in a real browser. Not yet run in wp-env |
 | C11-002 (partial data) | Implemented. Passes through a shim. Not yet run in wp-env |
 | C12-001 (full-site crawl) | Implemented. Passes locally; sitemap seed needs Apache, so it is required only in the wp-env job |
-| C21 Configuration A (Classic Editor plugin) | Dependency **approved by the owner** and pinned to the official WordPress.org release 1.7.0 ([DEPENDENCIES.md](DEPENDENCIES.md)). Configuration A tests, the install and provenance script (C21-021, C21-022) and CI wiring are implemented. **Not yet verified against the real WordPress.org package**, which this environment cannot reach. Test logic validated locally with a stand-in package (13 of 13, plus a sensitivity check); that is not evidence. Configuration B still passes (13 of 13) |
+| C21 Configuration A (Classic Editor plugin) | Classic Editor 1.7.0 is approved as the **intended test dependency, verification pending** ([DEPENDENCIES.md](DEPENDENCIES.md)). The Configuration A tests and the installer are implemented, and the installer refuses to run in strict mode until the pin is verified. **The pin is unverified: no WordPress.org package, no SHA-256, and no tie between the GitHub commit and the published package.** C21-021 and C21-022 are unverified and not satisfied. The stand-in tests (13 of 13 plus a sensitivity check) are engineering evidence about the test logic only, not release evidence. Configuration B still passes (13 of 13) |
 | C26-001 (content hashing) | Implemented with a sensitivity check; C26-001 and C26-002 pass through a shim. C26-003 to C26-006 are not implemented |
 
 ## Test-harness finding

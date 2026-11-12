@@ -29,11 +29,13 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | Coverage field | Value |
 |----------------|-------|
 | Planned | True |
-| Implemented | False |
-| Executed | False |
+| Implemented | Partly: see [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml) |
+| Executed | Partly, **local only**; no hosted run exists |
 | Accepted | False |
 
-It is a planning reference only. It does not authorise tests, workflows, dependency installation or implementation.
+It is a planning reference only. It did not itself authorise tests, workflows, dependency installation or implementation; those were authorised separately and are recorded in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md).
+
+**Dependency decision:** Classic Editor 1.7.0 is approved as the intended **test** dependency for Configuration A of criterion 21, with verification pending ([DEPENDENCIES.md](DEPENDENCIES.md)). C26-003 to C26-006 are deferred to M2-D, not waived.
 
 ## M1: what is completed
 
