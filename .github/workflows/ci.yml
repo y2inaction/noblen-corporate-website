@@ -101,8 +101,8 @@ jobs:
           name: junit-php${{ matrix.php }}
           path: ${{ runner.temp }}/junit-${{ matrix.php }}.xml
 
-  wpcli:
-    name: WP-CLI integration and package install (PHP ${{ matrix.php }})
+  host-wpcli:
+    name: Host WP-CLI, package install and uninstall retention (PK, PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -146,7 +146,7 @@ jobs:
         run: |
           sudo apt-get install -y -qq mysql-client >/dev/null
           for d in noblen_cli noblen_pkg; do mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE $d CHARACTER SET utf8mb4"; done
-      - name: WP-CLI integration (C01, C02, C04, C24, C26)
+      - name: Host WP-CLI integration incl. uninstall retention and opt-in removal (C26)
         env:
           NOBLEN_DB_NAME: noblen_cli
           WP: ${{ github.workspace }}/vendor/bin/wp
@@ -160,9 +160,11 @@ jobs:
           WP_SRC: ${{ runner.temp }}/wp
         run: tests-cli/package-install.sh
 
-  browser:
-    name: Browser, admin workflow and accessibility
+  parity-browser:
+    name: Non-WE parity, browser suites on PHP built-in server (informational)
     runs-on: ubuntu-latest
+    # The authoritative browser run is the wp-env job. This one exists to tell a wp-env/Docker failure apart from a test failure.
+    continue-on-error: true
     services:
       db:
         image: mysql:8.4
@@ -224,6 +226,63 @@ jobs:
         with:
           name: screenshots
           path: ${{ runner.temp }}/shots
+
+  we:
+    name: WE, wp-env (WordPress 6.4.3, PHP 8.3), WP-CLI, browser, admin, accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CI: 'true'
+      BASE_URL: http://localhost:8888
+      WE_ROOT: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Install tooling (wp-env 12.1.0, Playwright, axe-core pinned in the lockfile)
+        working-directory: tests-e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Start wp-env
+        run: |
+          tests-e2e/node_modules/.bin/wp-env start
+          tests-e2e/node_modules/.bin/wp-env run cli wp core version
+      - name: Prepare the site (permalinks, seed fixtures)
+        run: |
+          WPENV=tests-e2e/node_modules/.bin/wp-env
+          $WPENV run cli wp rewrite structure '/%postname%/' --hard
+          $WPENV run cli wp eval-file wp-content/noblen-e2e/seed-e2e.php
+          curl -fsS "$BASE_URL/" >/dev/null
+      - name: WE WP-CLI and HTTP integration (C01, C02, C03, C04, C24, C26)
+        run: tests-cli/we-integration.sh
+      - name: Front-end smoke at 360, 768, 1280 px (C13, C18-001, C12-001)
+        working-directory: tests-e2e
+        run: mkdir -p "$RUNNER_TEMP/shots" && node smoke.js "$RUNNER_TEMP/shots"
+      - name: WordPress admin workflow in a real browser (C06, C09, C10, C24)
+        working-directory: tests-e2e
+        env:
+          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node admin.js
+      - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
+        working-directory: tests-e2e
+        run: node a11y.js
+      - name: Collect the WordPress debug log
+        if: always()
+        run: tests-e2e/node_modules/.bin/wp-env run cli cat wp-content/debug.log > "$RUNNER_TEMP/wp-debug.log" || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: we-artifacts
+          path: |
+            ${{ runner.temp }}/shots
+            ${{ runner.temp }}/wp-debug.log
+      - name: Stop wp-env
+        if: always()
+        run: tests-e2e/node_modules/.bin/wp-env destroy --force || true
 
   packages:
     name: Package build

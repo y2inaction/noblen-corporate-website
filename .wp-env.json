@@ -1,0 +1,24 @@
+{
+  "core": "WordPress/WordPress#6.4.3",
+  "phpVersion": "8.3",
+  "port": 8888,
+  "plugins": [
+    "./wordpress-plugin/noblen-corporate-core"
+  ],
+  "themes": [
+    "./wordpress-theme/noblen-corporate"
+  ],
+  "mappings": {
+    "wp-content/mu-plugins/noblen-ci-config.php": "./tests-e2e/wp-env/noblen-ci-config.php",
+    "wp-content/noblen-e2e/seed-e2e.php": "./tests-e2e/seed-e2e.php",
+    "wp-content/noblen-e2e/probes": "./tests-e2e/wp-env/probes"
+  },
+  "config": {
+    "WP_DEBUG": true,
+    "WP_DEBUG_DISPLAY": false,
+    "WP_DEBUG_LOG": true,
+    "DISABLE_WP_CRON": true,
+    "AUTOMATIC_UPDATER_DISABLED": true
+  },
+  "testsEnvironment": false
+}

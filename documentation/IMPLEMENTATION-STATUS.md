@@ -26,10 +26,12 @@ The browser recipe was also run end to end on a freshly installed, freshly seede
 ## CI workflow review (not yet run on GitHub)
 
 - Every action is pinned to a verified full commit SHA with a version comment (checkout v4.4.0, setup-node v4.4.0, upload-artifact v4.6.2, setup-php 2.40.0). Each SHA was fetched from its official repository and confirmed to be a commit. Workflow permissions are `contents: read`; checkout does not persist credentials; there are no secrets.
-- Jobs: static analysis and compatibility (PHP 8.3 and 8.4), PHP 8.5 informational (`continue-on-error`; it must never be made a required status check in repository settings), PHPUnit (PHP 8.3 and 8.4, MySQL 8.4, WordPress 6.4.3 pinned and SHA-1 verified), WP-CLI integration and clean package install, browser/admin/accessibility, and package build.
-- Deviation from the frozen plan: the plan names `wp-env` (Docker) as the "WE" environment. The workflow uses a disposable WordPress with PHP's built-in server and real WP-CLI instead. It is functionally equivalent for these tests but is a different environment from the one specified.
+- Jobs: static analysis and compatibility (PHP 8.3 and 8.4), PHP 8.5 informational (`continue-on-error`; it must never be made a required status check in repository settings), PHPUnit (PHP 8.3 and 8.4, MySQL 8.4, WordPress 6.4.3 pinned and SHA-1 verified), WE on wp-env, host WP-CLI with package install and uninstall retention, an informational non-WE browser parity job, and package build.
+- WE environment: the plan names `wp-env`. The `we` job now uses wp-env 12.1.0 with WordPress 6.4.3 and PHP 8.3, and runs the WP-CLI, browser, admin and accessibility suites inside it. **It has not been run**: this sandbox cannot build wp-env's Docker images. The previous PHP built-in-server jobs are kept as informational parity checks. See [CI-WE-ENVIRONMENT-NOTES.md](CI-WE-ENVIRONMENT-NOTES.md), which also holds a contingency deviation proposal, not accepted.
 - Not implemented: the CI validator for the traceability register (rules 1-16), the E8, E9 and E11 evidence artefacts, and the C26-006 run-attempt evidence binding. The register is generated and valid YAML but is not yet checked by CI.
 - Bugs found and fixed by reviewing the wiring before any push: the browser job's setup script targeted the wrong database, the WP-CLI job never installed the theme, and the WordPress download had no integrity check.
+
+- Package ZIPs are now reproducible: file times are fixed to the commit time and entries are sorted, so the same source gives the same checksum (verified by rebuilding after touching a file).
 
 ## Defects found and fixed during verification
 

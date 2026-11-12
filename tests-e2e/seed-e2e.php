@@ -16,8 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Safety: this creates accounts with publicly known passwords and fixture records that are PUBLISHED.
 // It refuses to run unless explicitly allowed AND the site is on a loopback address.
 $noblen_seed_host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
-if ( '1' !== getenv( 'NOBLEN_ALLOW_E2E_SEED' ) || ! in_array( $noblen_seed_host, array( '127.0.0.1', 'localhost' ), true ) ) {
-	fwrite( STDERR, "Refusing to seed: set NOBLEN_ALLOW_E2E_SEED=1 and use a loopback site URL. Never run this on a real site.\n" );
+$noblen_seed_allowed = '1' === getenv( 'NOBLEN_ALLOW_E2E_SEED' ) || ( defined( 'NOBLEN_E2E_SITE' ) && NOBLEN_E2E_SITE );
+if ( ! $noblen_seed_allowed || ! in_array( $noblen_seed_host, array( '127.0.0.1', 'localhost' ), true ) ) {
+	fwrite( STDERR, "Refusing to seed: set NOBLEN_ALLOW_E2E_SEED=1 (or run on the wp-env test site) and use a loopback site URL. Never run this on a real site.\n" );
 	exit( 1 );
 }
 
