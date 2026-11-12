@@ -14,7 +14,7 @@ import argparse, collections, datetime, json, re, sys
 import xml.etree.ElementTree as ET
 
 ap = argparse.ArgumentParser()
-ap.add_argument('junit'); ap.add_argument('--cli'); ap.add_argument('--pkg'); ap.add_argument('--admin'); ap.add_argument('--a11y'); ap.add_argument('--smoke')
+ap.add_argument('junit'); ap.add_argument('--cli'); ap.add_argument('--pkg'); ap.add_argument('--admin'); ap.add_argument('--a11y'); ap.add_argument('--smoke'); ap.add_argument('--content'); ap.add_argument('--classic'); ap.add_argument('--crawl'); ap.add_argument('--partial'); ap.add_argument('--we')
 ap.add_argument('--out', default='documentation/acceptance-criteria-traceability.yml')
 a = ap.parse_args()
 
@@ -34,6 +34,12 @@ ADM = f'tests-e2e/admin.js (real browser, WordPress admin): {a.admin}'
 A11 = f'tests-e2e/a11y.js (axe-core, token contrast, keyboard): {a.a11y}'
 SMK = f'tests-e2e/smoke.js (360/768/1280 px, console, third-party requests, overflow, placeholder tokens): {a.smoke}'
 
+CNT = f'tests-e2e/content-types.js (real browser; project, product, company, industry, service created and edited through the admin UI; PHP built-in server, not wp-env): {a.content}'
+CLS = f'tests-e2e/classic-editor.js CONFIG=B (real browser; Classic Editor plugin not active; PHP built-in server, not wp-env): {a.classic}'
+CRL = f'tests-e2e/crawl.js (real browser; same-site crawl, placeholder tokens in text, title and meta description; PHP built-in server, so the core sitemap was NOT exercised): {a.crawl}'
+PRT = f'tests-cli/partial-data.sh (empty site, then companies, industries, projects added one at a time; run through a SHIM that routes wp-env commands to local WP-CLI, not wp-env itself): {a.partial}'
+WES = f'tests-cli/we-integration.sh incl. C26 logical-dataset hashing (SHIM, not wp-env itself): {a.we}'
+
 # key: (title, implemented, executed, manual_pending, extra evidence, gaps)
 C = {
  1: ('Theme installs and activates', 'automated_complete', 'local_full', 'C01-M01 dashboard walk-through', [CLI, PKG, SMK], ['Not run on the CI matrix (MySQL 8.4, PHP 8.4)']),
@@ -41,13 +47,13 @@ C = {
  3: ('Both work together', 'partial', 'partial', 'C03-M01', [SMK, CLI + ' (plugin inactive renders)'], ['C03-001 accessor-to-theme is exercised only through the browser fixtures, not a dedicated test']),
  4: ('Theme deactivation does not delete structured content', 'partial', 'partial', None, [CLI], ['C04-001 compares record counts only; C04-002 (content still viewable after switch) not tested']),
  5: ('All five custom post types work', 'automated_complete', 'local_full', None, [], []),
- 6: ('Dashboard content can be created and edited', 'partial', 'partial', 'C06-M01 admin walk-through', [ADM], ['Browser script covers the project type only; company, industry, service, product not driven through the UI']),
+ 6: ('Dashboard content can be created and edited', 'automated_complete', 'partial', 'C06-M01 admin walk-through', [ADM, CNT], ['C06-001 and C06-002 are implemented for all five types and pass locally in a real browser, but have not run in the WE environment (wp-env), which the plan requires']),
  7: ('Content relationships work', 'automated_complete', 'local_full', None, [], []),
  8: ('Private clearance data cannot be retrieved publicly', 'partial', 'partial', None, [], ['In-process probes only (accessor, query, meta, search, REST, routes, export). Rendered HTML, feeds and sitemap bodies are not probed over HTTP with sentinels']),
  9: ('Unauthorised users cannot approve publication', 'partial', 'partial', None, [ADM], ['Forged-request test covers one handler; no full per-role HTTP matrix']),
  10: ('Incomplete clearance blocks publication server-side', 'automated_complete', 'local_full', 'C10-M01', [CLI, ADM], ['C10 WP-CLI path now real (see C24); manual walk-through pending']),
- 11: ('Empty homepage sections stay hidden', 'partial', 'partial', None, [PKG + ' (empty site shows no section headings)'], ['Partial-data render (some sections filled) not asserted separately']),
- 12: ('No unfinished placeholders appear publicly', 'partial', 'partial', 'C12-M01', [SMK], ['Token scan covers the fixture pages only']),
+ 11: ('Empty homepage sections stay hidden', 'automated_complete', 'partial', None, [PKG + ' (empty site shows no section headings)', PRT], ['C11-001 and C11-002 are implemented, but the available execution used a shim, not wp-env, which the plan requires']),
+ 12: ('No unfinished placeholders appear publicly', 'automated_complete', 'partial', 'C12-M01', [SMK, CRL], ['C12-001 is implemented; the core sitemap seed needs Apache (wp-env) and has not been exercised. WordPress default sample content (Hello world, Sample Page) is reported as a warning and must be deleted before launch']),
  13: ('Layout works at 360, 768 and 1280 px', 'partial', 'partial', 'C13-M01', [SMK], ['No archived screenshot evidence in the repository; manual review pending']),
  14: ('Keyboard navigation works', 'partial', 'partial', 'C14-M01 (the acceptance test)', [A11], ['Automated support only; manual keyboard pass is the acceptance test']),
  15: ('WCAG AA contrast met', 'partial', 'partial', 'C15-M01', [A11], ['Automated axe covers 11 pages at two widths; manual review pending']),
@@ -56,12 +62,12 @@ C = {
  18: ('No unnecessary third-party requests', 'automated_complete', 'local_full', None, [SMK, 'scripts/check-no-third-party.sh: PASS'], []),
  19: ('Both ZIPs install on a clean WordPress', 'automated_complete', 'local_full', 'C19-M01', [PKG], ['Clean site is a copy of the local WordPress, not the CI-fetched release']),
  20: ('Installation and recovery instructions documented', 'partial', 'none', 'C20-M01, C20-M02 (rehearsal)', ['documentation/INSTALLATION.md', 'documentation/RECOVERY.md'], ['Link check not run on the new documents; recovery rehearsal not done']),
- 21: ('Classic Editor compatibility', 'partial', 'partial', None, [ADM], ['Configuration A (Classic Editor plugin active) not run: the plugin is not an approved dependency']),
+ 21: ('Classic Editor compatibility', 'partial', 'partial', 'C21-M01 manual editor check', [CLS], ['Configuration B (Classic Editor plugin inactive) is implemented and passes: C21-006 to C21-010, C21-012, C21-014, C21-016, C21-018, C21-020', 'Configuration A needs the Classic Editor plugin, which is NOT an approved dependency: C21-001 to C21-005, C21-011, C21-013, C21-015, C21-017, C21-019 are not run', 'C21-021 (version and source match a verified pin) cannot be met until the owner approves the dependency and a version is pinned; C21-022 (settings record) is not produced', 'Not yet run in wp-env']),
  22: ('Private approval status isolation', 'partial', 'partial', None, [], ['In-process only; HTML and feed bodies not sentinel-probed over HTTP; editor and anonymous reads covered']),
  23: ('Snapshot invalidation after editing public content', 'partial', 'partial', None, [], ['Every public scalar field is covered via the registry; relationship, term, thumbnail, gallery membership and order, alt, caption, title covered once each; media file replacement covered by C29; video URL covered as a field; presentation flag covered as a field']),
  24: ('Failed publication attempts through alternative write paths', 'automated_complete', 'local_full', None, [CLI + ' (real WP-CLI write paths)'], ['REST and XML-RPC paths are tested in-process with the endpoints enabled, not over HTTP']),
  25: ('Database migration and upgrade integrity', 'automated_complete', 'partial', 'C25-M01', [], ['Upgrade tested from a simulated v1 (index dropped), the only earlier schema; MySQL 8.4 not run locally']),
- 26: ('Preservation through theme switching and plugin upgrades', 'partial', 'partial', None, [CLI], ['Counts compared, not content hashes; plugin upgrade from a prior release not testable (no prior release)']),
+ 26: ('Preservation through theme switching and plugin upgrades', 'partial', 'partial', None, [CLI, WES], ['C26-001 and C26-002 now compare content hashes, metadata, relationship ID sets, clearance, approvals, media rights, settings and the existing audit entries, with a sensitivity check; executed through a shim, not wp-env', 'C26-003 to C26-006 (plugin upgrade from a registered source release, transformation manifest, attestation and runtime binding) are NOT implemented: no earlier release exists to register, and these belong to M2-D']),
  27: ('Audit trail behaviour', 'automated_complete', 'local_full', 'C27-M01', [], ['C27-001 is a static scan of includes/']),
  28: ('Related-record dependency mechanics', 'partial', 'partial', None, [], ['Loop-prevention, republish-after-lapse and snapshot-excludes-related-content not each asserted']),
  29: ('Media rights confirmation and invalidation', 'automated_complete', 'local_full', None, [], []),

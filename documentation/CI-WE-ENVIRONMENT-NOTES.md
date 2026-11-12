@@ -40,7 +40,9 @@ GitHub-hosted runners have unrestricted outbound access, so wp-env is expected t
 - Apache rewrite rules and permalinks in the wp-env container (`rewrite --hard`) are untested.
 - The Docker Hub rate limit seen here could affect a runner on a shared address, although less likely.
 - wp-env uses MariaDB, not MySQL 8.4. Plugin behaviour on MySQL 8.4 is covered by the PU job only.
-- WE tests that the plan lists but are still not written: C06-002 (company, industry and service through the UI), C11-002 (partial data), a full-site crawl for C12-001, C21 configuration A (needs the Classic Editor plugin, which is not an approved dependency), and content-hash comparison for C26-001.
+- The WE job now also runs: all five content types through the admin UI (C06), partial data on a pristine site before seeding (C11), Classic Editor Configuration B (C21), and a site crawl including the core sitemap (C12-001). Content hashing for C26-001 and C26-002 is in the WE integration script. All of these were run locally only (real browser against PHP's built-in server, or a shim for the wp-env commands).
+- Still not covered: C21 Configuration A (needs the Classic Editor plugin, which is not an approved dependency, and a verified version pin), and C26-003 to C26-006 (M2-D).
+- Reviewed against wp-env 12.1.0 source: `wp-env run` adds `-T` without a terminal, passes arguments as an array (quoting survives), prints its notices on stderr, exits non-zero on failure, activates all plugins and the first theme, and the core tag `6.4.3` exists upstream. The shim did not model container start-up, Apache rewrite behaviour, the file-mount of the seed script, or Docker Hub rate limiting.
 
 ## 6. Contingency proposal (to use only if wp-env proves infeasible on hosted runners)
 

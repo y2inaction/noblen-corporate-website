@@ -11,6 +11,10 @@ Environment: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, PHPUnit 9
 | Suite | Result |
 |-------|--------|
 | PHPUnit (real WordPress, one transaction per test, leak guard) | 146 tests, all pass |
+| `tests-e2e/content-types.js` (real browser: all five types created and edited through the admin UI) | 40 of 40 |
+| `tests-e2e/classic-editor.js` Configuration B (real browser) | 13 of 13 |
+| `tests-e2e/crawl.js` (real browser, placeholder-token crawl) | pass, 11 pages (sitemap not exercised) |
+| `tests-cli/partial-data.sh` and `tests-cli/we-integration.sh` (**shim**, not wp-env) | 13 of 13 and 25 of 25 |
 | PHPCS WordPress-Core/Extra + PHPCompatibilityWP | 0 errors, 0 warnings |
 | PHPCompatibility static check, PHP 8.3-, 8.4-, 8.5- | clean (static only; PHP 8.4 and 8.5 were not executed) |
 | `tests-cli/cli-integration.sh`, real WP-CLI (activation, write paths, deactivate, theme switch, uninstall retention and opt-in removal, error log canary) | 20 of 20 |
@@ -33,6 +37,16 @@ The browser recipe was also run end to end on a freshly installed, freshly seede
 
 - Package ZIPs are now reproducible: file times are fixed to the commit time and entries are sorted, so the same source gives the same checksum (verified by rebuilding after touching a file).
 
+## Criteria that were reported as gaps
+
+| Criterion | State now |
+|-----------|-----------|
+| C06-002 (company, industry, service through the UI) | Implemented for all five types (also C06-001 product). Passes locally in a real browser. Not yet run in wp-env |
+| C11-002 (partial data) | Implemented. Passes through a shim. Not yet run in wp-env |
+| C12-001 (full-site crawl) | Implemented. Passes locally; sitemap seed needs Apache, so it is required only in the wp-env job |
+| C21 Configuration A (Classic Editor plugin) | **Blocked: needs owner approval of a new dependency and a verified version pin.** Configuration B implemented and passes |
+| C26-001 (content hashing) | Implemented with a sensitivity check; C26-001 and C26-002 pass through a shim. C26-003 to C26-006 are not implemented |
+
 ## Defects found and fixed during verification
 
 1. Clearance and media-rights forms were nested inside the post form (invalid HTML), so the browser dropped them. Now saved with the record, nonce and capability checked. Found only by the real browser test.
@@ -50,7 +64,8 @@ The browser recipe was also run end to end on a freshly installed, freshly seede
 - Contact and partnership forms are deferred to M7 by the approved plan. Only a mailto call to action exists.
 - `get_posts()` and any query with `suppress_filters` bypass the read-time filter. Theme code must use the accessor. This is documented, not a defect in a listed interface.
 - No persistent object-cache drop-in test (criterion 31). Core object cache only.
-- Configuration A of criterion 21 (Classic Editor plugin installed) was not run: it is not an approved dependency.
+- Configuration A of criterion 21 (Classic Editor plugin installed) is not run: the plugin is not an approved dependency and its version cannot be verified from this environment.
+- C26-003 to C26-006 (plugin upgrade, transformation manifest, attestation, runtime binding) are not implemented. They need an earlier release to register and belong to M2-D.
 - Not executed anywhere: PHP 8.4 or 8.5, MySQL 8.4, the CI workflow itself.
 - The WordPress download step cannot be exercised here (wordpress.org returns 403). Its checksum logic was tested against a local server for both a matching and a tampered checksum.
 - Hazard: `tests-cli/cli-integration.sh` runs `wp plugin uninstall`, which deletes the plugin directory. It copies the plugin into the target WordPress and refuses to run against a symlink, but running it against a development site replaces a symlinked plugin folder.

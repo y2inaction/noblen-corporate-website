@@ -70,14 +70,15 @@ criteria:
   - id: 6
     title: "Dashboard content can be created and edited"
     planned: true
-    implemented: partial
+    implemented: automated_complete
     executed: partial  # local only
     accepted: false
     manual_records_pending: "C06-M01 admin walk-through"
     evidence:
       - "tests-e2e/admin.js (real browser, WordPress admin): 21/21"
+      - "tests-e2e/content-types.js (real browser; project, product, company, industry, service created and edited through the admin UI; PHP built-in server, not wp-env): 40/40"
     gaps:
-      - "Browser script covers the project type only; company, industry, service, product not driven through the UI"
+      - "C06-001 and C06-002 are implemented for all five types and pass locally in a real browser, but have not run in the WE environment (wp-env), which the plan requires"
   - id: 7
     title: "Content relationships work"
     planned: true
@@ -126,25 +127,27 @@ criteria:
   - id: 11
     title: "Empty homepage sections stay hidden"
     planned: true
-    implemented: partial
+    implemented: automated_complete
     executed: partial  # local only
     accepted: false
     manual_records_pending: none
     evidence:
       - "tests-cli/package-install.sh: 12/12 (empty site shows no section headings)"
+      - "tests-cli/partial-data.sh (empty site, then companies, industries, projects added one at a time; run through a SHIM that routes wp-env commands to local WP-CLI, not wp-env itself): 13/13"
     gaps:
-      - "Partial-data render (some sections filled) not asserted separately"
+      - "C11-001 and C11-002 are implemented, but the available execution used a shim, not wp-env, which the plan requires"
   - id: 12
     title: "No unfinished placeholders appear publicly"
     planned: true
-    implemented: partial
+    implemented: automated_complete
     executed: partial  # local only
     accepted: false
     manual_records_pending: "C12-M01"
     evidence:
       - "tests-e2e/smoke.js (360/768/1280 px, console, third-party requests, overflow, placeholder tokens): PASS"
+      - "tests-e2e/crawl.js (real browser; same-site crawl, placeholder tokens in text, title and meta description; PHP built-in server, so the core sitemap was NOT exercised): PASS, 11 pages locally (14 on the CI-ordered site)"
     gaps:
-      - "Token scan covers the fixture pages only"
+      - "C12-001 is implemented; the core sitemap seed needs Apache (wp-env) and has not been exercised. WordPress default sample content (Hello world, Sample Page) is reported as a warning and must be deleted before launch"
   - id: 13
     title: "Layout works at 360, 768 and 1280 px"
     planned: true
@@ -241,12 +244,15 @@ criteria:
     implemented: partial
     executed: partial  # local only
     accepted: false
-    manual_records_pending: none
+    manual_records_pending: "C21-M01 manual editor check"
     evidence:
       - "PHPUnit: 2/2 tests named test_C21_* pass (all)"
-      - "tests-e2e/admin.js (real browser, WordPress admin): 21/21"
+      - "tests-e2e/classic-editor.js CONFIG=B (real browser; Classic Editor plugin not active; PHP built-in server, not wp-env): 13/13"
     gaps:
-      - "Configuration A (Classic Editor plugin active) not run: the plugin is not an approved dependency"
+      - "Configuration B (Classic Editor plugin inactive) is implemented and passes: C21-006 to C21-010, C21-012, C21-014, C21-016, C21-018, C21-020"
+      - "Configuration A needs the Classic Editor plugin, which is NOT an approved dependency: C21-001 to C21-005, C21-011, C21-013, C21-015, C21-017, C21-019 are not run"
+      - "C21-021 (version and source match a verified pin) cannot be met until the owner approves the dependency and a version is pinned; C21-022 (settings record) is not produced"
+      - "Not yet run in wp-env"
   - id: 22
     title: "Private approval status isolation"
     planned: true
@@ -302,8 +308,10 @@ criteria:
     evidence:
       - "PHPUnit: 1/1 tests named test_C26_* pass (all)"
       - "tests-cli/cli-integration.sh (real WP-CLI 2.12.0): 20/20"
+      - "tests-cli/we-integration.sh incl. C26 logical-dataset hashing (SHIM, not wp-env itself): 25/25"
     gaps:
-      - "Counts compared, not content hashes; plugin upgrade from a prior release not testable (no prior release)"
+      - "C26-001 and C26-002 now compare content hashes, metadata, relationship ID sets, clearance, approvals, media rights, settings and the existing audit entries, with a sensitivity check; executed through a shim, not wp-env"
+      - "C26-003 to C26-006 (plugin upgrade from a registered source release, transformation manifest, attestation and runtime binding) are NOT implemented: no earlier release exists to register, and these belong to M2-D"
   - id: 27
     title: "Audit trail behaviour"
     planned: true

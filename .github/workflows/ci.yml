@@ -218,6 +218,20 @@ jobs:
         env:
           CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
         run: node admin.js
+      - name: All five content types through the admin UI (C06-001, C06-002)
+        working-directory: tests-e2e
+        env:
+          CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
+        run: node content-types.js
+      - name: Classic Editor, Configuration B (C21)
+        working-directory: tests-e2e
+        env:
+          CONFIG: B
+          CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
+        run: node classic-editor.js
+      - name: Site crawl for placeholder tokens (C12-001; the built-in server cannot serve sitemaps)
+        working-directory: tests-e2e
+        run: node crawl.js
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
@@ -251,11 +265,30 @@ jobs:
         run: |
           tests-e2e/node_modules/.bin/wp-env start
           tests-e2e/node_modules/.bin/wp-env run cli wp core version
-      - name: Prepare the site (permalinks, seed fixtures)
+      - name: Assert and record the WE environment (WordPress 6.4.3, PHP 8.3, inside wp-env)
         run: |
           WPENV=tests-e2e/node_modules/.bin/wp-env
-          $WPENV run cli wp rewrite structure '/%postname%/' --hard
-          $WPENV run cli wp eval-file wp-content/noblen-e2e/seed-e2e.php
+          wpv=$($WPENV run cli wp core version 2>/dev/null | tr -d '\r' | tail -1)
+          phpv=$($WPENV run cli wp eval 'echo PHP_VERSION;' 2>/dev/null | tr -d '\r' | tail -1)
+          dbv=$($WPENV run cli wp eval 'global $wpdb; echo $wpdb->db_version();' 2>/dev/null | tr -d '\r' | tail -1)
+          envv=$(node -p "require('./tests-e2e/node_modules/@wordpress/env/package.json').version")
+          {
+            echo "### WE environment (wp-env)"
+            echo "- wp-env: $envv"
+            echo "- WordPress: $wpv"
+            echo "- PHP: $phpv"
+            echo "- Database server: $dbv (wp-env uses MariaDB; MySQL 8.4 is covered by the PHPUnit job)"
+            echo "- Site: $BASE_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$wpv" = "6.4.3" ] || { echo "::error::WordPress is '$wpv', expected 6.4.3"; exit 1; }
+          case "$phpv" in 8.3.*) ;; *) echo "::error::PHP is '$phpv', expected 8.3.x"; exit 1;; esac
+      - name: Set permalinks
+        run: tests-e2e/node_modules/.bin/wp-env run cli wp rewrite structure '/%postname%/' --hard
+      - name: WE empty and partial data on a pristine site (C11-001, C11-002)
+        run: tests-cli/partial-data.sh
+      - name: Seed fixtures
+        run: |
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/seed-e2e.php
           curl -fsS "$BASE_URL/" >/dev/null
       - name: WE WP-CLI and HTTP integration (C01, C02, C03, C04, C24, C26)
         run: tests-cli/we-integration.sh
@@ -267,9 +300,25 @@ jobs:
         env:
           CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
         run: node admin.js
+      - name: All five content types through the admin UI (C06-001, C06-002)
+        working-directory: tests-e2e
+        env:
+          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node content-types.js
+      - name: Classic Editor, Configuration B (C21-006 to C21-010, C21-012, C21-014, C21-016, C21-018, C21-020)
+        working-directory: tests-e2e
+        env:
+          CONFIG: B
+          CLEAR_LOCKS_CMD: ${{ github.workspace }}/tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node classic-editor.js
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
+      - name: Site crawl including the core sitemap (C12-001)
+        working-directory: tests-e2e
+        env:
+          CRAWL_REQUIRE_SITEMAP: '1'
+        run: node crawl.js
       - name: Collect the WordPress debug log
         if: always()
         run: tests-e2e/node_modules/.bin/wp-env run cli cat wp-content/debug.log > "$RUNNER_TEMP/wp-debug.log" || true
@@ -280,6 +329,13 @@ jobs:
           path: |
             ${{ runner.temp }}/shots
             ${{ runner.temp }}/wp-debug.log
+      - name: WE result summary
+        if: always()
+        run: |
+          {
+            echo "### WE job result: ${{ job.status }}"
+            echo "Only a green WE job counts as WE evidence. A skipped, cancelled or failed job is not."
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Stop wp-env
         if: always()
         run: tests-e2e/node_modules/.bin/wp-env destroy --force || true
