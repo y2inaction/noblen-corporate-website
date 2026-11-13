@@ -28,6 +28,7 @@ final class Admin {
 			return;
 		}
 		add_action( 'add_meta_boxes', array( __CLASS__, 'meta_boxes' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_fields' ), 10, 2 );
 		add_action( 'admin_post_noblen_workflow', array( __CLASS__, 'handle_workflow' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_clearance' ), 20, 2 );
@@ -86,7 +87,7 @@ final class Admin {
 					echo '<br><span class="description">' . ( 'required' === $def['class'] ? 'Required for publication.' : 'Optional. A missing or unavailable item never blocks publication.' ) . '</span>';
 					break;
 				case 'gallery':
-					echo '<input type="text" class="regular-text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( implode( ',', (array) $val ) ) . '"><br><span class="description">Comma-separated media library IDs. Each image needs a private rights confirmation before approval.</span>';
+					self::gallery_picker( $id, $name, (array) $val );
 					break;
 				default:
 					echo '<input type="text" class="large-text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( (string) $val ) . '">';
@@ -97,6 +98,44 @@ final class Admin {
 			}
 			echo '</div>';
 		}
+	}
+
+	/**
+	 * Gallery field: the ID list stays editable as text, with a media-library picker added by script.
+	 *
+	 * @param string $id       Input ID.
+	 * @param string $name     Input name.
+	 * @param int[]  $selected Selected attachment IDs.
+	 */
+	private static function gallery_picker( string $id, string $name, array $selected ): void {
+		echo '<div class="noblen-gallery" data-input="' . esc_attr( $id ) . '"><ul class="noblen-gallery__list">';
+		foreach ( array_filter( array_map( 'intval', $selected ) ) as $att ) {
+			if ( 'attachment' !== get_post_type( $att ) ) {
+				continue;
+			}
+			echo '<li data-id="' . esc_attr( (string) $att ) . '">' . wp_get_attachment_image( $att, array( 80, 80 ), true, array( 'alt' => (string) get_post_meta( $att, '_wp_attachment_image_alt', true ) ) );
+			echo '<span class="noblen-gallery__tools"><button type="button" class="button-link noblen-gallery__up" aria-label="' . esc_attr( 'Move image ' . $att . ' earlier' ) . '">&uarr;</button> <button type="button" class="button-link noblen-gallery__down" aria-label="' . esc_attr( 'Move image ' . $att . ' later' ) . '">&darr;</button> <button type="button" class="button-link noblen-gallery__remove" aria-label="' . esc_attr( 'Remove image ' . $att ) . '">Remove</button></span></li>';
+		}
+		echo '</ul><button type="button" class="button noblen-gallery__add" hidden>Choose images</button></div>';
+		echo '<input type="text" class="regular-text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( implode( ',', $selected ) ) . '"><br><span class="description">Choose images from the media library, or type comma-separated media IDs. Each image needs a private rights confirmation before approval.</span>';
+	}
+
+	/**
+	 * Load the media modal and the picker script on the editor screens of our content types.
+	 *
+	 * @param string $hook Admin page hook.
+	 */
+	public static function enqueue_assets( string $hook ): void {
+		if ( ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+			return;
+		}
+		$screen = get_current_screen();
+		if ( ! $screen || ! Types::is_ours( (string) $screen->post_type ) ) {
+			return;
+		}
+		wp_enqueue_media();
+		wp_enqueue_script( 'noblen-admin-gallery', plugins_url( 'assets/admin-gallery.js', NOBLEN_CORE_FILE ), array( 'media-editor' ), NOBLEN_CORE_VERSION, true );
+		wp_add_inline_style( 'wp-admin', '.noblen-gallery__list{display:flex;flex-wrap:wrap;gap:12px;margin:8px 0;padding:0;list-style:none}.noblen-gallery__list li{display:flex;flex-direction:column;gap:4px;width:80px}.noblen-gallery__list img{width:80px;height:80px;object-fit:cover;border:1px solid #c3c4c7}.noblen-gallery__tools{display:flex;gap:6px;flex-wrap:wrap;font-size:12px}.noblen-gallery__add[hidden]{display:none}' );
 	}
 
 	/**

@@ -252,6 +252,9 @@ jobs:
         env:
           CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
         run: node content-types.js
+      - name: Gallery media picker in a real browser (choose, dedupe, remove, no-JavaScript fallback)
+        working-directory: tests-e2e
+        run: node gallery.js
       - name: Classic Editor, Configuration B (C21)
         working-directory: tests-e2e
         env:
@@ -345,6 +348,9 @@ jobs:
         env:
           CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
         run: node content-types.js
+      - name: Gallery media picker in a real browser (choose, dedupe, remove, no-JavaScript fallback)
+        working-directory: tests-e2e
+        run: node gallery.js
       - name: Classic Editor, Configuration B (C21-006 to C21-010, C21-012, C21-014, C21-016, C21-018, C21-020)
         working-directory: tests-e2e
         env:

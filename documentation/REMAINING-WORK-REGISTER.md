@@ -10,7 +10,7 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 | T2 | Header, navigation and footer polish; footer shows only owner-entered facts. | open |
 | T3 | Breadcrumbs on archives and records. | done (hosted CI green at 663c356) |
 | T4 | Homepage: group introduction, partnerships section (renders nothing without verified data), section order and visibility theme settings. | done in the theme: Customizer order and visibility for nine sections, tested by tests-cli/home-sections-test.php (15 checks, mutation-checked). Partnerships renders nothing until verified partner data exists: the plugin has no partner record type, and adding one changes the content model, which needs an owner decision. The theme reads the filter noblen_partnership_items. |
-| T5 | Internal templates: record layout with facts panel, related items, gallery, empty and error states. | open |
+| T5 | Internal templates: record layout with facts panel, related items, gallery, empty and error states. | partly done: breadcrumbs, page headers, empty states, record facts panel (tests-cli/record-facts-test.php, 8 checks). Still open: richer record layouts are limited by the fields the plugin exposes. |
 | T6 | `screenshot.png` for the theme. | open |
 | T7 | Self-hosted fonts. Blocked on a licence-checked font file supplied or approved by the owner; until then the system font stack is the documented, licence-free choice. | owner |
 | T8 | Reveal animation script (optional, reduced-motion safe). | open |
@@ -20,7 +20,7 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 
 | ID | Requirement | Status |
 |----|-------------|--------|
-| P1 | Gallery field stores comma-separated media IDs; needs a media picker before launch. | open |
+| P1 | Gallery field stores comma-separated media IDs; needs a media picker before launch. | done locally (tests-e2e/gallery.js, 9 checks: choose, dedupe, remove, no-JavaScript fallback). Hosted result pending. The local dev site is Debian-packaged WordPress and needed a symlink for underscore.min.js in the scratch site (not in the repo), so the local run is real-local evidence only. |
 | P2 | `languages/` folder and text-domain loading. | open |
 | P3 | Audit of input validation, output escaping, nonces, capabilities, SQL preparation and upload handling, with evidence. | open |
 | P4 | Contact forms are deferred to a later milestone by the approved plan (M7). The theme offers an email link only. | deferred by plan |
