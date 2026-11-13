@@ -14,7 +14,7 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 | T6 | `screenshot.png` for the theme. | done: 1200x900 screenshot.png rendered from the theme CSS with neutral structural labels only (no business claims); it is a design preview, replace it with a real capture once approved content exists |
 | T7 | Self-hosted fonts. Blocked on a licence-checked font file supplied or approved by the owner; until then the system font stack is the documented, licence-free choice. | owner |
 | T8 | Reveal animation script (optional, reduced-motion safe). | open |
-| T9 | Approved logo. A brand sheet (logo lockups, colour variants, sector icons, values) was shared in chat as an image only. No logo file is in the repository, so none is installed and none is recreated. The owner must supply the master file (SVG preferred, or PNG with transparency) and confirm which lockup is the approved one. The theme already supports the WordPress custom logo, so it can be uploaded in the Customizer or committed as an asset. The sheet also shows a green accent and a gold edition. The approved palette (M2 section 8) has no gold, so the gold edition is not used. Any green accent needs an owner decision. | owner |
+| T9 | Approved logo. A brand sheet (logo lockups, colour variants, sector icons, values) was shared in chat as an image only. No logo file is in the repository, so none is installed and none is recreated. The owner must supply the master file (SVG preferred, or PNG with transparency) and confirm which lockup is the approved one. The theme already supports the WordPress custom logo, so it can be uploaded in the Customizer or committed as an asset. The sheet also shows a green accent and a gold edition. The approved palette (M2 section 8) has no gold, so the gold edition is not used. Any green accent needs an owner decision. | The logo can now be uploaded by an administrator (Site Identity, no code). The master logo file itself is still owner-supplied; the brand sheet was shared as an image only. |
 
 ## B. Plugin and integration
 
@@ -37,6 +37,19 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 | ID | Requirement | Status |
 |----|-------------|--------|
 | V1 | Operator-facing configuration validation in Tools, Site Health (audit key and chain, migration, debug display, HTTPS, permalinks, theme, separation of duties, uninstall data removal, search visibility). Read-only. tests-cli/site-health-test.php: 39 checks. Confirmed visible on the real Site Health screen locally. | done locally; hosted result pending |
+
+## B4. Brand identity management (approved additional requirement)
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| B4-1 | Logo management through Site Identity and the Media Library: upload, replace, remove; PNG, WebP and GIF with transparency; SVG for administrators, rebuilt from an allow-list; responsive heights and preserved aspect ratio; alternative text; wordmark fallback; optional dark-appearance logo. Nothing hard-coded. `tests-cli/svg-test.php` (56 checks, mutation-tested), `tests-e2e/brand-logo.js` (62 checks). | done locally; hosted result pending |
+| B4-2 | Brand Identity in the Customizer: 18 colour controls (primary, secondary, accent, heading, text, background, surface, header, footer, links, buttons with hover and active states), WordPress colour pickers, live preview, Publish. `tests-e2e/brand-customizer.js` (43 checks). | done locally; hosted result pending |
+| B4-3 | Logo-based palette suggestions: server-side extraction (GD for raster, text parsing for SVG), no external service; suggested palette is reviewed, adjustable, previewed, and applied only by explicit action; gold and yellow ignored by design. `tests-cli/palette-test.php` (28 checks including a 300-logo property test), plus the browser flow. Limits documented (complex SVG gradients, very large images, undecodable formats). | done locally; hosted result pending |
+| B4-4 | Central tokens: component CSS uses only custom properties (a test enforces no colour literals); semantic status colours fixed; derived tints via `color-mix()` with fallbacks. Propagation verified for header, mobile menu, home sections, buttons, links, cards, forms, archives, records, footer. | done locally |
+| B4-5 | Light and dark appearance (derived from the brand and contrast-checked), saved presets (up to 12), built-in presets, restore defaults, contrast warnings. `tests-e2e/brand-parity.js` (40 checks: PHP and JavaScript produce identical output; every preset passes contrast in light and dark). | done locally; hosted result pending |
+| B4-6 | Persistence and robustness: settings survive a theme switch; nothing configured is graceful; hostile stored values never reach the CSS. `tests-cli/brand-persistence-test.php` (23 checks). | done locally; hosted result pending |
+| B4-7 | Manual verification by a person (C13-M01, C15-M01 updated in the acceptance guide): real devices, screen reader, and a designer's judgement of the suggestions. Cross-browser: only Chromium was available. | owner or reviewer |
+| B4-8 | Admin documentation: CUSTOMIZATION.md rewritten; ADMINISTRATOR-GUIDE.md, OWNER-CONTENT-REQUIREMENTS.md, SECURITY-REVIEW.md and the release report updated. | done |
 
 ## C. M2-D, packaging and release
 

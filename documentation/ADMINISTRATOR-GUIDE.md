@@ -31,6 +31,17 @@ Noblen, Settings holds the company name, contact details, social links and home 
 
 Approvals are signed into a tamper-evident audit chain using a key defined in `wp-config.php`. If the key is missing or invalid, approvals are blocked and published content stays available. Keep the key in secure custody and follow [RECOVERY.md](RECOVERY.md) for rotation or loss. Never generate a replacement silently.
 
+## Changing the logo and colours
+
+Everything is in **Appearance, Customize** and needs no code; see [CUSTOMIZATION.md](CUSTOMIZATION.md) for the full guide. In short:
+
+1. **Logo:** Site Identity, Logo. Use SVG or a transparent PNG or WebP. Set the alternative text and the heights there too.
+2. **Colours:** Brand Identity. Change any colour and watch the preview; press **Publish** to save. Heading, footer and hover colours are separate controls.
+3. **Dark appearance:** Brand Identity, Appearance. Choose Light, Dark or Follow the visitor's device.
+4. **Not sure which colours?** Choose a preset, or press **Suggest colours from my logo**, review and adjust, preview it on the site, then Publish. Nothing is applied until you do.
+5. **Go back:** **Restore Noblen defaults**, then Publish.
+6. **Check readability:** the **Contrast check** lists any pair of colours that is hard to read. Warnings are advice, not blocks.
+
 ## Checking the configuration
 
 Open Tools, Site Health. The **Noblen configuration** test reports, in plain language, whether the audit chain verifies, the database schema is current, errors are hidden from visitors, HTTPS and pretty permalinks are on, the theme is active, separation of duties is enforced, data is kept on uninstall, and search engines are allowed. **Critical** items block approvals or risk data and should be fixed first; **recommended** items are advice (for example, search engines should stay discouraged only until launch). The test only reads; it changes nothing.
@@ -43,6 +54,10 @@ Open Tools, Site Health. The **Noblen configuration** test reports, in plain lan
 | A record is not visible publicly | It is not approved and published, or a required section or image lacks clearance. Check the Publication and Clearance boxes. |
 | Home page section missing | It is hidden in Customize, or has no published content. |
 | Footer shows no menu | The Footer menu is unassigned (Appearance, Menus). |
+| My logo upload was refused | SVG uploads are for administrators and are checked for safety. Read the message: usually the file contains script or a document-type declaration, is over 256 KB, or is not a real SVG. Export a plain SVG again or use a PNG. |
+| The logo looks blurry or has a white box | Use SVG, or a PNG or WebP with a transparent background. A JPEG cannot be transparent. |
+| "Suggest colours" says nothing usable was found | The logo is white, transparent, gold-only, too large, or in a format the server cannot read. Choose the colours by hand or use a preset. |
+| After changing colours the site looks unchanged | The change is a preview until you press **Publish**. If you use a page cache, purge it. |
 | "Choose images" button missing | JavaScript is off or blocked; type media IDs instead. |
 | Site shows a plain PHP/WordPress version message | The platform is older than PHP 8.3 or WordPress 6.4; upgrade it. |
 | Migration failed notice | Approvals stay blocked and nothing is lost. Restore the pre-upgrade backup or fix the cause and clear the failure. |
