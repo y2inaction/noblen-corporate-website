@@ -263,6 +263,10 @@ jobs:
         env:
           WP_DIR: ${{ runner.temp }}/wp
         run: bash tests-cli/noblen-cli-test.sh
+      - name: Pending or failed upgrade notice in the administration
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/migration-notice-test.php
       - name: Install browser tooling
         working-directory: tests-e2e
         run: |

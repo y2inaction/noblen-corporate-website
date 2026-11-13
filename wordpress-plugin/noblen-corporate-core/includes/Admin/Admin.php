@@ -9,6 +9,7 @@ use Noblen\Core\Clearance\Approvals;
 use Noblen\Core\Clearance\Workflow;
 use Noblen\Core\Clearance\MediaRights;
 use Noblen\Core\Audit\Verifier;
+use Noblen\Core\Database\Migrator;
 use Noblen\Core\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -438,6 +439,14 @@ final class Admin {
 			delete_transient( 'noblen_field_errors_' . $uid );
 			foreach ( (array) $errors as $k => $msg ) {
 				printf( '<div class="notice notice-warning"><p>%s: %s</p></div>', esc_html( (string) $k ), esc_html( (string) $msg ) );
+			}
+		}
+		if ( current_user_can( 'noblen_manage_settings' ) ) {
+			$migration = Migrator::state();
+			if ( 'failed' === $migration['state'] ) {
+				echo '<div class="notice notice-error"><p><strong>A Noblen database upgrade failed.</strong> Approvals and publication are blocked and nothing has been lost. See Tools, Site Health, and the recovery guide before changing anything.</p></div>';
+			} elseif ( Migrator::pending() ) {
+				echo '<div class="notice notice-warning"><p><strong>A Noblen database upgrade is waiting.</strong> Approvals and publication are blocked until it is done. Take a backup of the files and the database and check it, then run <code>wp noblen migrate confirm-backup --user=&lt;administrator login&gt;</code> and <code>wp noblen migrate run --user=&lt;administrator login&gt;</code> (ask your developer or host if you cannot).</p></div>';
 			}
 		}
 		if ( current_user_can( 'noblen_approve_publication' ) || current_user_can( 'noblen_manage_settings' ) ) {

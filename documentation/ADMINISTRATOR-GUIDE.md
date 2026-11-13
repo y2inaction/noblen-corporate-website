@@ -82,6 +82,7 @@ Open Tools, Site Health. The **Noblen configuration** test reports, in plain lan
 | After changing colours the site looks unchanged | The change is a preview until you press **Publish**. If you use a page cache, purge it. |
 | "Choose images" button missing | JavaScript is off or blocked; type media IDs instead. |
 | Site shows a plain PHP/WordPress version message | The platform is older than PHP 8.3 or WordPress 6.4; upgrade it. |
+| "A Noblen database upgrade is waiting" notice | An upgrade changed the database and needs a confirmed backup first. Take and check a backup, then follow the commands named in the notice (or ask your developer or host). Approvals stay blocked until it is done. |
 | Migration failed notice | Approvals stay blocked and nothing is lost. Restore the pre-upgrade backup or fix the cause and clear the failure. |
 
 ## Security practices
