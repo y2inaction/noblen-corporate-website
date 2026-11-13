@@ -71,6 +71,9 @@ const R = H.reporter();
   const inputBg = await pf().evaluate(() => { const i = document.createElement('input'); i.type = 'text'; document.body.appendChild(i); const v = getComputedStyle(i).backgroundColor; i.remove(); return v; });
   R.check(H.toHex(inputBg) === '#eef6ff', 'form inputs use the surface colour');
 
+  const status = await pf().evaluate(() => { const out = {}; ['info', 'success', 'warning', 'error'].forEach((k) => { const d = document.createElement('div'); d.className = 'notice notice--' + k; d.textContent = 'x'; document.body.appendChild(d); out[k] = getComputedStyle(d).color; d.remove(); }); return out; });
+  R.check(H.toHex(status.error) === '#b42318' && H.toHex(status.success) === '#166534' && H.toHex(status.warning) === '#9a3412' && H.toHex(status.info) === '#1e40af', 'notices keep their fixed semantic colours whatever the brand colours are');
+
   // ---- Appearance: light, dark, follow the device.
   await H.setting(page, 'noblen_brand_appearance', 'dark'); await H.settle(page);
   const attr = await pf().evaluate(() => document.documentElement.getAttribute('data-appearance'));
@@ -90,6 +93,16 @@ const R = H.reporter();
   await H.settle(page);
   const deep = def.presets.find((p) => p.id === 'deep-navy');
   R.check((await H.getSetting(page, 'noblen_brand_primary')) === lib.complete(def, deep.colors).primary, 'applying a built-in preset previews its colours');
+  // Keyboard: choose a preset and activate the button without the mouse.
+  await H.setting(page, 'noblen_brand_primary', '#123456');
+  await page.focus('#noblen-preset-select');
+  await page.selectOption('#noblen-preset-select', 'b:slate');
+  await page.focus('.noblen-apply-preset');
+  await page.keyboard.press('Enter'); await H.settle(page);
+  R.check((await H.getSetting(page, 'noblen_brand_primary')) === lib.complete(def, def.presets.find((p) => p.id === 'slate').colors).primary, 'the preset tools can be operated from the keyboard (Enter on the button)');
+  const tabbable = await page.evaluate(() => [...document.querySelectorAll('.noblen-tools button, .noblen-tools select, .noblen-tools input')].every((e) => e.tabIndex >= 0 && (e.getAttribute('aria-label') || e.id || e.textContent.trim())));
+  R.check(tabbable, 'every control in the tools has a keyboard-reachable, named control');
+  await page.selectOption('#noblen-preset-select', 'b:deep-navy'); await page.click('.noblen-apply-preset'); await H.settle(page);
   const stamp = 'E2E ' + Date.now();
   await page.fill('#noblen-preset-name', stamp);
   await page.click('.noblen-save-preset');
@@ -122,14 +135,21 @@ const R = H.reporter();
   // ---- Publish, then a fresh logged-out visitor sees it; the Customizer shows it again after reload.
   await H.setting(page, 'noblen_brand_primary', '#0b3d2e');
   await H.setting(page, 'noblen_brand_secondary', '#e05a00');
+  await H.setting(page, 'noblen_brand_footer_bg', '#222222');
+  await H.setting(page, 'noblen_brand_heading', '#3a0ca3');
+  await H.setting(page, 'noblen_brand_bg', '#f7f7f2');
   await H.setting(page, 'noblen_brand_appearance', 'auto');
   const before = await H.publicVars(browser, '/');
   R.check(before['--brand-primary'] === lib.defaults(def).primary, 'before publishing, visitors still see the saved palette (preview changes are not public)');
   await H.publish(page);
   const after = await H.publicVars(browser, '/');
   R.check(after['--brand-primary'] === '#0b3d2e' && after['--brand-secondary'] === '#e05a00' && after.appearance === 'auto', 'after Publish, visitors see the new palette and appearance');
-  const deepPage = await H.publicVars(browser, '/projects/');
-  R.check(deepPage['--brand-primary'] === '#0b3d2e', 'the palette reaches archive pages too');
+  for (const path of ['/projects/', '/projects/dev-fixture-project/', '/group/', '/?s=fixture', '/missing-page-check/', '/hello-world/']) {
+    const pctx = await browser.newContext(); const pp = await pctx.newPage(); await pp.goto(H.base + path);
+    const got = await pp.evaluate(() => { const c = (sel, prop) => { const e = document.querySelector(sel); return e ? getComputedStyle(e)[prop] : null; }; return { primary: getComputedStyle(document.documentElement).getPropertyValue('--brand-primary').trim(), footer: c('.site-footer', 'backgroundColor'), bg: c('body', 'backgroundColor'), h1: c('h1', 'color') }; });
+    R.check(got.primary === '#0b3d2e' && H.toHex(got.footer) === '#222222' && H.toHex(got.bg) === '#f7f7f2' && H.toHex(got.h1) === '#3a0ca3', `${path}: the published palette reaches this template (primary, footer, background, headings)`, JSON.stringify(got));
+    await pctx.close();
+  }
   await H.openCustomizer(page);
   R.check((await H.getSetting(page, 'noblen_brand_primary')) === '#0b3d2e', 'the Customizer shows the saved palette after a reload');
 
