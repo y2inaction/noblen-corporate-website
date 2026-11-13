@@ -51,11 +51,11 @@ def junit(cases, declared='auto', wrapper=True, suites=1):
     for name, children in cases:
         name = html.escape(name, quote=True)  # PHPUnit writes a data-set name's quotes as &quot;
         inner = ''.join(f'<{c}>detail</{c}>' for c in children)
-        body += (f'<testcase name="{name}" class="FooTest" classname="FooTest" file="/home/secret-user/project/tests/FooTest.php" '
+        body += (f'<testcase name="{name}" class="FooTest" classname="FooTest" file="/srv/secret-user/project/tests/FooTest.php" '
                  f'line="12" assertions="2" time="0.01">{inner}</testcase>' if inner else
-                 f'<testcase name="{name}" class="FooTest" classname="FooTest" file="/home/secret-user/project/tests/FooTest.php" '
+                 f'<testcase name="{name}" class="FooTest" classname="FooTest" file="/srv/secret-user/project/tests/FooTest.php" '
                  f'line="12" assertions="2" time="0.01"/>')
-    cls = f'<testsuite name="FooTest" file="/home/secret-user/project/tests/FooTest.php"{declared_attr} assertions="{2 * n}">{body}</testsuite>'
+    cls = f'<testsuite name="FooTest" file="/srv/secret-user/project/tests/FooTest.php"{declared_attr} assertions="{2 * n}">{body}</testsuite>'
     suite = (f'<testsuite name="noblen-core"{declared_attr} assertions="{2 * n}">{cls}</testsuite>')
     outer = f'<testsuite name=""{declared_attr} assertions="{2 * n}">{suite}</testsuite>'
     if suites == 2:  # two outer suites, each with the same cases: the declared totals must be summed
@@ -93,7 +93,7 @@ check('clean run: exit 0 and nothing on stderr', rc == 0 and err == '', f'rc={rc
 check('clean run: per-criterion counts equal the executed test cases (data sets counted one each)', t.get('C01') == 2 and t.get('C05') == 3 and t.get('C23') == 1, str(t))
 check('clean run: cases without a test_CNN_ name are counted as "other" and the total adds up', t.get('other') == 2 and t.get('total') == 8, str(t))
 check('clean run: the label, the executed total and the assertion total are printed', 'PHP 9.9' in out and 'Executed test cases: 8' in out and 'Assertions: 16' in out, out[:300])
-check('clean run: no file path or user name from the JUnit file is printed', '/home/' not in out and 'secret-user' not in out and '.php' not in out, out)
+check('clean run: no file path or user name from the JUnit file is printed', '/srv/' not in out and 'secret-user' not in out and '.php' not in out, out)
 check('clean run: nested suites are not double counted (three suite levels, 8 cases)', t.get('total') == 8)
 
 # ---- Name matching is exact.
