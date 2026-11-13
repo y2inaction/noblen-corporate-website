@@ -76,7 +76,7 @@ def main():
     name_m = re.search(r'^\s+role_label:\s*"([^"]+)"', designation, re.M)
     designated = name_m.group(1) if name_m else None
     ok(bool(designated), 'the designation file gives the reviewer a role label')
-    ok(re.search(r'^\s+name:', designation, re.M) is None and 'identity_held_privately: true' in designation, 'no personal name is recorded in the public designation file')
+    ok('declarations_held_privately: true' in designation and 'separate_reviewer: false' in designation and 'may_sign_or_declare_for_reviewer: false' in designation, 'declarations are private and technical inspection support is not a separate reviewer and cannot sign')
     ok('designated_by: owner' in designation, 'the designation says it was made by the owner')
     ok(re.search(r'instruction_recorded:\s*"\d{4}-\d{2}-\d{2}"', designation) is not None, 'the designation records the date the instruction was received')
     state_lines = re.findall(r'state:\s*(\w+)', designation)

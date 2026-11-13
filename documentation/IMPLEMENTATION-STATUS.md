@@ -122,7 +122,7 @@ Clicking Save Draft while WordPress's permalink request is still in flight is si
 
 ## Manual records still required (prepared, all PENDING)
 
-The 17 manual records (the `-M` items) are prepared in [acceptance-records/](acceptance-records/README.md) and are all **PENDING**: none has been performed, signed or accepted. The owner designated a **nominated independent reviewer** (role label; identity held privately); independence is **not verified** (see [REVIEW-PLAN.md](REVIEW-PLAN.md)). 14 records are reviewer-run (C01, C02, C03, C06, C10, C12, C13, C14, C15, C19, C20-M01, C20-M02, C25, C27) and 3 are owner-run (C17-M01, C31-M01, C34-M01). `C17-S01` is a CI status item, not a record, and `C27-M01` is not in the frozen CI plan.
+The 17 manual records (the `-M` items) are prepared in [acceptance-records/](acceptance-records/README.md) and are all **PENDING**: none has been performed, signed or accepted. The owner designated a **designated human reviewer** (who may use technical inspection support; role label in public files); independence is **not verified** (see [REVIEW-PLAN.md](REVIEW-PLAN.md)). 14 records are reviewer-run (C01, C02, C03, C06, C10, C12, C13, C14, C15, C19, C20-M01, C20-M02, C25, C27) and 3 are owner-run (C17-M01, C31-M01, C34-M01). `C17-S01` is a CI status item, not a record, and `C27-M01` is not in the frozen CI plan.
 
 ## Owner inputs
 

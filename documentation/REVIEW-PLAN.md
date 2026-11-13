@@ -1,18 +1,29 @@
 # Review plan: designated reviewer and independence
 
-**Status: the owner has designated a reviewer. No review has been performed. All 17 manual acceptance records are PENDING. Independence is NOT VERIFIED.** This plan assigns responsibilities, sets out what independence requires, and flags every conflict and missing fact instead of assuming it away. It records no signature, finding, date, approval or acceptance, and it changes no acceptance status. The frozen plans are unchanged.
+**Status: the owner has designated a human reviewer and accepted the engagement arrangement. No review has been performed. All 17 manual acceptance records are PENDING. Independence is NOT VERIFIED.** This plan assigns responsibilities, sets out what independence requires, and flags every conflict and missing fact instead of assuming it away. It records no signature, finding, date, approval or acceptance, and it changes no acceptance status. The frozen plans are unchanged.
 
-## 1. The designation
+## 1. The designation and the roles
+
+| Role | Held by | What it means |
+|------|---------|---------------|
+| **Human reviewer** | **Sultan Zakariya**, designated by the owner | Performs the reviewer-run records, forms the review judgement and is the person the frozen plan means by "reviewer" |
+| **Review accountability** | Sultan Zakariya | Answerable for every finding, record and recommendation made in the review, whoever or whatever helped to prepare it |
+| **Human sign-off** | Sultan Zakariya, personally | Every signature, decision and independence or competence declaration the frozen plan requires is his own. Nobody and nothing signs or declares for him |
+| **Technical inspection support** | **Z (Z.ai)**, used under Sultan's direction | A service Sultan uses to inspect, analyse and prepare supporting evidence (for example re-verifying CI results, checksums and contrast figures). It is **not** a separate or second reviewer, is not independent of Sultan's direction, may not impersonate him, and may not sign or declare anything on his behalf |
+| Owner | The owner | Keeps the owner-only responsibilities (section 3) and every acceptance decision |
 
 | Item | Value |
 |------|-------|
-| Designated reviewer | **Nominated independent reviewer** (role label; the owner holds the identity privately) |
 | Designated by | The owner |
-| Instruction recorded | 2026-11-13, from the owner's instruction to the delegated development session (this is the date the instruction was received, not a review date) |
+| Instruction recorded | 2026-11-13, from the owner's instruction to the delegated development session (the date the instruction was received, not a review date) |
+| Engagement | The owner accepted the arrangement on 2026-11-13: Sultan is the human reviewer and uses Z (Z.ai) for technical inspection. This resolved an earlier ambiguity about whether Z.ai was a separate reviewer. It is an engagement decision only: it verifies no independence check, performs no record and accepts no criterion |
+| Supporting correspondence | A letter from Z (Z.ai) accepting the engagement is held privately by the owner as supporting correspondence, read with the owner's clarification above. It is not published here |
 | Scope | The outstanding manual acceptance and review records (17), within the limits in section 3 |
 | Machine-readable form | [review-designation.yml](review-designation.yml) |
 
-The designation does not record contact details, qualifications, a signature or any decision. The repository is public, so by the owner's decision of 2026-11-13 the name, personal declarations and qualification information are kept out of public files; a role label is used. An earlier commit in git history still contains the name. Removing it would need a history rewrite on a shared branch, which is not done without separate approval.
+By the owner's instruction the human reviewer is named in this file and in review-designation.yml only. Every other public file, the 17 records and the generated register use the role label "Designated human reviewer". The designation does not record contact details, qualifications, declarations, a signature or any decision; those are given privately to the owner. An earlier commit in git history contains a name from before this arrangement, and no history rewrite is done without separate approval.
+
+**Rules for the inspection support.** Its findings are inputs that Sultan reads, checks and adopts or rejects; he remains accountable for them. Where a check exceeds what it can verify, it says so plainly. Its output never becomes a record, a signature or an acceptance, and a record it prepares is not complete until Sultan has personally performed or verified it and signed it.
 
 ## 2. What the frozen plans require
 
@@ -28,7 +39,7 @@ From [CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md) and [M2-IMPLEMENTA
 
 | Responsibility | Assigned to | Notes |
 |----------------|-------------|-------|
-| Perform and sign the 14 reviewer-run records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01 | Designated reviewer | Subject to the independence checks in section 4 |
+| Perform and sign (personally) the 14 reviewer-run records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01 | Human reviewer (Sultan), who may use technical inspection support | Subject to the independence checks in section 4 |
 | Perform C17-M01, C31-M01 and C34-M01 | **The owner** | The frozen plan assigns them to the owner. The designation cannot replace the owner on these. |
 | Independently verify the owner's evidence for those three | Designated reviewer (additional, optional) | A separate section of each record. It does not replace the owner's own record. |
 | Approve the C26-006 pre-run attestation, if the owner wishes the reviewer to do so | Open decision | Needs the reviewer's own GitHub identity (not the account that authored the pull request) and an agreed approval route. Not assumed. |

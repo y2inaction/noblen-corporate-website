@@ -7,16 +7,37 @@
 schema_version: 1
 
 designated_reviewer:
-  # Role label only. The person's name and any personal declarations are held privately by the owner, not in this public repository.
-  role_label: "Nominated independent reviewer"
-  identity_held_privately: true
+  # Owner instruction of 2026-11-13: the human reviewer is named in this file and in REVIEW-PLAN.md only. Every other public file,
+  # the records and the generated register use the role label. Declarations, qualifications and contact details are never recorded
+  # here: the reviewer gives them privately to the owner.
+  role_label: "Designated human reviewer"
+  name: "Sultan Zakariya"
   designated_by: owner
   # The date the owner's instruction was received in the delegated development session. It is not a review date.
   instruction_recorded: "2026-11-13"
+  accountability: designated_reviewer
+  human_sign_off: designated_reviewer
   scope:
     reviewer_run_records: 14   # the frozen plan assigns these to the reviewer
     owner_run_records: 3       # the frozen plan assigns these to the owner; the reviewer's role is additional verification only
   contact_details_recorded: false
+  declarations_held_privately: true
+
+# Technical inspection support. NOT a second reviewer: it is a service the designated human reviewer uses and directs. It may inspect,
+# analyse and prepare supporting evidence. It must not impersonate the reviewer, declare independence for the reviewer or sign for the reviewer.
+technical_inspection_support:
+  name: "Z (Z.ai)"
+  role: "technical inspection support, used under the direction of the designated human reviewer"
+  separate_reviewer: false
+  may_sign_or_declare_for_reviewer: false
+
+# The owner's acceptance of the review arrangement. Supporting correspondence is held privately and is not published. This records an
+# engagement only: it verifies no independence check, performs no record and accepts no criterion.
+engagement:
+  owner_accepted_arrangement: true
+  accepted_on: "2026-11-13"
+  correspondence_held_privately: true
+  verifies_independence: false
 
 # Whether the designation satisfies the independence requirements. "not_verified" is the honest state until the declarations
 # and identity facts below are supplied by the people concerned. Nothing here may be changed to "verified" by the implementer.
@@ -56,4 +77,4 @@ independence:
       state: missing
       note: "Not provisioned."
 
-public_repository_note: "The repository is public. The reviewer is identified here by role only; the owner holds the name, declarations and qualification information privately (owner decision, 2026-11-13). The name appeared in earlier commits and stays in git history."
+public_repository_note: "The repository is public. By the owner's instruction the designated human reviewer is named in this file and in REVIEW-PLAN.md only. Declarations, qualification information, contact details and engagement correspondence are held privately by the owner and are not published."

@@ -6,7 +6,7 @@
 
 | Who | Records |
 |-----|---------|
-| **Nominated independent reviewer** (designated by the owner; independence **NOT VERIFIED**) | The 14 reviewer-run records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01 |
+| **Designated human reviewer** (designated by the owner; independence **NOT VERIFIED**; may use technical inspection support but signs personally) | The 14 reviewer-run records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01 |
 | **The owner** (the frozen plan assigns these to the owner) | C17-M01, C31-M01, C34-M01. The reviewer may add an independent verification of the owner's evidence; it does not replace the owner's record. |
 | **The owner only** | C21-021, C21-022 and C21-M01, decided in [owner-acceptance-decisions.yml](owner-acceptance-decisions.yml). All three are pending. |
 

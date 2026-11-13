@@ -275,10 +275,22 @@ def load_review(designation_path, records_dir):
         name = dr.get('role_label')
         if not isinstance(name, str) or not name.strip():
             fail('designated_reviewer.role_label must be a non-empty string')
-        if dr.get('identity_held_privately') is not True:
-            fail('designated_reviewer.identity_held_privately must be true: the name is not recorded in this public repository')
-        if 'name' in dr:
-            fail('designated_reviewer.name must not be present: use role_label only')
+        if not isinstance(dr.get('name'), str) or not dr['name'].strip():
+            fail('designated_reviewer.name must be a non-empty string')
+        if dr.get('declarations_held_privately') is not True:
+            fail('designated_reviewer.declarations_held_privately must be true: declarations are not recorded in this public repository')
+        if dr.get('accountability') != 'designated_reviewer' or dr.get('human_sign_off') != 'designated_reviewer':
+            fail('accountability and human_sign_off must both stay with the designated_reviewer')
+        tis = raw.get('technical_inspection_support')
+        if not isinstance(tis, dict) or not isinstance(tis.get('name'), str) or not tis['name'].strip():
+            fail('technical_inspection_support.name must be a non-empty string')
+        if tis.get('separate_reviewer') is not False or tis.get('may_sign_or_declare_for_reviewer') is not False:
+            fail('technical inspection support must not be a separate reviewer and must not sign or declare for the reviewer')
+        eng = raw.get('engagement')
+        if not isinstance(eng, dict) or eng.get('correspondence_held_privately') is not True or eng.get('verifies_independence') is not False:
+            fail('engagement must keep its correspondence private and must not claim to verify independence')
+        if eng.get('owner_accepted_arrangement') is not True:
+            fail('engagement.owner_accepted_arrangement must be true once recorded')
         if dr.get('designated_by') != 'owner':
             fail("designated_reviewer.designated_by must be 'owner'")
         when = dr.get('instruction_recorded')
@@ -339,7 +351,7 @@ def load_review(designation_path, records_dir):
 
 REVIEW = load_review(a.designation, a.records)
 _done = REVIEW['tally']['ACCEPTED'] + REVIEW['tally']['NOT ACCEPTED']
-MANUAL_REVIEW = (f"Reviewer: {REVIEW['name']}, designated by the owner (instruction recorded {REVIEW['when']}); identity and declarations are held privately by the owner. "
+MANUAL_REVIEW = (f"Reviewer: {REVIEW['name']}, designated by the owner (instruction recorded {REVIEW['when']}); declarations are held privately by the owner. Technical inspection support (a service the reviewer directs) is not a separate reviewer and cannot sign or declare for the reviewer; the owner accepted this arrangement on 2026-11-13, which verifies no independence check. "
                  + ('Independence: VERIFIED.' if REVIEW['independence'] == 'verified' else f"Independence: NOT VERIFIED ({len(REVIEW['open_checks'])} independence checks are open; see documentation/REVIEW-PLAN.md).")
                  + f" Manual records prepared in documentation/acceptance-records/: {len(EXPECTED_RECORDS)} ({REVIEW['reviewer_run']} reviewer-run, {REVIEW['owner_run']} owner-run); "
                  + f"completed: {_done}; pending: {REVIEW['tally']['PENDING']}. A completed record is evidence, not acceptance, and does not change accepted_count.")

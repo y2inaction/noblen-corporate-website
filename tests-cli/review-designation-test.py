@@ -71,7 +71,7 @@ def fails(name, **kw):
 rc, err, text = run(designation_text=VALID)
 ok(rc == 0 and text is not None, 'the real designation and records produce a register', err.strip()[:160])
 if text:
-    ok('Reviewer: Nominated independent reviewer, designated by the owner' in text and 'Sultan' not in text, 'the register names the reviewer by role only')
+    ok('Reviewer: Designated human reviewer, designated by the owner' in text and 'Sultan' not in text and 'not a separate reviewer' in text, 'the register names the reviewer by role only and says inspection support is not a separate reviewer')
     ok('Independence: NOT VERIFIED' in text, 'the register says independence is NOT VERIFIED')
     ok('completed: 0; pending: 17' in text, 'the register reports 0 completed and 17 pending records')
     ok(re.search(r'^  accepted_count: 0$', text, re.M) is not None, 'accepted_count is 0')
@@ -97,9 +97,15 @@ fails('an empty file is refused', designation_text='')
 fails('a list at the top level is refused', designation_text='- a\n- b\n')
 fails('an unparseable file is refused', designation_text='a: [unclosed\n')
 fails('a wrong schema version is refused', designation_text=VALID.replace('schema_version: 1', 'schema_version: 2'))
-fails('an empty reviewer role label is refused', designation_text=VALID.replace('role_label: "Nominated independent reviewer"', 'role_label: ""'))
-fails('a personal name recorded in the public designation is refused', designation_text=VALID.replace('  role_label:', '  name: "X"\n  role_label:'))
-fails('identity not held privately is refused', designation_text=VALID.replace('identity_held_privately: true', 'identity_held_privately: false'))
+fails('an empty reviewer role label is refused', designation_text=VALID.replace('role_label: "Designated human reviewer"', 'role_label: ""'))
+fails('an empty reviewer name is refused', designation_text=re.sub(r'^  name: ".*"$', '  name: ""', VALID, count=1, flags=re.M))
+fails('declarations not held privately is refused', designation_text=VALID.replace('declarations_held_privately: true', 'declarations_held_privately: false'))
+fails('technical support as a separate reviewer is refused', designation_text=VALID.replace('separate_reviewer: false', 'separate_reviewer: true'))
+fails('technical support allowed to sign for the reviewer is refused', designation_text=VALID.replace('may_sign_or_declare_for_reviewer: false', 'may_sign_or_declare_for_reviewer: true'))
+fails('sign-off moved away from the designated reviewer is refused', designation_text=VALID.replace('human_sign_off: designated_reviewer', 'human_sign_off: technical_support'))
+fails('an engagement claiming to verify independence is refused', designation_text=VALID.replace('verifies_independence: false', 'verifies_independence: true'))
+fails('engagement correspondence that is not private is refused', designation_text=VALID.replace('correspondence_held_privately: true', 'correspondence_held_privately: false'))
+fails('a missing technical support section is refused', designation_text=VALID.replace('technical_inspection_support:', 'something_else:'))
 fails('a designation not made by the owner is refused', designation_text=VALID.replace('designated_by: owner', 'designated_by: implementer'))
 fails('a future instruction date is refused', designation_text=VALID.replace('"2026-11-13"', '"2099-01-01"'))
 fails('a malformed instruction date is refused', designation_text=VALID.replace('"2026-11-13"', '"yesterday"'))
@@ -116,6 +122,18 @@ fails('a missing record is refused', designation_text=VALID, drop_records=['C19-
 fails('an extra record file is refused', designation_text=VALID, extra_files=['C17-S01.md'])
 fails('a record with an invalid decision is refused', designation_text=VALID, mutate_records={'C02-M01': lambda t: t.replace('| Decision | PENDING |', '| Decision | PROBABLY FINE |')})
 fails('a record with no decision row is refused', designation_text=VALID, mutate_records={'C03-M01': lambda t: t.replace('| Decision | PENDING |', '')})
+
+# ---- The name appears only in the designation file and REVIEW-PLAN.md.
+_nm = re.search(r'^  name: "([^"]+)"', VALID, re.M).group(1)
+_leaks = []
+for _d, _, _fs in os.walk(os.path.join(ROOT, 'documentation')):
+    for _f in _fs:
+        _p = os.path.join(_d, _f)
+        if _f in ('review-designation.yml', 'REVIEW-PLAN.md'):
+            continue
+        if _nm in open(_p, encoding='utf-8', errors='replace').read():
+            _leaks.append(os.path.relpath(_p, ROOT))
+ok(not _leaks, 'the reviewer name appears only in the designation file and REVIEW-PLAN.md', str(_leaks))
 
 # ---- Nothing in the real files claims more than the evidence supports.
 real = open(os.path.join(ROOT, 'documentation', 'acceptance-criteria-traceability.yml'), encoding='utf-8').read()
