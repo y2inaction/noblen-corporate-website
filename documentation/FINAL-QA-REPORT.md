@@ -1,10 +1,10 @@
 # Final quality report
 
-Tip assessed: `7228471ebb22338bcab2e1c6ebaf1376b75dbbaa` on `feature/m2-implementation` (local and remote identical when checked; base `main` `da432a6531f2239cc2d04437af5d002a3c38c95a`). Application code is unchanged since `28bbdbd`; later commits are documentation, tests of documentation, and register regeneration. Evidence is separated into hosted, local, manual and unverified. Nothing here is acceptance.
+Tip assessed locally: `7228471ebb22338bcab2e1c6ebaf1376b75dbbaa` (hosted evidence also covers `37df1378cd49e2154dba6398dbefd01f6aa3e8e8`) on `feature/m2-implementation` (local and remote identical when checked; base `main` `da432a6531f2239cc2d04437af5d002a3c38c95a`). Application code is unchanged since `28bbdbd`; later commits are documentation, tests of documentation, and register regeneration. Evidence is separated into hosted, local, manual and unverified. Nothing here is acceptance.
 
 ## 1. Hosted evidence (GitHub Actions, read on 2026-11-13)
 
-For the tip: **CI run 70** (push, id 43471253584), **CI run 71** (pull request event, id 43471265831) and **Validate run 39** (id 43471265837) all completed with success. Run 70 has 11 of 11 jobs, each with every step concluded `success`; no job or step was skipped, neutral or cancelled.
+For `7228471`: **CI run 70** (push, id 43471253584), **CI run 71** (pull request event, id 43471265831) and **Validate run 39** (id 43471265837) all completed with success; run 70 has 11 of 11 jobs, every step `success`. For `37df137` (documentation, report generator, register update): **CI run 72** (push, id 43506052814, 11 of 11 jobs, every step `success`, none skipped, neutral or cancelled), **CI run 73** (pull request event, id 43506061607, 11 of 11 jobs `success`, verified at job level) and **Validate run 40** (id 43506061672, `success`). The step list below is from run 70; run 72 has the same steps plus "Acceptance traceability report is current" in both static jobs.
 
 | Job (run 70) | Result | Notable steps confirmed executed |
 |--------------|--------|----------------------------------|

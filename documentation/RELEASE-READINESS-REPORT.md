@@ -4,7 +4,7 @@
 
 **NOT READY for production. The release criteria are not satisfied.** The branch is a **release candidate for review**: the technically achievable work is implemented and verified by automated evidence, locally and in hosted CI. It is not production-ready, and automated success does not make it so. Required human evidence, owner acceptance, owner inputs and several unmet criteria remain, and they can only be closed by the people concerned. This report records no owner acceptance, authorises no merge and authorises no deployment.
 
-Code evidence commit: `28bbdbded3f1c6a681546babb7db6444c43f5ea7`. Documentation tip when this report was written: see the pull request head (the report is updated in a documentation-only commit on top of the verified tip `7228471ebb22338bcab2e1c6ebaf1376b75dbbaa`). Base `main`: `da432a6531f2239cc2d04437af5d002a3c38c95a`. Pull request 2 is an open draft with no reviews and no merge.
+Code evidence commit: `28bbdbded3f1c6a681546babb7db6444c43f5ea7`. Last commit with a hosted result recorded in this report: `37df1378cd49e2154dba6398dbefd01f6aa3e8e8` (documentation and report tooling on top of the verified `7228471`); later commits only edit documentation and their results are in the pull request description. Base `main`: `da432a6531f2239cc2d04437af5d002a3c38c95a`. Pull request 2 is an open draft with no reviews and no merge.
 
 ## 1. What is implemented
 
@@ -36,9 +36,10 @@ All completed with success. Run numbers are CI unless marked Validate.
 | `28bbdbd` | 64 (43446280335) | 65 (43446288683) | 36 (43446288707) | Key custody rehearsal and plan-register test confirmed executed |
 | `6f7434a` | 66 (43446330751) | 67 (43446342838) | 37 (43446342548) | |
 | `59b9205` | 68 (43454858460) | 69 (43454873711) | 38 (43454873736) | |
-| `7228471` | 70 (43471253584) | 71 (43471265831) | 39 (43471265837) | 11 of 11 jobs; verified at step level; the tip assessed for this report |
+| `7228471` | 70 (43471253584) | 71 (43471265831) | 39 (43471265837) | 11 of 11 jobs; verified at step level |
+| `37df137` | 72 (43506052814) | 73 (43506061607) | 40 (43506061672) | Documentation, report generator and register change. Run 72: 11 of 11 jobs verified at step level, nothing skipped; the new "Acceptance traceability report is current" step passed in both static jobs. Run 73: 11 of 11 jobs success (verified at job level). Validate 40 success |
 
-Earlier commits are also green. Hosted evidence for the commit that adds this report and the final documents is recorded in the pull request after it runs; no earlier result is attributed to it.
+Earlier commits are also green. The hosted result for any commit **after** `37df137` (including the one that last edits this report) is recorded in the pull request description, not here; no earlier result is attributed to a later commit.
 
 ## 4. Criteria and records
 
