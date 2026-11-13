@@ -31,20 +31,22 @@ $noblen_social = array_filter( $noblen_social );
 				?>
 				<p><?php echo esc_html( noblen_setting( 'contact_phone' ) ); ?></p><?php endif; ?>
 		</div>
-		<nav aria-label="Footer">
-		<?php
-		wp_nav_menu(
-			array(
-				'theme_location' => 'footer',
-				'container'      => false,
-				'fallback_cb'    => false,
-				'depth'          => 1,
-			)
-		);
-		?>
+		<?php if ( has_nav_menu( 'footer' ) ) : ?>
+		<nav aria-label="Footer"><p class="site-footer__head">Explore</p>
+			<?php
+			wp_nav_menu(
+				array(
+					'theme_location' => 'footer',
+					'container'      => false,
+					'fallback_cb'    => false,
+					'depth'          => 1,
+				)
+			);
+			?>
 		</nav>
+		<?php endif; ?>
 		<?php if ( $noblen_social ) : ?>
-		<nav aria-label="Social"><ul class="menu">
+		<nav aria-label="Social"><p class="site-footer__head">Follow</p><ul class="menu">
 			<?php
 			foreach ( $noblen_social as $label => $url ) :
 				?>

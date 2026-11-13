@@ -14,7 +14,18 @@ if ( ! $item ) {
 	return;
 }
 ?>
-<article class="section"><div class="wrap prose record">
+<?php $noblen_ptype = get_post_type_object( (string) $item['type'] ); ?>
+<header class="page-head"><div class="wrap">
+	<?php
+	noblen_breadcrumbs(
+		array_filter(
+			array(
+				$noblen_ptype ? array( (string) $noblen_ptype->labels->name, noblen_archive_url( (string) $item['type'] ) ) : null,
+				array( (string) $item['title'], '' ),
+			)
+		)
+	);
+	?>
 	<?php
 	if ( ! empty( $item['status']['label'] ) ) :
 		?>
@@ -24,6 +35,8 @@ if ( ! $item ) {
 	if ( ! empty( $item['tagline'] ) ) :
 		?>
 		<p class="lead"><?php echo esc_html( $item['tagline'] ); ?></p><?php endif; ?>
+</div></header>
+<article class="section"><div class="wrap prose record">
 	<?php
 	if ( ! empty( $item['business_unit']['title'] ) ) :
 		?>

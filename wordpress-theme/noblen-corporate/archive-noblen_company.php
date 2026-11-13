@@ -9,8 +9,11 @@ $items = noblen_items(
 	)
 );
 ?>
-<section class="section"><div class="wrap">
+<header class="page-head"><div class="wrap">
+	<?php noblen_breadcrumbs( array( array( post_type_archive_title( '', false ), '' ) ) ); ?>
 	<h1><?php post_type_archive_title(); ?></h1>
+</div></header>
+<section class="section"><div class="wrap">
 	<?php
 	if ( $items ) :
 		?>
@@ -23,6 +26,6 @@ $items = noblen_items(
 		<?php
 	else :
 		?>
-		<p>There is nothing to show here yet.</p><?php endif; ?>
+		<p class="empty">Nothing is published in this section yet.</p><?php endif; ?>
 </div></section>
 <?php get_footer(); ?>

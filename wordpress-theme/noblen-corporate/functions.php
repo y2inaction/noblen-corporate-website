@@ -41,7 +41,8 @@ add_action(
 	'wp_enqueue_scripts',
 	static function () {
 		$dir = get_template_directory_uri() . '/assets';
-		wp_enqueue_style( 'noblen-main', $dir . '/css/main.css', array(), NOBLEN_THEME_VERSION );
+		wp_enqueue_style( 'noblen-tokens', $dir . '/css/tokens.css', array(), NOBLEN_THEME_VERSION );
+		wp_enqueue_style( 'noblen-main', $dir . '/css/main.css', array( 'noblen-tokens' ), NOBLEN_THEME_VERSION );
 		wp_enqueue_script(
 			'noblen-main',
 			$dir . '/js/main.js',
@@ -102,6 +103,26 @@ function noblen_section( string $id, string $title, array $items, string $more =
 		noblen_card( $item );
 	}
 	echo '</div></div></section>';
+}
+
+/**
+ * Render a breadcrumb trail. The last crumb is the current page and is not a link.
+ *
+ * @param array<int,array{0:string,1:string}> $trail Pairs of label and URL ('' URL for the current page).
+ */
+function noblen_breadcrumbs( array $trail ): void {
+	if ( ! $trail ) {
+		return;
+	}
+	echo '<nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="' . esc_url( home_url( '/' ) ) . '">Home</a></li>';
+	foreach ( $trail as $crumb ) {
+		if ( '' !== $crumb[1] ) {
+			echo '<li><a href="' . esc_url( $crumb[1] ) . '">' . esc_html( $crumb[0] ) . '</a></li>';
+		} else {
+			echo '<li aria-current="page">' . esc_html( $crumb[0] ) . '</li>';
+		}
+	}
+	echo '</ol></nav>';
 }
 
 /** Search should include the five custom types; only eligible records are ever returned by the plugin gate. */

@@ -1,0 +1,13 @@
+/* Design tokens. Palette per M2 Rev 5.1 section 8: navy, electric blue, white, light grey, slate text, restrained teal. No gold or yellow. */
+:root{
+	--navy:#0a1b3d;--navy-2:#12306b;--blue:#1f6bff;--blue-d:#1553c9;--teal:#0e7f78;--teal-l:#e5f4f3;
+	--white:#fff;--grey:#f2f5fa;--line:#d9e0ee;--ink:#1a2438;--muted:#4b5876;--on-navy:#dbe6ff;--on-navy-2:#b9c8ee;
+	--font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+	--fs-xs:.8125rem;--fs-sm:.9375rem;--fs-base:1rem;--fs-md:1.125rem;--fs-lg:clamp(1.25rem,1.1rem + .6vw,1.5rem);
+	--fs-xl:clamp(1.5rem,1.2rem + 1.2vw,2.125rem);--fs-2xl:clamp(2rem,1.4rem + 2.6vw,3.5rem);
+	--sp-1:.25rem;--sp-2:.5rem;--sp-3:.75rem;--sp-4:1rem;--sp-5:1.5rem;--sp-6:2rem;--sp-7:3rem;--sp-8:4.5rem;
+	--r:10px;--r-lg:16px;--max:1160px;--prose:760px;
+	--shadow-1:0 1px 2px rgba(10,27,61,.06),0 1px 3px rgba(10,27,61,.08);
+	--shadow-2:0 6px 20px rgba(10,27,61,.12);
+	--bp-nav:820px;--ease:cubic-bezier(.2,.7,.2,1);--dur:.18s;
+}
