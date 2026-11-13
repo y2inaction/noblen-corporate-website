@@ -21,7 +21,7 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 | ID | Requirement | Status |
 |----|-------------|--------|
 | P1 | Gallery field stores comma-separated media IDs; needs a media picker before launch. | done locally (tests-e2e/gallery.js, 9 checks: choose, dedupe, remove, no-JavaScript fallback). Hosted result pending. The local dev site is Debian-packaged WordPress and needed a symlink for underscore.min.js in the scratch site (not in the repo), so the local run is real-local evidence only. |
-| P2 | `languages/` folder and text-domain loading. | open |
+| P2 | `languages/` folder and text-domain loading. | done: languages/ folder, Domain Path header and load_plugin_textdomain. Administration text is English only in this release; wrapping strings for translation is not required by the plan and is not done. |
 | P3 | Audit of input validation, output escaping, nonces, capabilities, SQL preparation and upload handling, with evidence. | reviewed and written up in SECURITY-REVIEW.md. No defect found; open items are host-level security headers, an independent dynamic scan, and an accepted dev-tooling advisory exception (npm audit: 10 moderate, 1 high, test tools only). |
 | P4 | Contact forms are deferred to a later milestone by the approved plan (M7). The theme offers an email link only. | deferred by plan |
 | P5 | Persistent object-cache behaviour (criterion 31) is tested only without a persistent cache. | open |

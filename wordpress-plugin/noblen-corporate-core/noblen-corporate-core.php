@@ -8,6 +8,7 @@
  * Author: Noblen Technologies Limited
  * License: Proprietary
  * Text Domain: noblen-core
+ * Domain Path: /languages
  *
  * @package Noblen\Core
  */
@@ -54,6 +55,14 @@ if ( '' !== noblen_core_compat_problem() ) {
 	);
 	return;
 }
+
+// Ready for translation files. The administration text is English only in this release.
+add_action(
+	'init',
+	static function () {
+		load_plugin_textdomain( 'noblen-core', false, dirname( plugin_basename( NOBLEN_CORE_FILE ) ) . '/languages' );
+	}
+);
 
 require_once NOBLEN_CORE_DIR . 'includes/Autoloader.php';
 Noblen\Core\Autoloader::register( NOBLEN_CORE_DIR . 'includes/' );
