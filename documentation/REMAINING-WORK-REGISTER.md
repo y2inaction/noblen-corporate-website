@@ -30,7 +30,7 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 
 | ID | Requirement | Status |
 |----|-------------|--------|
-| Q1 | SEO fundamentals and performance: meta description, Open Graph, Organization data from owner-entered settings only, archive heading order. Lighthouse 12.8.2 on the local dev site (home, archive, record; Chromium, local server, no compression): accessibility 100, best practices 100, SEO 100, performance 99 to 100, LCP 1.7 s, CLS 0, TBT 0 ms. Tests: tests-e2e/seo.js (51 checks), tests-cli/seo-test.php (12 checks). Real-local evidence on fixture content; re-measure on staging with real hosting and compression. | done locally; hosted result pending |
+| Q1 | SEO fundamentals and performance: meta description, Open Graph, Organization data from owner-entered settings only, archive heading order. Lighthouse 12.8.2 on the local dev site (home, archive, record; Chromium, local server, no compression): accessibility 100, best practices 100, SEO 100, performance 98 to 99 (re-measured after the brand work), LCP 1.7 to 1.9 s, CLS 0, TBT 0 ms. Tests: tests-e2e/seo.js (51 checks), tests-cli/seo-test.php (12 checks). Real-local evidence on fixture content; re-measure on staging with real hosting and compression. | done locally; hosted result pending |
 
 ## B3. Configuration validation
 
