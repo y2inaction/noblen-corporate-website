@@ -51,10 +51,14 @@ jobs:
         run: scripts/check-no-third-party.sh
       - name: Repository audit (artifacts, credentials, local paths, dev data)
         run: scripts/audit-repo.sh
+      - name: PyYAML is a stable release of at least 6.0.1 (used by check-pins.sh, the traceability generator and its tests)
+        run: python3 scripts/build-traceability.py --check-dependencies
       - name: Dependency pins (exact versions, verification state, Configuration A and B isolation)
         run: scripts/check-pins.sh
       - name: PHP error-log check regression tests (the single allowed upstream deprecation stays narrow)
         run: tests-cli/php-log-check-test.sh
+      - name: Owner acceptance decisions (fail-closed generator and its regression tests)
+        run: python3 tests-cli/acceptance-decisions-test.py
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)

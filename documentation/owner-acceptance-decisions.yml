@@ -1,0 +1,45 @@
+# OWNER ACCEPTANCE DECISIONS
+#
+# Hand-maintained. NEVER generated. Edit this file only on an explicit instruction from the project owner; the commit that
+# changes it must cite that instruction. scripts/build-traceability.py reads it and fails if it is missing or malformed.
+#
+# Rules (enforced by the generator, which fails closed):
+#   - schema_version must be 1. The top level has exactly 'schema_version' and 'decisions'.
+#   - Each entry has exactly: id, status, evidence, accepted_on, accepted_by (and optionally 'note').
+#   - id must be one of the sub-criteria the generator requires (REQUIRED_SUBS); unknown or duplicate ids are errors.
+#   - An id with no entry is treated as 'pending'.
+#   - status is 'pending' or 'accepted'.
+#   - pending: accepted_on and accepted_by must be null.
+#   - accepted: evidence is a non-empty list of references (run ids, artifact ids, review reference), accepted_on is a
+#     real YYYY-MM-DD date that is not in the future, and accepted_by is the role label 'owner' (no personal names).
+#   - A criterion is accepted only when EVERY required sub-criterion is accepted. Criterion 21 requires C21-021,
+#     C21-022 and C21-M01.
+#
+# Invariants: no test result, generator run, developer action or technical approval can change a decision in this file.
+# The 'evidence' strings are audit references typed by the owner. The generator does NOT check that the referenced
+# runs, artifacts or reviews exist; they identify what the owner relied on, they do not prove it.
+#
+# Example of an accepted entry (do not enable without the owner's explicit decision):
+#   - id: C21-021
+#     status: accepted
+#     evidence:
+#       - "CI run 43316091579, strict Configuration A job 131524371513, record artifact 13988531774"
+#     accepted_on: 2026-01-01
+#     accepted_by: owner
+schema_version: 1
+decisions:
+  - id: C21-021
+    status: pending
+    evidence: []
+    accepted_on: null
+    accepted_by: null
+  - id: C21-022
+    status: pending
+    evidence: []
+    accepted_on: null
+    accepted_by: null
+  - id: C21-M01
+    status: pending
+    evidence: []
+    accepted_on: null
+    accepted_by: null

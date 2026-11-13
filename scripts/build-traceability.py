@@ -7,15 +7,74 @@ suites are passed on the command line, so nothing is typed in by hand without a 
 Four independent statuses per criterion: planned, implemented, executed, accepted.
   implemented: none | partial | automated_complete  (automated parts only; manual parts are separate)
   executed:    none | partial | local_full          (local, except where an entry cites a hosted run: the first hosted run, commit de59ce1, and for criterion 21 the capture run 43286920565 and the strict run 43316091579)
-  accepted:    always false here. Acceptance needs reviewed evidence and, where listed, manual records.
+  accepted:    false unless the OWNER has recorded acceptance of every required sub-criterion (REQUIRED_SUBS) in
+               documentation/owner-acceptance-decisions.yml. It is never inferred from test results. Missing entries are pending.
+               No test result, generator run, developer action or technical approval can change an owner decision. The 'evidence'
+               strings in that file are audit references typed by the owner: this script does not verify that the records exist.
 Usage: build-traceability.py junit.xml --cli 20/20 --pkg 11/11 --admin 21/21 --a11y 43/43 --smoke PASS
+       build-traceability.py --check-dependencies     (prints the PyYAML version and exits 0 if it meets the minimum)
+Exit status: 0 only when a new register was written. Any non-zero status means NO register was written, and any existing
+register file must NOT be treated as current (it is left untouched, never deleted). The '# Generated:' line carries a UTC
+timestamp with seconds, so a successful generation can be told apart from a stale file.
 """
-import argparse, collections, datetime, json, re, sys
+import argparse, collections, datetime, json, os, re, sys, tempfile
 import xml.etree.ElementTree as ET
 
-ap = argparse.ArgumentParser()
+NOT_CURRENT = 'No register was written. Any existing register file must NOT be treated as current.'
+
+
+def die(msg):
+    sys.stderr.write(f'{msg}\n{NOT_CURRENT}\n')
+    sys.exit(1)
+
+
+def _excepthook(exc_type, exc, tb):
+    sys.__excepthook__(exc_type, exc, tb)
+    sys.stderr.write(f'build-traceability: generation FAILED. {NOT_CURRENT}\n')
+
+
+sys.excepthook = _excepthook
+
+# PyYAML: the minimum is the version this tooling is tested with, and it must be a STABLE release (no alpha, beta,
+# release-candidate, dev or other pre-release, whatever its number). Local install: apt-get install python3-yaml, or
+# python3 -m pip install "PyYAML>=6.0.1". Documented in documentation/DEPENDENCIES.md.
+MIN_PYYAML = (6, 0, 1)
+MIN_PYYAML_TEXT = '.'.join(map(str, MIN_PYYAML))
+try:
+    import yaml
+except ImportError:
+    die(f'build-traceability.py needs a stable PyYAML release >= {MIN_PYYAML_TEXT} (Debian/Ubuntu: apt-get install python3-yaml; otherwise: python3 -m pip install "PyYAML>={MIN_PYYAML_TEXT}"). See documentation/DEPENDENCIES.md')
+
+
+def _stable_release(text):
+    """Return the release tuple when `text` is a stable release (N.N[.N], optionally followed by .postN and/or a +local
+    suffix); return None for anything else. Every pre-release (a, b, c, rc, alpha, beta, pre, preview, dev) and every text
+    that is not recognised is therefore refused, so a pre-release of a LATER version is refused as well."""
+    m = re.fullmatch(r'(\d+)\.(\d+)(?:\.(\d+))?([^+]*)(?:\+[A-Za-z0-9.]+)?', str(text).strip())
+    if not m or not re.fullmatch(r'(?:[._-]?post[._-]?\d*)?', m.group(4).lower()):
+        return None
+    return tuple(int(x or 0) for x in m.groups()[:3])
+
+
+_YAML_VERSION = getattr(yaml, '__version__', 'unknown')
+_YAML_RELEASE = _stable_release(_YAML_VERSION)
+if _YAML_RELEASE is None or _YAML_RELEASE < MIN_PYYAML:
+    die(f'build-traceability.py requires a stable PyYAML release >= {MIN_PYYAML_TEXT} (no pre-releases); found {_YAML_VERSION}. Install one (apt-get install python3-yaml, or python3 -m pip install "PyYAML>={MIN_PYYAML_TEXT}"). See documentation/DEPENDENCIES.md')
+if '--check-dependencies' in sys.argv[1:]:
+    print(f'PyYAML {_YAML_VERSION} (minimum {MIN_PYYAML_TEXT}): ok')
+    sys.exit(0)
+
+
+class _Parser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        die(f'{self.prog}: error: {message}')
+
+
+ap = _Parser()
 ap.add_argument('junit'); ap.add_argument('--cli'); ap.add_argument('--pkg'); ap.add_argument('--admin'); ap.add_argument('--a11y'); ap.add_argument('--smoke'); ap.add_argument('--content'); ap.add_argument('--classic'); ap.add_argument('--crawl'); ap.add_argument('--partial'); ap.add_argument('--we'); ap.add_argument('--classic-a')
 ap.add_argument('--out', default='documentation/acceptance-criteria-traceability.yml')
+ap.add_argument('--decisions', default='documentation/owner-acceptance-decisions.yml')
 a = ap.parse_args()
 
 counts, failed = collections.Counter(), collections.Counter()
@@ -27,6 +86,167 @@ for tc in ET.parse(a.junit).iter('testcase'):
         counts[int(m.group(1))] += 1
         if tc.find('failure') is not None or tc.find('error') is not None:
             failed[int(m.group(1))] += 1
+
+# ---- Owner acceptance decisions: hand-maintained input, never generated, fail-closed. -------------------------
+# Only the owner's recorded decisions can make a sub-criterion 'accepted'. A criterion is accepted only when EVERY
+# required sub-criterion listed here is accepted. Criteria not listed here stay 'accepted: false'.
+REQUIRED_SUBS = {21: ('C21-021', 'C21-022', 'C21-M01')}
+OWNER_ROLE = 'owner'
+SCHEMA_VERSION = 1
+
+
+class _StrictLoader(yaml.SafeLoader):
+    """SafeLoader that rejects duplicate mapping keys instead of silently keeping the last one."""
+
+
+def _no_duplicate_keys(loader, node, deep=False):
+    seen = set()
+    for key_node, _ in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        try:
+            hash(key)
+        except TypeError:
+            raise ValueError(f'a mapping key of type {type(key).__name__} is not allowed (keys must be plain scalars)') from None
+        if key in seen:
+            raise ValueError(f'duplicate key {key!r}')
+        seen.add(key)
+    return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+
+_StrictLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _no_duplicate_keys)
+
+
+def load_decisions(path, today):
+    def fail(msg):
+        die(f'owner-acceptance-decisions: {msg}')
+    try:
+        with open(path, encoding='utf-8') as fh:
+            raw = yaml.load(fh, Loader=_StrictLoader)
+    except FileNotFoundError:
+        fail(f'{path} is missing; it is required')
+    except OSError as e:
+        fail(f'cannot read {path}: {e.strerror or e}')
+    except (yaml.YAMLError, ValueError, RecursionError) as e:
+        fail(f'cannot parse {path}: {e}')
+    except Exception as e:  # last resort: never a traceback, never silent; the file is rejected and the run fails
+        fail(f'unexpected problem while reading {path} ({type(e).__name__}: {e}); the file is rejected')
+    try:
+        return _validate_decisions(raw, today, fail)
+    except SystemExit:
+        raise
+    except Exception as e:  # malformed input must never end in a traceback; the file is rejected
+        fail(f'unexpected problem while validating ({type(e).__name__}: {e}); the file is rejected')
+
+
+def _validate_decisions(raw, today, fail):
+    if not isinstance(raw, dict) or not all(isinstance(k, str) for k in raw) or set(raw) != {'schema_version', 'decisions'}:
+        fail("top level must be a mapping with exactly the keys 'schema_version' and 'decisions'")
+    if type(raw['schema_version']) is not int or raw['schema_version'] != SCHEMA_VERSION:
+        fail(f'schema_version must be the integer {SCHEMA_VERSION}')
+    if not isinstance(raw['decisions'], list):
+        fail("'decisions' must be a list")
+    known = {s for subs in REQUIRED_SUBS.values() for s in subs}
+    need = {'id', 'status', 'evidence', 'accepted_on', 'accepted_by'}
+    out = {}
+    for i, e in enumerate(raw['decisions']):
+        where = f'decisions[{i}]'
+        if not isinstance(e, dict) or not all(isinstance(k, str) for k in e):
+            fail(f'{where} must be a mapping with string keys')
+        if not need <= set(e) or set(e) - need - {'note'}:
+            fail(f"{where} must have exactly the keys {sorted(need)} (and optionally 'note'); got {sorted(e)}")
+        sid = e['id']
+        if not isinstance(sid, str):
+            fail(f'{where}: id must be a string')
+        if sid not in known:
+            fail(f'{where}: unknown id {sid!r}; known ids are {sorted(known)}')
+        if sid in out:
+            fail(f'{where}: duplicate entry for {sid}')
+        st = e['status']
+        if not isinstance(st, str) or st not in ('pending', 'accepted'):
+            fail(f"{where} ({sid}): status must be 'pending' or 'accepted', got {st!r}")
+        ev = e['evidence']
+        if not isinstance(ev, list) or any(not isinstance(x, str) or not x.strip() for x in ev):
+            fail(f'{where} ({sid}): evidence must be a list of non-empty strings')
+        if 'note' in e and not isinstance(e['note'], str):
+            fail(f'{where} ({sid}): note must be a string')
+        on, by = e['accepted_on'], e['accepted_by']
+        if isinstance(on, datetime.datetime):
+            fail(f'{where} ({sid}): accepted_on must be a date without a time')
+        if isinstance(on, datetime.date):
+            on = on.isoformat()
+        if on is not None and not isinstance(on, str):
+            fail(f'{where} ({sid}): accepted_on must be a YYYY-MM-DD date or null')
+        if by is not None and not isinstance(by, str):
+            fail(f'{where} ({sid}): accepted_by must be a string or null')
+        if st == 'pending':
+            if on is not None or by is not None:
+                fail(f'{where} ({sid}): a pending entry must have accepted_on and accepted_by set to null')
+        else:
+            if not ev:
+                fail(f'{where} ({sid}): an accepted entry needs at least one evidence reference')
+            if not (isinstance(on, str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}', on)):
+                fail(f'{where} ({sid}): accepted_on must be a YYYY-MM-DD date')
+            try:
+                day = datetime.date.fromisoformat(on)
+            except ValueError:
+                fail(f'{where} ({sid}): accepted_on {on!r} is not a real date')
+            if day > today:
+                fail(f'{where} ({sid}): accepted_on {on} is in the future')
+            if by != OWNER_ROLE:
+                fail(f"{where} ({sid}): accepted_by must be the role label {OWNER_ROLE!r}")
+        out[sid] = {'status': st, 'evidence': ev, 'accepted_on': on, 'accepted_by': by}
+    return out
+
+
+DEC = load_decisions(a.decisions, datetime.date.today())
+PENDING = {'status': 'pending', 'evidence': [], 'accepted_on': None, 'accepted_by': None}
+
+
+def sub_status(sid):
+    return DEC.get(sid, PENDING)
+
+
+def criterion_accepted(n):
+    subs = REQUIRED_SUBS.get(n)
+    return bool(subs) and all(sub_status(s)['status'] == 'accepted' for s in subs)
+
+
+def sub_lines(n):
+    if n not in REQUIRED_SUBS:
+        return []
+    out = ['    subcriteria_acceptance:']
+    for sid in REQUIRED_SUBS[n]:
+        d = sub_status(sid)
+        out += [f'      - id: {sid}', f"        status: {d['status']}"]
+        out += ['        evidence: []'] if not d['evidence'] else ['        evidence:'] + [f'          - {json.dumps(x)}' for x in d['evidence']]
+        out += [f"        accepted_on: {json.dumps(d['accepted_on'])}", f"        accepted_by: {json.dumps(d['accepted_by'])}"]
+    return out
+
+
+def _owner(sid):
+    d = sub_status(sid)
+    return f"ACCEPTED by the owner on {d['accepted_on']}" if d['status'] == 'accepted' else 'AWAITING OWNER ACCEPTANCE. Not accepted'
+
+
+def _pin_acceptance():
+    """Owner-acceptance wording of the register summary, derived from the decisions for C21-021 and C21-022 independently.
+    Both pending keeps the original wording; otherwise each sub-criterion states its own state and date."""
+    if sub_status('C21-021')['status'] != 'accepted' and sub_status('C21-022')['status'] != 'accepted':
+        return 'C21-021 and C21-022: EVIDENCED, AWAITING OWNER ACCEPTANCE'
+
+    def one(sid):
+        d = sub_status(sid)
+        return f"ACCEPTED BY THE OWNER on {d['accepted_on']}" if d['status'] == 'accepted' else 'AWAITING OWNER ACCEPTANCE'
+    return f"C21-021: EVIDENCED, {one('C21-021')}. C21-022: EVIDENCED, {one('C21-022')}"
+
+
+SUB_TOTAL = sum(len(v) for v in REQUIRED_SUBS.values())
+SUB_ACCEPTED = sum(1 for v in REQUIRED_SUBS.values() for sid in v if sub_status(sid)['status'] == 'accepted')
+G21_021 = f'C21-021 (version and source match the verified pin): EVIDENCED by hosted strict run 43316091579. {_owner("C21-021")}'
+G21_022 = f'C21-022 (record of the settings used): EVIDENCED by the settings record of strict run 43316091579 (classic-editor-replace=block; classic-editor-allow-users not stored, the plugin default applies). {_owner("C21-022")}'
+M21 = 'C21-M01 manual editor check' if sub_status('C21-M01')['status'] != 'accepted' else 'none'
+G21_M01 = ('C21-M01 (manual editor check) is still pending, so criterion 21 as a whole is not accepted'
+           if sub_status('C21-M01')['status'] != 'accepted' else f"C21-M01 (manual editor check): {_owner('C21-M01')}")
 
 CLI = f'tests-cli/cli-integration.sh (real WP-CLI 2.12.0): {a.cli}'
 PKG = f'tests-cli/package-install.sh: {a.pkg}'
@@ -66,7 +286,7 @@ C = {
  18: ('No unnecessary third-party requests', 'automated_complete', 'local_full', None, [SMK, 'scripts/check-no-third-party.sh: PASS'], []),
  19: ('Both ZIPs install on a clean WordPress', 'automated_complete', 'local_full', 'C19-M01', [PKG], ['Clean site is a copy of the local WordPress, not the CI-fetched release']),
  20: ('Installation and recovery instructions documented', 'partial', 'none', 'C20-M01, C20-M02 (rehearsal)', ['documentation/INSTALLATION.md', 'documentation/RECOVERY.md'], ['Link check not run on the new documents; recovery rehearsal not done']),
- 21: ('Classic Editor compatibility', 'automated_complete', 'partial', 'C21-M01 manual editor check', [CLS, CLA, CLH_CAP, CLH_REV, CLH_STR], ['C21-021 (version and source match the verified pin): EVIDENCED by hosted strict run 43316091579. AWAITING OWNER ACCEPTANCE. Not accepted', 'C21-022 (record of the settings used): EVIDENCED by the settings record of strict run 43316091579 (classic-editor-replace=block; classic-editor-allow-users not stored, the plugin default applies). AWAITING OWNER ACCEPTANCE. Not accepted', 'Pin limits: the whole-ZIP SHA-256 was observed stable on one day only; the SVN revision was not recorded; the pin\'s checksums URL is the WP-CLI form and its live reachability is not independently confirmed; the SVN tag and the download host share one trust anchor', 'Configuration A tests C21-001 to C21-005, 011, 013, 015, 017, 019 passed 13/13 against the real package in capture run 43286920565 and strict run 43316091579. Configuration B ran in the wp-env job of run 43316091579 (step passed; its check count was not re-read)', 'C21-M01 (manual editor check) is still pending, so criterion 21 as a whole is not accepted']),
+ 21: ('Classic Editor compatibility', 'automated_complete', 'partial', M21, [CLS, CLA, CLH_CAP, CLH_REV, CLH_STR], [G21_021, G21_022, 'Pin limits: the whole-ZIP SHA-256 was observed stable on one day only; the SVN revision was not recorded; the pin\'s checksums URL is the WP-CLI form and its live reachability is not independently confirmed; the SVN tag and the download host share one trust anchor', 'Configuration A tests C21-001 to C21-005, 011, 013, 015, 017, 019 passed 13/13 against the real package in capture run 43286920565 and strict run 43316091579. Configuration B ran in the wp-env job of run 43316091579 (step passed; its check count was not re-read)', G21_M01]),
  22: ('Private approval status isolation', 'partial', 'partial', None, [], ['In-process only; HTML and feed bodies not sentinel-probed over HTTP; editor and anonymous reads covered']),
  23: ('Snapshot invalidation after editing public content', 'partial', 'partial', None, [], ['Every public scalar field is covered via the registry; relationship, term, thumbnail, gallery membership and order, alt, caption, title covered once each; media file replacement covered by C29; video URL covered as a field; presentation flag covered as a field']),
  24: ('Failed publication attempts through alternative write paths', 'automated_complete', 'local_full', None, [CLI + ' (real WP-CLI write paths)'], ['REST and XML-RPC paths are tested in-process with the endpoints enabled, not over HTTP']),
@@ -82,20 +302,26 @@ C = {
  34: ('Audit key: missing, invalid, rotation and recovery', 'partial', 'partial', 'C34-M01 (owner)', [], ['Wrong-key-for-historical-segment, compromise rotation and old-key-available are not each tested']),
 }
 
+_missing = [n for n in REQUIRED_SUBS if n not in C]
+if _missing:
+    die(f'owner-acceptance-decisions: REQUIRED_SUBS names criteria that are not in the criterion table: {_missing}')
+ACCEPTED_COUNT = sum(1 for n in C if criterion_accepted(n))
+
 lines = [
  '# M2 acceptance-criteria traceability (generated by scripts/build-traceability.py)',
- f'# Generated: {datetime.date.today().isoformat()}',
+ f'# Generated: {datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}',
  '# Executions are LOCAL (PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3) unless an entry cites a hosted run: the first hosted run (commit de59ce1, run 43259095276, 6 of 11 jobs green) and, for criterion 21, the capture run 43286920565 and the strict run 43316091579 (both green).',
- '# accepted is false everywhere: acceptance needs reviewed evidence and, where listed, manual records.',
+ f'# accepted is false unless the owner records acceptance of every required sub-criterion in documentation/owner-acceptance-decisions.yml ({SUB_ACCEPTED} of {SUB_TOTAL} required sub-criteria accepted); acceptance also needs reviewed evidence and, where listed, manual records.',
  'summary:',
  f'  phpunit_total_tests: {total}',
  '  environment: "local: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, Chromium (Playwright 1.63.0), axe-core 4.10.2"',
- '  accepted_count: 0',
- '  classic_editor_pin: "verified (1.7.0; independent review 2026-11-12, reference NOBLEN-CORP-CE-INDEPENDENT-REVIEW-2026-11-12; strict hosted run 43316091579 passed). C21-021 and C21-022: EVIDENCED, AWAITING OWNER ACCEPTANCE"',
+ f'  accepted_count: {ACCEPTED_COUNT}',
+ '  owner_acceptance_decisions: "documentation/owner-acceptance-decisions.yml (hand-maintained by the owner; an entry that is absent is pending; evidence entries are audit references that the generator does not verify)"',
+ f'  classic_editor_pin: "verified (1.7.0; independent review 2026-11-12, reference NOBLEN-CORP-CE-INDEPENDENT-REVIEW-2026-11-12; strict hosted run 43316091579 passed). {_pin_acceptance()}"',
  '  c26_003_to_c26_006: "deferred to M2-D by owner decision; not implemented; not waived; not accepted"',
  'criteria:',
 ]
-for n in range(1, 35):
+for n in sorted(C):
     t, impl, ex, manual, extra, gaps = C[n]
     cnt = counts.get(n, 0)
     ev = ([f'PHPUnit: {cnt - failed.get(n, 0)}/{cnt} tests named test_C{n:02d}_* pass ({"all" if not failed.get(n) else "FAILURES"})'] if cnt else []) + extra
@@ -105,9 +331,25 @@ for n in range(1, 35):
         '    planned: true',
         f'    implemented: {impl}',
         f'    executed: {ex}  # local only',
-        '    accepted: false',
+        f'    accepted: {"true" if criterion_accepted(n) else "false"}',
         f'    manual_records_pending: {json.dumps(manual) if manual else "none"}',
         '    evidence:' if ev else '    evidence: []',
-    ] + [f'      - {json.dumps(e)}' for e in ev] + (['    gaps:'] + [f'      - {json.dumps(g)}' for g in gaps] if gaps else ['    gaps: []'])
-open(a.out, 'w').write('\n'.join(lines) + '\n')
+    ] + [f'      - {json.dumps(e)}' for e in ev] + (['    gaps:'] + [f'      - {json.dumps(g)}' for g in gaps] if gaps else ['    gaps: []']) + sub_lines(n)
+# Write to a temporary file in the same directory and replace the output only after everything above has succeeded,
+# so a failed run can never leave a half-written register behind.
+_dir = os.path.dirname(os.path.abspath(a.out))
+_fd, _tmp = tempfile.mkstemp(prefix='.traceability-', suffix='.tmp', dir=_dir)
+try:
+    with os.fdopen(_fd, 'w') as _fh:
+        _fh.write('\n'.join(lines) + '\n')
+        _fh.flush()
+        os.fsync(_fh.fileno())
+    os.chmod(_tmp, 0o644)
+    os.replace(_tmp, a.out)
+except BaseException:
+    try:
+        os.unlink(_tmp)
+    except OSError:
+        pass
+    raise
 print('wrote', a.out, 'criteria with failures:', [n for n in failed])
