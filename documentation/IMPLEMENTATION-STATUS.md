@@ -108,8 +108,8 @@ Clicking Save Draft while WordPress's permalink request is still in flight is si
 
 ## Gaps against Revision 5.1 (actual, not fixed)
 
-- Theme: no `screenshot.png`, no partnerships section, no section order or visibility settings, no breadcrumbs, no split token/base CSS, no reveal animation script, no self-hosted fonts (system fonts only). The plan lists these; none is invented content, but the homepage skeleton is simpler than the plan's.
-- Plugin: the gallery field is a comma-separated list of media IDs, not a media picker. This is poor editor usability and should be replaced before launch.
+- Theme: no `screenshot.png`, no reveal animation script and no self-hosted fonts (system fonts only). Design tokens are split into `tokens.css`; breadcrumbs, page headers, home section order and visibility settings (Customizer) and a record facts panel exist. The partnerships section exists but renders nothing: the plugin has no partner record type, so there is no verified data source (see `REMAINING-WORK-REGISTER.md`).
+- Plugin: the gallery field has a media-library picker (choose, reorder, remove). The comma-separated ID field remains as the fallback when JavaScript is off. Browser-tested locally (`tests-e2e/gallery.js`); hosted result is recorded in the register once CI has run.
 - Plugin: no `languages/` folder; no separate Deactivator and Compat classes (their work is done in `Activator` and the main file).
 - Contact and partnership forms are deferred to M7 by the approved plan. Only a mailto call to action exists.
 - `get_posts()` and any query with `suppress_filters` bypass the read-time filter. Theme code must use the accessor. This is documented, not a defect in a listed interface.
