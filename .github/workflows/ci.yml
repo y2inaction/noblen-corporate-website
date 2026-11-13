@@ -36,6 +36,7 @@ jobs:
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: ${{ matrix.php }}
+          extensions: gd, dom, mbstring
           tools: composer
       - name: Install dev tooling
         run: composer install --no-interaction --prefer-dist
@@ -65,6 +66,10 @@ jobs:
         run: python3 -I tests-cli/upgrade-attestation-test.py
       - name: Brand colour system (PHP and JavaScript parity, presets pass contrast, no colour literals in component CSS)
         run: node tests-e2e/brand-parity.js
+      - name: SVG logo sanitiser (hostile-input suite)
+        run: php tests-cli/svg-test.php
+      - name: Logo palette analysis and suggestions (synthetic logos, property test)
+        run: php tests-cli/palette-test.php
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)

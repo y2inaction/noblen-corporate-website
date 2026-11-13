@@ -59,9 +59,9 @@
 	}
 	function darkPalette(p) {
 		var base = luminance(p.primary) <= 0.12 ? p.primary : mix(p.primary, '#000000', 0.75);
-		var bg = mix(base, '#000000', 0.45);
-		var surface = mix(base, '#ffffff', 0.1);
-		var text = ensureContrast('#e6ecf8', bg, 7);
+		var bg = mix(base, '#000000', 0.6);
+		var surface = mix(bg, '#ffffff', 0.05);
+		var text = ensureContrast(ensureContrast('#e6ecf8', bg, 7), surface, 7);
 		var footer = mix(bg, '#000000', 0.35);
 		var link = ensureContrast(ensureContrast(p.secondary, bg, 4.5), surface, 4.5);
 		var hover = ensureContrast(mix(link, '#ffffff', 0.35), bg, 4.5);

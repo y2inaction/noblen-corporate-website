@@ -106,9 +106,9 @@ function noblen_ensure_badge_contrast( string $accent, string $surface ): string
  */
 function noblen_brand_dark_palette( array $p ): array {
 	$base    = noblen_luminance( $p['primary'] ) <= 0.12 ? $p['primary'] : noblen_mix( $p['primary'], '#000000', 0.75 );
-	$bg      = noblen_mix( $base, '#000000', 0.45 );
-	$surface = noblen_mix( $base, '#ffffff', 0.1 );
-	$text    = noblen_ensure_contrast( '#e6ecf8', $bg, 7 );
+	$bg      = noblen_mix( $base, '#000000', 0.6 );
+	$surface = noblen_mix( $bg, '#ffffff', 0.05 );
+	$text    = noblen_ensure_contrast( noblen_ensure_contrast( '#e6ecf8', $bg, 7 ), $surface, 7 );
 	$footer  = noblen_mix( $bg, '#000000', 0.35 );
 	$link    = noblen_ensure_contrast( noblen_ensure_contrast( $p['secondary'], $bg, 4.5 ), $surface, 4.5 );
 	$hover   = noblen_ensure_contrast( noblen_mix( $link, '#ffffff', 0.35 ), $bg, 4.5 );
