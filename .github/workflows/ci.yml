@@ -230,6 +230,10 @@ jobs:
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
         run: php tests-cli/home-sections-test.php
+      - name: Record facts panel (escaping, empty values)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/record-facts-test.php
       - name: Install browser tooling
         working-directory: tests-e2e
         run: |

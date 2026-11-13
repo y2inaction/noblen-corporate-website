@@ -37,14 +37,7 @@ if ( ! $item ) {
 		<p class="lead"><?php echo esc_html( $item['tagline'] ); ?></p><?php endif; ?>
 </div></header>
 <article class="section"><div class="wrap prose record">
-	<?php
-	if ( ! empty( $item['business_unit']['title'] ) ) :
-		?>
-		<p class="card__meta">Business unit: <a href="<?php echo esc_url( $item['business_unit']['url'] ); ?>"><?php echo esc_html( $item['business_unit']['title'] ); ?></a></p><?php endif; ?>
-	<?php
-	if ( ! empty( $item['client'] ) ) :
-		?>
-		<p class="card__meta">Client: <?php echo esc_html( $item['client'] ); ?></p><?php endif; ?>
+	<?php noblen_record_facts( $item ); ?>
 	<?php
 	if ( ! empty( $item['featured_image'] ) ) :
 		?>

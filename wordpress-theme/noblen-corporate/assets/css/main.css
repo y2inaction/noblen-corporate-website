@@ -88,3 +88,4 @@ h1{font-size:var(--fs-2xl)}h2{font-size:var(--fs-xl)}h3{font-size:var(--fs-lg)}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}.card:hover{transform:none}}
 @media print{.site-header,.site-footer,.skip-link,.nav-toggle{display:none}body{color:#000}a{color:#000}}
+.page-head .badge{margin-top:var(--sp-3)}

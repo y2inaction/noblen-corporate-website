@@ -107,6 +107,59 @@ function noblen_section( string $id, string $title, array $items, string $more =
 }
 
 /**
+ * Facts for a record: only values the core plugin returned as public, each shown with its label.
+ *
+ * @param array<string,mixed> $item Record from the core accessor.
+ * @return array<int,array{0:string,1:string}> Pairs of label and trusted HTML (already escaped).
+ */
+function noblen_record_fact_rows( array $item ): array {
+	$rows = array();
+	if ( ! empty( $item['business_unit']['title'] ) ) {
+		$unit_url = esc_url( (string) ( $item['business_unit']['url'] ?? '' ) );
+		$unit     = esc_html( (string) $item['business_unit']['title'] );
+		$rows[]   = array( 'Business unit', '' !== $unit_url ? '<a href="' . $unit_url . '">' . $unit . '</a>' : $unit );
+	}
+	if ( ! empty( $item['client'] ) ) {
+		$rows[] = array( 'Client', esc_html( (string) $item['client'] ) );
+	}
+	$by_tax = array();
+	foreach ( (array) ( $item['terms'] ?? array() ) as $term ) {
+		if ( ! empty( $term['taxonomy'] ) && ! empty( $term['name'] ) ) {
+			$by_tax[ (string) $term['taxonomy'] ][] = $term;
+		}
+	}
+	foreach ( $by_tax as $tax => $terms ) {
+		$obj   = get_taxonomy( $tax );
+		$label = $obj ? (string) $obj->labels->name : ucfirst( str_replace( '_', ' ', $tax ) );
+		$links = array();
+		foreach ( $terms as $term ) {
+			$url     = is_string( $term['url'] ?? null ) ? (string) $term['url'] : '';
+			$links[] = '' !== $url ? '<a href="' . esc_url( $url ) . '">' . esc_html( (string) $term['name'] ) . '</a>' : esc_html( (string) $term['name'] );
+		}
+		$rows[] = array( $label, implode( ', ', $links ) );
+	}
+	return $rows;
+}
+
+/**
+ * Print the facts panel. Prints nothing when there are no facts.
+ *
+ * @param array<string,mixed> $item Record from the core accessor.
+ */
+function noblen_record_facts( array $item ): void {
+	$rows = noblen_record_fact_rows( $item );
+	if ( ! $rows ) {
+		return;
+	}
+	echo '<dl class="facts">';
+	foreach ( $rows as $row ) {
+		// Values are built from esc_html() and esc_url() in noblen_record_fact_rows().
+		echo '<div class="fact"><dt>' . esc_html( $row[0] ) . '</dt><dd>' . $row[1] . '</dd></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+	echo '</dl>';
+}
+
+/**
  * Render a breadcrumb trail. The last crumb is the current page and is not a link.
  *
  * @param array<int,array{0:string,1:string}> $trail Pairs of label and URL ('' URL for the current page).
