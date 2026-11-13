@@ -20,7 +20,7 @@ $items = noblen_items(
 		<div class="grid">
 		<?php
 		foreach ( $items as $i ) {
-				noblen_card( $i ); }
+				noblen_card( $i, 2 ); }
 		?>
 </div>
 		<?php

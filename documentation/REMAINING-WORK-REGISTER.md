@@ -26,6 +26,12 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 | P4 | Contact forms are deferred to a later milestone by the approved plan (M7). The theme offers an email link only. | deferred by plan |
 | P5 | Persistent object-cache behaviour (criterion 31) is tested only without a persistent cache. | open |
 
+## B2. Quality, SEO and performance
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| Q1 | SEO fundamentals and performance: meta description, Open Graph, Organization data from owner-entered settings only, archive heading order. Lighthouse 12.8.2 on the local dev site (home, archive, record; Chromium, local server, no compression): accessibility 100, best practices 100, SEO 100, performance 99 to 100, LCP 1.7 s, CLS 0, TBT 0 ms. Tests: tests-e2e/seo.js (51 checks), tests-cli/seo-test.php (12 checks). Real-local evidence on fixture content; re-measure on staging with real hosting and compression. | done locally; hosted result pending |
+
 ## C. M2-D, packaging and release
 
 | ID | Requirement | Status |

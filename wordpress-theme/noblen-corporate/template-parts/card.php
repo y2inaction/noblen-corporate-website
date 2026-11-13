@@ -1,6 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
-$item = $args['item'] ?? array();
+$item  = $args['item'] ?? array();
+$level = in_array( (int) ( $args['level'] ?? 3 ), array( 2, 3 ), true ) ? (int) $args['level'] : 3;
 if ( ! $item ) {
 	return;
 }
@@ -14,7 +15,7 @@ if ( ! $item ) {
 		if ( ! empty( $item['status']['label'] ) ) :
 			?>
 			<span class="badge"><?php echo esc_html( $item['status']['label'] ); ?></span><?php endif; ?>
-		<h3 class="card__title"><a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['title'] ); ?></a></h3>
+		<h<?php echo (int) $level; ?> class="card__title"><a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['title'] ); ?></a></h<?php echo (int) $level; ?>>
 		<?php
 		if ( ! empty( $item['tagline'] ) ) :
 			?>

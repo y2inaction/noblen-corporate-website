@@ -12,6 +12,7 @@ define( 'NOBLEN_THEME_VERSION', '0.1.0' );
 require_once get_template_directory() . '/inc/compat.php';
 require_once get_template_directory() . '/inc/core-bridge.php';
 require_once get_template_directory() . '/inc/home-sections.php';
+require_once get_template_directory() . '/inc/seo.php';
 
 add_action(
 	'after_setup_theme',
@@ -77,10 +78,18 @@ add_filter( 'excerpt_length', static fn() => 28 );
 /**
  * Render the card for a public record array.
  *
- * @param array<string,mixed> $item Record from the core accessor.
+ * @param array<string,mixed> $item  Record from the core accessor.
+ * @param int                 $level Heading level for the title (2 when the page has only an h1 above).
  */
-function noblen_card( array $item ): void {
-	get_template_part( 'template-parts/card', null, array( 'item' => $item ) );
+function noblen_card( array $item, int $level = 3 ): void {
+	get_template_part(
+		'template-parts/card',
+		null,
+		array(
+			'item'  => $item,
+			'level' => $level,
+		)
+	);
 }
 
 /**

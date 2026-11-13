@@ -236,6 +236,10 @@ jobs:
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
         run: php tests-cli/record-facts-test.php
+      - name: SEO helpers (snippets, Organization data)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/seo-test.php
       - name: Install browser tooling
         working-directory: tests-e2e
         run: |
@@ -269,6 +273,9 @@ jobs:
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
+      - name: SEO and document structure (descriptions, structured data, headings)
+        working-directory: tests-e2e
+        run: node seo.js
       - name: Upgrade comparison on a code-built schema-1 fixture (C26-003 to C26-005 tooling; destroys this disposable site's Noblen data, so it runs last)
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
@@ -367,6 +374,9 @@ jobs:
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
+      - name: SEO and document structure (descriptions, structured data, headings)
+        working-directory: tests-e2e
+        run: node seo.js
       - name: Site crawl including the core sitemap (C12-001)
         working-directory: tests-e2e
         env:
