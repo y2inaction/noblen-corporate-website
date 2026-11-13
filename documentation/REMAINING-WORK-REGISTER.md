@@ -30,7 +30,7 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 
 | ID | Requirement | Status |
 |----|-------------|--------|
-| D1 | C26-003 to C26-006 (upgrade comparison, audit chain before and after, declared transformations, attestation and runtime binding). Boundary review recorded; prerequisites need an independent reviewer, a registered source and target, and an authorised hosted run. Part A (repository-resident tooling) is implementable. | open, owner for prerequisites |
+| D1 | C26-003 to C26-006 (upgrade comparison, audit chain before and after, declared transformations, attestation and runtime binding). Boundary review recorded; prerequisites need an independent reviewer, a registered source and target, and an authorised hosted run. Part A (repository-resident tooling) is implementable. | tooling done and tested (UPGRADE-VERIFICATION.md): manifest, code-built schema-1 fixture, comparison harness (25 checks, 4 mutants caught), attestation checker (41 checks, 8 mutants caught). The criteria are NOT satisfied: they still need the registered source/target, an independent reviewer and approved attestation, and an authorised hosted run. |
 | D2 | Release packaging reproducibility, checksums, fresh-install and package-install tests. | partly done; extend |
 | D3 | Upgrade test from an earlier real release. None exists; a fixture must be described as a fixture. | owner |
 | D4 | Container images used by the browser tests are not pinned (wp-env 12.1.0 offers no pinning). Record digests and document the exception. | open |

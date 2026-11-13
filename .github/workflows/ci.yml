@@ -61,6 +61,8 @@ jobs:
         run: python3 tests-cli/acceptance-decisions-test.py
       - name: PHPUnit per-criterion report regression tests (missing, empty, malformed and red JUnit output fail closed)
         run: python3 tests-cli/phpunit-criteria-report-test.py
+      - name: Upgrade attestation checker regression tests (C26-006 failure conditions, synthetic records only)
+        run: python3 -I tests-cli/upgrade-attestation-test.py
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)
@@ -267,6 +269,11 @@ jobs:
       - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
         working-directory: tests-e2e
         run: node a11y.js
+      - name: Upgrade comparison on a code-built schema-1 fixture (C26-003 to C26-005 tooling; destroys this disposable site's Noblen data, so it runs last)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+          NOBLEN_UPGRADE_FIXTURE_RESET: '1'
+        run: php tests-cli/upgrade-comparison.php
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
