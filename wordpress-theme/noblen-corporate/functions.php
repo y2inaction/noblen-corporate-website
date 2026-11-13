@@ -15,6 +15,8 @@ require_once get_template_directory() . '/inc/home-sections.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/brand.php';
 require_once get_template_directory() . '/inc/logo.php';
+require_once get_template_directory() . '/inc/customizer.php';
+require_once get_template_directory() . '/inc/brand-ajax.php';
 
 add_action(
 	'after_setup_theme',

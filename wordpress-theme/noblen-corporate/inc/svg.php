@@ -224,6 +224,15 @@ function noblen_svg_clean_node( DOMNode $node, int &$count ): void {
 			continue;
 		}
 		$name = strtolower( (string) $child->localName );
+		if ( 'a' === $name && NOBLEN_SVG_NS === $child->namespaceURI ) {
+			// A link wrapper is harmless without its attributes: keep its (separately cleaned) children, drop the link.
+			while ( $child->firstChild ) {
+				$node->insertBefore( $child->firstChild, $child );
+			}
+			$node->removeChild( $child );
+			noblen_svg_clean_node( $node, $count );
+			return;
+		}
 		if ( ! in_array( $name, $allowed_el, true ) || ( '' !== (string) $child->namespaceURI && NOBLEN_SVG_NS !== $child->namespaceURI ) ) {
 			$node->removeChild( $child );
 			continue;
@@ -388,29 +397,53 @@ add_filter(
 	3
 );
 
-// Rebuild the uploaded file from the allow-list before WordPress stores it. A file that cannot be made safe is refused.
-add_filter(
-	'wp_handle_upload_prefilter',
-	static function ( $file ) {
-		if ( empty( $file['name'] ) || 'svg' !== strtolower( pathinfo( (string) $file['name'], PATHINFO_EXTENSION ) ) ) {
-			return $file;
-		}
-		if ( ! noblen_svg_user_can_upload() ) {
-			$file['error'] = 'You are not allowed to upload SVG files.';
-			return $file;
-		}
-		$source = is_readable( (string) ( $file['tmp_name'] ?? '' ) ) ? (string) file_get_contents( $file['tmp_name'] ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$reason = '';
-		$clean  = noblen_svg_sanitize( $source, $reason );
-		if ( null === $clean ) {
-			$file['error'] = 'This SVG was not uploaded: ' . $reason;
-			return $file;
-		}
-		if ( false === file_put_contents( $file['tmp_name'], $clean ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			$file['error'] = 'This SVG could not be processed.';
-		}
+/**
+ * Upload prefilter: rebuild the file from the allow-list before WordPress stores it, or refuse it with a plain reason.
+ *
+ * @param array<string,mixed> $file Upload being handled.
+ * @return array<string,mixed>
+ */
+function noblen_svg_prefilter( $file ) {
+	if ( empty( $file['name'] ) || 'svg' !== strtolower( pathinfo( (string) $file['name'], PATHINFO_EXTENSION ) ) ) {
 		return $file;
 	}
+	if ( ! noblen_svg_user_can_upload() ) {
+		$file['error'] = 'You are not allowed to upload SVG files.';
+		return $file;
+	}
+	$source = is_readable( (string) ( $file['tmp_name'] ?? '' ) ) ? (string) file_get_contents( $file['tmp_name'] ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$reason = '';
+	$clean  = noblen_svg_sanitize( $source, $reason );
+	if ( null === $clean ) {
+		$file['error'] = 'This SVG was not uploaded: ' . $reason;
+		return $file;
+	}
+	if ( false === file_put_contents( $file['tmp_name'], $clean ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$file['error'] = 'This SVG could not be processed.';
+	}
+	return $file;
+}
+
+// The media library and the REST API use different upload routines, each with its own prefilter.
+add_filter( 'wp_handle_upload_prefilter', 'noblen_svg_prefilter' );
+add_filter( 'wp_handle_sideload_prefilter', 'noblen_svg_prefilter' );
+
+// Safety net for every other route (XML-RPC, imports, plugins): whichever way an SVG attachment is created, the stored file is
+// rebuilt from the allow-list, and an attachment that cannot be made safe is deleted.
+add_action(
+	'add_attachment',
+	static function ( $attachment_id ) {
+		if ( 'image/svg+xml' !== get_post_mime_type( $attachment_id ) ) {
+			return;
+		}
+		$path   = get_attached_file( $attachment_id );
+		$reason = '';
+		$clean  = ( $path && is_readable( $path ) ) ? noblen_svg_sanitize( (string) file_get_contents( $path ), $reason ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( null === $clean || false === file_put_contents( $path, $clean ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			wp_delete_attachment( $attachment_id, true );
+		}
+	},
+	1
 );
 
 // Give SVG attachments dimensions (from the sanitised file) so layouts keep the aspect ratio.

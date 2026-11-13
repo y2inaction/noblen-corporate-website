@@ -76,6 +76,10 @@ foreach ( $bad as $name => $svg ) {
 	t( ! $danger, "hostile input neutralised: $name", (string) $o );
 }
 
+// ---- Link wrappers are unwrapped, not lost.
+$unwrapped = (string) clean( wrap( '<a href="javascript:alert(1)" onclick="x()"><rect width="9" height="9" fill="#fff"/></a>' ) );
+t( str_contains( $unwrapped, '<rect' ) && ! str_contains( $unwrapped, '<a' ) && ! str_contains( $unwrapped, 'javascript' ), 'an <a> wrapper is removed but its shapes are kept' );
+
 // ---- Documents that must be refused outright.
 $entity = '<?xml version="1.0"?><!DOCTYPE svg [<!ENTITY x SYSTEM "file:///etc/passwd">]>' . wrap( '<text>&x;</text>' );
 t( null === clean( $entity ), 'external entity (XXE) is refused' );
