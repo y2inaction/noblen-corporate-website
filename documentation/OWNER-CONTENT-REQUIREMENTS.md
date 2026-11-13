@@ -27,7 +27,7 @@ Technical development does not wait for these. The site shows only structure unt
 - Case studies for verified projects (twelve structured fields; outcomes only when verified).
 - Insights articles and announcements.
 - Partnership and contact **forms** (planned for milestone M7; M2 offers a mailto call to action only).
-- Schema.org, sitemap design and performance tuning (milestone M8).
+- Further SEO and performance tuning (milestone M8). Basic fundamentals now exist: meta description, Open Graph and Organization data built only from the settings the owner enters, plus the WordPress core sitemap.
 - A hosting or CDN purge integration (the plugin supplies the purge list and a hook).
 
 ## C. May remain unpublished until verified
@@ -42,3 +42,18 @@ These stay as unpublished drafts. Do not publish them until status and evidence 
 - Client logos and photographs, unless permission is recorded.
 
 The marketplace may appear only as "OnlineMart" or "Online Marketplace".
+
+## D. Added in the completion phase
+
+| # | Item | Why it is the owner's | Notes |
+|---|------|-----------------------|-------|
+| 14 | **Master logo file**: SVG (preferred) or PNG with a transparent background, and which lockup is approved (horizontal, stacked, or icon only) | A brand sheet was shared as an image only; the repository must use the exact approved artwork and never a redrawn one | Upload through Customize, Site Identity, or supply for commit as an asset. The green swoosh stays in the logo only |
+| 15 | Confirmation that the sector icons and the four values on the brand sheet are **verified** and may be published, and what each icon should link to | They read as business claims | The theme is ready to show them; none are published until confirmed |
+| 16 | Whether any green accent may be used in the interface | The approved palette is navy, blue and teal; the brand sheet adds a green | Gold is excluded |
+| 17 | A decision to add a **partner record type** (with clearance) if the partnerships section is wanted | It changes the content model; no verified partner data exists, so the section renders nothing | See `REMAINING-WORK-REGISTER.md`, item T4 |
+| 18 | Domain, hosting, HTTPS certificate, backup service and CDN or page cache choices, and who operates them | Hosting and any cost are the owner's commitment | Production deployment, DNS and database changes stay reserved gates |
+| 19 | HTTP security headers (policy for frames, content sources, HSTS) applied at the host or CDN | They depend on the real hosting | See `SECURITY-REVIEW.md` |
+| 20 | The named **independent reviewer(s)** for the 17 manual acceptance records, and the owner for the owner-run items | Independence cannot be supplied by the implementer | See `ACCEPTANCE-RECORDS-GUIDE.md` |
+| 21 | Owner decisions in `owner-acceptance-decisions.yml` for C21-021, C21-022 and C21-M01 | Acceptance is the owner's | All three are pending |
+| 22 | For C26-003 to C26-006: the registered upgrade source and target, an independent reviewer, an approved attestation and an authorised hosted run | They cannot be produced by the implementer | See `UPGRADE-VERIFICATION.md` |
+| 23 | A real capture to replace the theme `screenshot.png` design preview, once approved content exists | The current image uses structural labels only | |
