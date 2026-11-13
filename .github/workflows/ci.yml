@@ -226,6 +226,10 @@ jobs:
           $W eval-file tests-e2e/wp-env/seed-e2e.php
           PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8100 -t "$WP_DIR" > "$RUNNER_TEMP/php-server.log" 2>&1 &
           sleep 3; curl -fsS "$BASE_URL/" >/dev/null
+      - name: Home page section order, visibility and partnerships (theme settings)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/home-sections-test.php
       - name: Install browser tooling
         working-directory: tests-e2e
         run: |

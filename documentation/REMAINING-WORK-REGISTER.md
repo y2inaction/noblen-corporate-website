@@ -6,10 +6,10 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 
 | ID | Requirement | Status |
 |----|-------------|--------|
-| T1 | Design tokens for colour, type scale, spacing, radii, shadows, breakpoints, motion (Rev 5.1 section 8). Only colour, radius and width existed. | open |
+| T1 | Design tokens for colour, type scale, spacing, radii, shadows, breakpoints, motion (Rev 5.1 section 8). Only colour, radius and width existed. | done (tokens.css; hosted CI green at 663c356) |
 | T2 | Header, navigation and footer polish; footer shows only owner-entered facts. | open |
-| T3 | Breadcrumbs on archives and records. | open |
-| T4 | Homepage: group introduction, partnerships section (renders nothing without verified data), section order and visibility theme settings. | open |
+| T3 | Breadcrumbs on archives and records. | done (hosted CI green at 663c356) |
+| T4 | Homepage: group introduction, partnerships section (renders nothing without verified data), section order and visibility theme settings. | done in the theme: Customizer order and visibility for nine sections, tested by tests-cli/home-sections-test.php (15 checks, mutation-checked). Partnerships renders nothing until verified partner data exists: the plugin has no partner record type, and adding one changes the content model, which needs an owner decision. The theme reads the filter noblen_partnership_items. |
 | T5 | Internal templates: record layout with facts panel, related items, gallery, empty and error states. | open |
 | T6 | `screenshot.png` for the theme. | open |
 | T7 | Self-hosted fonts. Blocked on a licence-checked font file supplied or approved by the owner; until then the system font stack is the documented, licence-free choice. | owner |

@@ -11,6 +11,7 @@ define( 'NOBLEN_THEME_VERSION', '0.1.0' );
 
 require_once get_template_directory() . '/inc/compat.php';
 require_once get_template_directory() . '/inc/core-bridge.php';
+require_once get_template_directory() . '/inc/home-sections.php';
 
 add_action(
 	'after_setup_theme',
