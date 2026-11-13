@@ -8,16 +8,17 @@ const paths = (process.env.A11Y_PATHS || '/,/projects/,/group/,/industries/,/sol
 let failures = 0, passes = 0;
 const check = (ok, name, extra = '') => { if (ok) { passes++; console.log('ok  ', name); } else { failures++; console.log('FAIL', name, extra); } };
 
-// ---- C15-001: contrast of every text/background token pair used by the theme (WCAG AA).
-function lum(hex) { const c = hex.replace('#', ''); const v = [0, 2, 4].map((i) => parseInt(c.substr(i, 2), 16) / 255).map((x) => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; }
-const ratio = (a, b) => { const [l1, l2] = [lum(a), lum(b)].sort((x, y) => y - x); return (l1 + 0.05) / (l2 + 0.05); };
-const cssDir = path.join(__dirname, '../wordpress-theme/noblen-corporate/assets/css');
-const css = ['tokens.css', 'main.css'].map((f) => fs.readFileSync(path.join(cssDir, f), 'utf8')).join('\n');
-const tok = {}; for (const m of css.matchAll(/--([a-z-]+):(#[0-9a-fA-F]{3,6})\b/g)) tok[m[1]] = m[2].length === 4 ? '#' + [...m[2].slice(1)].map((c) => c + c).join('') : m[2];
-const pairs = [['ink', 'white', 4.5], ['muted', 'white', 4.5], ['muted', 'grey', 4.5], ['navy', 'white', 4.5], ['navy', 'grey', 4.5], ['blue-d', 'white', 4.5], ['blue-d', 'grey', 4.5], ['white', 'blue', 4.5], ['white', 'blue-d', 4.5], ['white', 'navy', 4.5], ['teal', 'white', 4.5]];
-for (const [fg, bg, min] of pairs) { const r = ratio(tok[fg], tok[bg]); check(r >= min, `contrast ${fg} on ${bg} = ${r.toFixed(2)} (min ${min})`); }
-// Specific literal pairs used in CSS.
-for (const [fg, bg, label] of [['#dbe6ff', '#12306b', 'hero intro on gradient end'], ['#b9c8ee', '#0a1b3d', 'footer text on navy'], ['#0a5d58', '#e5f4f3', 'badge text on badge background']]) check(ratio(fg, bg) >= 4.5, `contrast ${label} = ${ratio(fg, bg).toFixed(2)}`);
+// ---- C15-001: contrast of every text/background pair the theme uses (WCAG AA), for the default palette, every built-in preset and
+// their dark derivations. The pair list and maths are shared with the Customizer (assets/js/brand-lib.js).
+const brand = require('../wordpress-theme/noblen-corporate/assets/js/brand-lib.js');
+const brandDef = require('../wordpress-theme/noblen-corporate/assets/brand-defaults.json');
+for (const pr of brandDef.presets) {
+  const light = brand.complete(brandDef, pr.colors);
+  const dark = Object.assign({}, light, brand.darkPalette(light));
+  for (const [mode, pal] of [['light', light], ['dark', dark]]) {
+    for (const row of brand.contrastReport(pal)) check(row.pass, `contrast [${pr.id}, ${mode}] ${row.label} = ${row.ratio} (min ${row.min})`);
+  }
+}
 
 (async () => {
   const browser = await chromium.launch();

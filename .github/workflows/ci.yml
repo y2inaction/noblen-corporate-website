@@ -63,6 +63,8 @@ jobs:
         run: python3 tests-cli/phpunit-criteria-report-test.py
       - name: Upgrade attestation checker regression tests (C26-006 failure conditions, synthetic records only)
         run: python3 -I tests-cli/upgrade-attestation-test.py
+      - name: Brand colour system (PHP and JavaScript parity, presets pass contrast, no colour literals in component CSS)
+        run: node tests-e2e/brand-parity.js
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)

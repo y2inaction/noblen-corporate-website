@@ -13,6 +13,7 @@ require_once get_template_directory() . '/inc/compat.php';
 require_once get_template_directory() . '/inc/core-bridge.php';
 require_once get_template_directory() . '/inc/home-sections.php';
 require_once get_template_directory() . '/inc/seo.php';
+require_once get_template_directory() . '/inc/brand.php';
 
 add_action(
 	'after_setup_theme',

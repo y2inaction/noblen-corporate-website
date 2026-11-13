@@ -1,13 +1,29 @@
-/* Design tokens. Palette per M2 Rev 5.1 section 8: navy, electric blue, white, light grey, slate text, restrained teal. No gold or yellow. */
+/* Design tokens. The brand colours below are only DEFAULTS: the Customizer (Appearance, Customize, Brand Identity) prints the
+   administrator's values in a <style id="noblen-brand-css"> block after this file, and those win. Every colour used by the theme
+   comes from these custom properties; main.css contains no brand colour literals. No gold or yellow. */
 :root{
-	--navy:#0a1b3d;--navy-2:#12306b;--blue:#1f6bff;--blue-d:#1553c9;--teal:#0e7f78;--teal-l:#e5f4f3;
-	--white:#fff;--grey:#f2f5fa;--line:#d9e0ee;--ink:#1a2438;--muted:#4b5876;--on-navy:#dbe6ff;--on-navy-2:#b9c8ee;
+	--brand-primary:#0a1b3d;--brand-secondary:#1f6bff;--brand-accent:#177443;--color-heading:#0a1b3d;--color-text:#1a2438;--color-bg:#ffffff;--color-surface:#ffffff;--color-header-bg:#ffffff;--color-header-text:#1a2438;--color-footer-bg:#0a1b3d;--color-footer-text:#b9c8ee;--color-link:#1553c9;--color-link-hover:#0a1b3d;--color-link-active:#0a1b3d;--color-button-bg:#1f6bff;--color-button-text:#ffffff;--color-button-hover:#1553c9;--color-button-active:#0f3f9e;
+	--color-on-primary:#ffffff;
+	/* Derived from the brand colours, so a change to one propagates everywhere. Static fallbacks first for old browsers. */
+	--color-tint:#f2f5fa;--color-line:#d9e0ee;--color-muted:#4b5876;--color-input-border:#8a94ab;
 	--font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 	--fs-xs:.8125rem;--fs-sm:.9375rem;--fs-base:1rem;--fs-md:1.125rem;--fs-lg:clamp(1.25rem,1.1rem + .6vw,1.5rem);
 	--fs-xl:clamp(1.5rem,1.2rem + 1.2vw,2.125rem);--fs-2xl:clamp(2rem,1.4rem + 2.6vw,3.5rem);
 	--sp-1:.25rem;--sp-2:.5rem;--sp-3:.75rem;--sp-4:1rem;--sp-5:1.5rem;--sp-6:2rem;--sp-7:3rem;--sp-8:4.5rem;
 	--r:10px;--r-lg:16px;--max:1160px;--prose:760px;
-	--shadow-1:0 1px 2px rgba(10,27,61,.06),0 1px 3px rgba(10,27,61,.08);
-	--shadow-2:0 6px 20px rgba(10,27,61,.12);
+	--logo-h:48px;--logo-h-mobile:36px;
+	--shadow-1:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+	--shadow-2:0 6px 20px rgba(16,24,40,.14);
 	--bp-nav:820px;--ease:cubic-bezier(.2,.7,.2,1);--dur:.18s;
+	/* Semantic status colours are intentionally fixed, so that success, warning and error keep their meaning in any brand. */
+	--status-info:#1e40af;--status-info-bg:#eff6ff;--status-success:#166534;--status-success-bg:#f0fdf4;
+	--status-warning:#9a3412;--status-warning-bg:#fff7ed;--status-error:#b42318;--status-error-bg:#fef3f2;
+}
+@supports (color:color-mix(in srgb,red,blue)){
+	:root{
+		--color-tint:color-mix(in srgb,var(--brand-primary) 5%,var(--color-bg));
+		--color-line:color-mix(in srgb,var(--color-text) 16%,var(--color-bg));
+		--color-muted:color-mix(in srgb,var(--color-text) 78%,var(--color-bg));
+		--color-input-border:color-mix(in srgb,var(--color-text) 45%,var(--color-bg));
+	}
 }
