@@ -13,7 +13,7 @@
 Corrections made when these records were prepared:
 
 - The earlier version of this guide listed 18 rows under "the 17 items". **`C17-S01` is not a record.** It is a status item that CI reports, saying only whether the owner's naming-scan evidence is outstanding or supplied. The 17 records are the 17 `-M` items in the table above.
-- **`C27-M01` is not defined in the frozen CI acceptance plan** (criterion 27 is automated only there). It comes from the implementation's register and the earlier pre-push review. Its record says so.
+- **`C27-M01` is not defined in the frozen CI acceptance plan** (provenance and options: [C27-M01-PROVENANCE.md](C27-M01-PROVENANCE.md)) (criterion 27 is automated only there). It comes from the implementation's register and the earlier pre-push review. Its record says so.
 - `C31-M01` is an owner-run record in the frozen plan. The earlier version of this guide wrongly gave it to the reviewer.
 
 ## Rules for every record

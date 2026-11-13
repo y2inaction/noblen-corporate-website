@@ -74,6 +74,8 @@ jobs:
         run: |
           python3 -I tests-cli/acceptance-records-test.py
           python3 -I tests-cli/review-designation-test.py
+      - name: Register and records against the two frozen plans (read-only; the one documented addition is C27-M01)
+        run: python3 -I tests-cli/plan-register-consistency-test.py
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)

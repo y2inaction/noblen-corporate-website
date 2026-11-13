@@ -107,7 +107,7 @@ def main():
             # Not in the frozen plan (criterion 27 is automated only there): it must say so, and the register must list it.
             ok(pe is None and 'Not defined in the frozen' in (field(t, 'Source') or ''), 'C27-M01: states that it is not defined in the frozen plan', str(field(t, 'Source')))
             reg = read(os.path.join(docs, 'acceptance-criteria-traceability.yml'))
-            ok('manual_records_pending: "C27-M01"' in reg, 'C27-M01: the implementation register lists it as pending')
+            ok('manual_records_pending: "C27-M01 (supplementary, NOT in the frozen plans' in reg, 'C27-M01: the implementation register lists it as pending')
         else:
             ok(pe is not None and ex == pe, f'{rid}: executor "{ex}" matches the frozen plan ("{pe}")')
         ok(all(s in t for s in SECTIONS), f'{rid}: has every template section')
