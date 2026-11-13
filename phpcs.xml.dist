@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="Noblen">
+	<description>WordPress coding standards and PHP compatibility for the theme and the core plugin.</description>
+	<file>wordpress-theme/noblen-corporate</file>
+	<file>wordpress-plugin/noblen-corporate-core</file>
+	<exclude-pattern>*/tests/*</exclude-pattern>
+	<arg name="extensions" value="php"/>
+	<arg value="ps"/>
+	<config name="testVersion" value="8.3-"/>
+	<config name="minimum_wp_version" value="6.4"/>
+	<rule ref="WordPress-Core"/>
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress.Security"/>
+	<rule ref="PHPCompatibilityWP"/>
+	<!-- The plugin uses PSR-4 class autoloading; WordPress file-naming rules apply to the theme. -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase"><exclude-pattern>*/wordpress-plugin/*</exclude-pattern><exclude-pattern>*/wordpress-theme/*/single-noblen_*.php</exclude-pattern><exclude-pattern>*/wordpress-theme/*/archive-noblen_*.php</exclude-pattern></rule>
+	<!-- Template hierarchy requires the underscore post type name in single-/archive- file names. -->
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName"><exclude-pattern>*/wordpress-plugin/*</exclude-pattern></rule>
+	<!-- Hook callbacks must accept the full WordPress signature; "class", "use" and "new" are accepted as parameter names. -->
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter"><exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed"/></rule>
+	<rule ref="Universal.NamingConventions.NoReservedKeywordParameterNames"><severity>0</severity></rule>
+	<rule ref="WordPress.WP.Capabilities"><properties><property name="custom_capabilities" type="array"><element value="noblen_manage_clearance"/><element value="noblen_approve_publication"/><element value="noblen_view_audit"/><element value="noblen_manage_settings"/><element value="manage_noblen_taxonomies"/></property></properties></rule>
+	<rule ref="WordPress.WP.I18n"><properties><property name="text_domain" type="array"><element value="noblen-core"/><element value="noblen-corporate"/></property></properties></rule>
+</ruleset>

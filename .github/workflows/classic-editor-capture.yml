@@ -1,0 +1,107 @@
+name: Classic Editor capture
+
+# CAPTURE IS NOT VERIFICATION. This workflow downloads the pinned official Classic Editor package once and records its
+# SHA-256 and a source-parity report as MATERIAL FOR A HUMAN REVIEWER. It never edits the pin, never marks C21-021 or
+# C21-022 as satisfied or accepted, and is separate from the strict job in ci.yml, which stays non-blocking until the
+# pin has been independently reviewed and a later strict run has passed.
+#
+# Trigger: a push to a feature/** branch whose changes include tests-e2e/wp-env/capture-request.txt, or a manual dispatch
+# (GitHub only offers dispatch for workflows on the default branch, so the marker file is the working trigger).
+# Procedure: documentation/CLASSIC-EDITOR-VERIFICATION-PROCEDURE.md.
+
+on:
+  push:
+    branches: ['feature/**']
+    paths:
+      - 'tests-e2e/wp-env/capture-request.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: classic-editor-capture-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    name: Classic Editor CAPTURE (review material only; C21-021 NOT SATISFIED)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CI: 'true'
+      BASE_URL: http://localhost:8888
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Check the capture request marker names the pinned version
+        run: |
+          pinned="$(node -p "require('./tests-e2e/wp-env/classic-editor.pin.json').version")"
+          expected="classic-editor $pinned capture request"
+          actual="$(head -n1 tests-e2e/wp-env/capture-request.txt)"
+          [ "$actual" = "$expected" ] || { echo "::error::capture-request.txt says '$actual', expected '$expected'"; exit 1; }
+      - name: Install tooling
+        working-directory: tests-e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Start wp-env
+        run: |
+          tests-e2e/node_modules/.bin/wp-env start
+          tests-e2e/node_modules/.bin/wp-env run cli wp rewrite structure '/%postname%/' --hard
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/seed-e2e.php
+          curl -fsS "$BASE_URL/" >/dev/null
+      - name: Activate and verify the Noblen theme and plugin (wp-env does not activate themes)
+        run: tests-cli/we-site-state.sh
+      - name: Capture the pinned Classic Editor package (refuses unless the pin is unverified with no hash)
+        run: tests-cli/classic-editor-config-a.sh install --capture
+      - name: Confirm the record says C21-021 is NOT SATISFIED and the pin is unchanged
+        run: |
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("tests-e2e/wp-env/downloads/classic-editor-record.json", "utf8"));
+            const errs = [];
+            if (r.mode !== "CAPTURE") errs.push("mode is " + r.mode);
+            if (!/^NOT SATISFIED/.test(r.c21_021)) errs.push("c21_021 is " + r.c21_021);
+            if (r.pin_state !== "unverified") errs.push("pin_state is " + r.pin_state);
+            if (r.test_only !== false) errs.push("test_only is " + r.test_only);
+            if (errs.length) { console.error("::error::" + errs.join("; ")); process.exit(1); }
+            console.log("record: mode=" + r.mode + "; " + r.c21_021 + "; sha256=" + r.package_sha256);'
+          git diff --exit-code -- tests-e2e/wp-env/classic-editor.pin.json
+          {
+            echo "### Classic Editor CAPTURE (not verification)"
+            echo "- **C21-021: NOT SATISFIED.** C21-022 is recorded but nothing is accepted by a capture run."
+            echo "- The pin was not changed. The reviewer follows documentation/CLASSIC-EDITOR-VERIFICATION-PROCEDURE.md."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Classic Editor, Configuration A suite (C21-001 to C21-005, C21-011, C21-013, C21-015, C21-017, C21-019)
+        working-directory: tests-e2e
+        env:
+          CONFIG: A
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node classic-editor.js
+      - name: Restore Configuration B
+        if: always()
+        run: tests-cli/classic-editor-config-a.sh cleanup
+      - name: Collect diagnostics (debug log, container state and container logs)
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/diag"
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/print-log.php > "$RUNNER_TEMP/diag/wp-debug.log" 2>&1 || echo "(wp-env was not running, so no debug log could be read)" > "$RUNNER_TEMP/diag/wp-debug.log"
+          docker ps -a --format '{{.Names}}  {{.Image}}  {{.Status}}' > "$RUNNER_TEMP/diag/containers.txt" 2>&1 || true
+          for c in $(docker ps -aq); do docker logs --tail 300 "$c" > "$RUNNER_TEMP/diag/container-$c.log" 2>&1 || true; done
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: classic-editor-capture
+          path: |
+            tests-e2e/wp-env/downloads/classic-editor-record.json
+            tests-e2e/wp-env/downloads/classic-editor.1.7.0.zip
+            ${{ runner.temp }}/diag
+          if-no-files-found: warn
+      - name: Stop wp-env
+        if: always()
+        run: tests-e2e/node_modules/.bin/wp-env destroy --force || true

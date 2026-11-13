@@ -1,0 +1,18 @@
+/* Styles for the brand tools in the Customizer's left pane (administration only). */
+.noblen-tools h4{margin:1.4em 0 .4em}.noblen-tools h5{margin:1em 0 .3em}
+.noblen-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.noblen-tools select,.noblen-tools input[type=text]{max-width:100%}
+.noblen-status{margin:8px 0;font-weight:600}.noblen-status.is-error,.noblen-sum.is-warning,.noblen-report__head.is-warning{color:#b32d2e}
+.noblen-report__head.is-ok{color:#007017}.noblen-report__list{margin:4px 0 8px 18px;list-style:disc}
+.noblen-swatches{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}.noblen-swatches li{display:flex;align-items:center;gap:6px}
+.noblen-swatch{display:inline-block;width:22px;height:22px;border:1px solid #8c8f94;border-radius:3px}
+.noblen-grid{display:grid;grid-template-columns:1fr;gap:6px}.noblen-cell{display:grid;grid-template-columns:1fr 40px 80px;gap:6px;align-items:center}
+.noblen-cell label{font-size:12px}.noblen-cell input[type=color]{width:40px;height:30px;padding:0}.noblen-hex{font-family:monospace}
+.noblen-note{font-style:italic}
+.noblen-mini{border:1px solid #c3c4c7;border-radius:4px;overflow:hidden;font-size:12px;margin:6px 0;background:var(--color-bg,#fff);color:var(--color-text,#000)}
+.noblen-mini__header{background:var(--color-header-bg);color:var(--color-header-text);padding:6px 8px}
+.noblen-mini__hero{background:var(--brand-primary);color:var(--color-on-primary);padding:14px 8px}
+.noblen-mini__body{padding:8px}.noblen-mini__h{color:var(--color-heading)}.noblen-mini__link{color:var(--color-link)}
+.noblen-mini__btn{display:inline-block;margin:0 6px;padding:2px 8px;background:var(--color-button-bg);color:var(--color-button-text);border-radius:4px}
+.noblen-mini__card{display:inline-block;padding:2px 8px;background:var(--color-surface);border:1px solid var(--brand-accent);color:var(--brand-accent);border-radius:4px}
+.noblen-mini__footer{background:var(--color-footer-bg);color:var(--color-footer-text);padding:6px 8px}

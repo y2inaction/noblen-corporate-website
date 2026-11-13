@@ -1,0 +1,12 @@
+{
+  "name": "noblen/corporate-website-dev",
+  "description": "Development tooling only. Nothing here ships inside either package.",
+  "license": "proprietary",
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1",
+    "wp-cli/wp-cli-bundle": "^2.11",
+    "wp-coding-standards/wpcs": "^3.1"
+  },
+  "config": { "allow-plugins": { "dealerdirect/phpcodesniffer-composer-installer": true }, "sort-packages": true }
+}

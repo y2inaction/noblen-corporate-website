@@ -1,19 +1,23 @@
-# OS / editor
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.swp
 
+!tests-e2e/wp-env/downloads/.gitkeep
 # Dependencies and build output
-node_modules/
-vendor/
-dist/
-build/
-*.zip
-
 # Local WordPress / environment
-.env
-.wp-env.override.json
-wp-config.php
+# OS / editor
 *.log
+*.sql
+*.sqlite
+*.swp
+*.zip
+.DS_Store
+.env
+.idea/
+.phpunit.result.cache
+.vscode/
+.wp-env.override.json
+Thumbs.db
+build/
+dist/
+node_modules/
+tests-e2e/wp-env/downloads/*
+vendor/
+wp-config.php

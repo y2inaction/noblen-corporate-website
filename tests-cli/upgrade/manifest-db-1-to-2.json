@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "id": "plugin-db-1-to-2",
+  "description": "Every logical difference expected when the plugin database moves from schema version 1 to 2. The source is a fixture built by code (tests-cli/upgrade-comparison.php); schema version 1 was never released.",
+  "source": { "db_version": 1, "kind": "fixture" },
+  "target": { "db_version": 2 },
+  "logical_categories": {
+    "posts": { "rule": "identical" },
+    "metadata": { "rule": "identical" },
+    "relationships": { "rule": "identical" },
+    "clearance": { "rule": "identical" },
+    "approvals": { "rule": "identical" },
+    "media_rights": { "rule": "identical" },
+    "settings": { "rule": "identical" },
+    "audit": {
+      "rule": "append_only",
+      "appended": [
+        { "event_type": "backup_confirmed", "detail": { "target_version": 2 } },
+        { "event_type": "migration_applied", "detail": { "version": 2 } }
+      ]
+    }
+  },
+  "option_changes": [
+    { "option": "noblen_core_db_version", "from": "1", "to": "2" },
+    { "option": "noblen_core_backup_confirmed", "from": null, "to": "present" }
+  ],
+  "physical_changes": [
+    { "table": "approvals", "change": "index_added", "name": "post_status" }
+  ],
+  "preservation_mappings": []
+}

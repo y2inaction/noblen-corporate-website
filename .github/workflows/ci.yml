@@ -1,0 +1,556 @@
+name: CI
+
+# Dependencies come only from official sources: Packagist (Composer), the npm registry,
+# wordpress.org (pinned WordPress release), the Playwright browser CDN and GitHub Actions.
+# Nothing is vendored. No secrets are used. Not pushed or run until the owner approves.
+
+on:
+  workflow_dispatch:
+    inputs:
+      capture_classic_editor_hash:
+        description: 'Classic Editor FIRST-RUN CAPTURE (pin unverified only). Records the package SHA-256 and a source-parity report for human review. This is NOT verification.'
+        type: boolean
+        default: false
+  push:
+    branches: [main, 'feature/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  WP_VERSION: '6.4.3'
+
+jobs:
+  static:
+    name: Static analysis (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gd, dom, mbstring
+          tools: composer
+      - name: Install dev tooling
+        run: composer install --no-interaction --prefer-dist
+      - name: PHP lint (C16-001, C16-002)
+        run: find wordpress-theme wordpress-plugin tests-e2e scripts -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: PHPCS, WordPress standards (C16-003, C16-004)
+        run: vendor/bin/phpcs
+      - name: PHP compatibility 8.3 and 8.4 (C16-005)
+        run: |
+          vendor/bin/phpcs -q --standard=PHPCompatibility --runtime-set testVersion 8.3- --extensions=php --ignore='*/tests/*' wordpress-theme wordpress-plugin
+          vendor/bin/phpcs -q --standard=PHPCompatibility --runtime-set testVersion 8.4- --extensions=php --ignore='*/tests/*' wordpress-theme wordpress-plugin
+      - name: No third-party hosts in sources (C18-002)
+        run: scripts/check-no-third-party.sh
+      - name: Repository audit (artifacts, credentials, local paths, dev data)
+        run: scripts/audit-repo.sh
+      - name: PyYAML is a stable release of at least 6.0.1 (used by check-pins.sh, the traceability generator and its tests)
+        run: python3 scripts/build-traceability.py --check-dependencies
+      - name: Dependency pins (exact versions, verification state, Configuration A and B isolation)
+        run: scripts/check-pins.sh
+      - name: PHP error-log check regression tests (the single allowed upstream deprecation stays narrow)
+        run: tests-cli/php-log-check-test.sh
+      - name: Owner acceptance decisions (fail-closed generator and its regression tests)
+        run: python3 tests-cli/acceptance-decisions-test.py
+      - name: PHPUnit per-criterion report regression tests (missing, empty, malformed and red JUnit output fail closed)
+        run: python3 tests-cli/phpunit-criteria-report-test.py
+      - name: Upgrade attestation checker regression tests (C26-006 failure conditions, synthetic records only)
+        run: python3 -I tests-cli/upgrade-attestation-test.py
+      - name: Brand colour system (PHP and JavaScript parity, presets pass contrast, no colour literals in component CSS)
+        run: node tests-e2e/brand-parity.js
+      - name: SVG logo sanitiser (hostile-input suite)
+        run: php tests-cli/svg-test.php
+      - name: Logo palette analysis and suggestions (synthetic logos, property test)
+        run: php tests-cli/palette-test.php
+      - name: 'Reviewer designation and manual records (fail-closed: no fabricated or half-completed record; a record never accepts a criterion)'
+        run: |
+          python3 -I tests-cli/acceptance-records-test.py
+          python3 -I tests-cli/review-designation-test.py
+      - name: Register and records against the two frozen plans (read-only; the one documented addition is C27-M01)
+        run: python3 -I tests-cli/plan-register-consistency-test.py
+      - name: Acceptance traceability report is current (generated from the register and records; changes no status)
+        run: python3 -I scripts/render-traceability-report.py --check
+
+  php85-informational:
+    name: PHP 8.5 compatibility (informational, C16-006)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.5'
+          tools: composer
+      - run: composer install --no-interaction --prefer-dist --ignore-platform-req=php
+      - run: find wordpress-theme wordpress-plugin -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: vendor/bin/phpcs -q --standard=PHPCompatibility --runtime-set testVersion 8.5- --extensions=php --ignore='*/tests/*' wordpress-theme wordpress-plugin
+
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }}, MySQL 8.4)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+    services:
+      db:
+        image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902 # MySQL 8.4 line, digest resolved 2026-11-12; refresh only by a reviewed change
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: noblen_test
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, gd, mbstring
+          tools: phpunit:9.6.17
+      - name: Disposable WordPress ${{ env.WP_VERSION }}
+        env:
+          WP_DIR: ${{ runner.temp }}/wp
+        run: scripts/ci-setup-wordpress.sh
+      - name: PHPUnit
+        working-directory: wordpress-plugin/noblen-corporate-core/tests
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: phpunit -c phpunit.xml.dist --log-junit "$RUNNER_TEMP/junit-${{ matrix.php }}.xml"
+      - name: Per-criterion executed test cases (counted from the JUnit output; fails if it is missing, malformed or not clean)
+        if: always()
+        run: python3 scripts/phpunit-criteria-report.py "$RUNNER_TEMP/junit-${{ matrix.php }}.xml" --label "PHP ${{ matrix.php }}, MySQL 8.4" --baseline documentation/acceptance-criteria-traceability.yml
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: junit-php${{ matrix.php }}
+          path: ${{ runner.temp }}/junit-${{ matrix.php }}.xml
+
+  host-wpcli:
+    name: Host WP-CLI, package install and uninstall retention (PK, PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+    services:
+      db:
+        image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902 # MySQL 8.4 line, digest resolved 2026-11-12; refresh only by a reviewed change
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, gd, mbstring
+          tools: composer
+      - run: composer install --no-interaction --prefer-dist
+      - name: Fetch WordPress core
+        env:
+          WP_DIR: ${{ runner.temp }}/wp
+        run: |
+          scripts/fetch-wordpress.sh "$WP_VERSION" "$WP_DIR"
+          cat > "$WP_DIR/wp-config.php" <<'PHP'
+          <?php
+          define( 'DB_NAME', getenv( 'NOBLEN_DB_NAME' ) ); define( 'DB_USER', 'root' ); define( 'DB_PASSWORD', 'root' );
+          define( 'DB_HOST', '127.0.0.1' ); define( 'DB_CHARSET', 'utf8mb4' ); define( 'DB_COLLATE', '' );
+          foreach ( array( 'AUTH_KEY','SECURE_AUTH_KEY','LOGGED_IN_KEY','NONCE_KEY','AUTH_SALT','SECURE_AUTH_SALT','LOGGED_IN_SALT','NONCE_SALT' ) as $k ) { define( $k, 'ci-only-' . $k ); }
+          $table_prefix = 'wp_';
+          define( 'NOBLEN_AUDIT_KEYS', array( 'ci1' => 'ci-only-throwaway-key-0123456789abcdef' ) ); define( 'NOBLEN_AUDIT_KEY_ID', 'ci1' );
+          define( 'WP_DEBUG', true ); define( 'WP_DEBUG_DISPLAY', false ); define( 'WP_DEBUG_LOG', getenv( 'WP_DEBUG_LOG_FILE' ) ? getenv( 'WP_DEBUG_LOG_FILE' ) : false );
+          define( 'WP_HTTP_BLOCK_EXTERNAL', true ); define( 'DISABLE_WP_CRON', true );
+          if ( ! defined( 'ABSPATH' ) ) { define( 'ABSPATH', __DIR__ . '/' ); }
+          require_once ABSPATH . 'wp-settings.php';
+          PHP
+      - name: Databases
+        run: |
+          sudo apt-get install -y -qq mysql-client >/dev/null
+          for d in noblen_cli noblen_pkg; do mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE $d CHARACTER SET utf8mb4"; done
+      - name: Host WP-CLI integration incl. uninstall retention and opt-in removal (C26)
+        env:
+          NOBLEN_DB_NAME: noblen_cli
+          WP: ${{ github.workspace }}/vendor/bin/wp
+          WP_PATH: ${{ runner.temp }}/wp
+          WP_DEBUG_LOG_FILE: ${{ runner.temp }}/cli-debug.log
+        run: tests-cli/cli-integration.sh
+      - name: Package build and clean install (C19)
+        if: always()
+        env:
+          NOBLEN_DB_NAME: noblen_pkg
+          WP: ${{ github.workspace }}/vendor/bin/wp
+          WP_SRC: ${{ runner.temp }}/wp
+        run: tests-cli/package-install.sh
+      - name: 'Audit key custody rehearsal on a disposable site (backup, rotation, interruption, compromise, loss, recovery, restore, tamper, wrong and missing keys; automated, not the owner record C34-M01)'
+        env:
+          NOBLEN_REHEARSAL_DISPOSABLE: 'yes'
+          WP_SRC: ${{ runner.temp }}/wp
+          WP_CLI: ${{ github.workspace }}/vendor/bin/wp
+          REHEARSAL_DB_HOST: 127.0.0.1
+          REHEARSAL_DB_USER: root
+          REHEARSAL_DB_PASS: root
+          REHEARSAL_EVIDENCE: ${{ runner.temp }}/rehearsal-evidence-${{ matrix.php }}
+        run: python3 -I tests-cli/key-custody-rehearsal.py
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: key-custody-rehearsal-evidence-php${{ matrix.php }}
+          path: ${{ runner.temp }}/rehearsal-evidence-${{ matrix.php }}/rehearsal-report.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  parity-browser:
+    name: Non-WE parity, browser suites on PHP built-in server (informational)
+    runs-on: ubuntu-latest
+    # The authoritative browser run is the wp-env job. This one exists to tell a wp-env/Docker failure apart from a test failure.
+    continue-on-error: true
+    services:
+      db:
+        image: mysql:8.4@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902 # MySQL 8.4 line, digest resolved 2026-11-12; refresh only by a reviewed change
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: noblen_e2e
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      BASE_URL: http://127.0.0.1:8100
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.3'
+          extensions: mysqli, gd, mbstring
+          tools: composer
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: composer install --no-interaction --prefer-dist
+      - name: Disposable WordPress
+        env:
+          WP_DIR: ${{ runner.temp }}/wp
+          DB_NAME: noblen_e2e
+        run: scripts/ci-setup-wordpress.sh
+      - name: Activate, seed, serve
+        env:
+          WP_DIR: ${{ runner.temp }}/wp
+          NOBLEN_ALLOW_E2E_SEED: '1'
+        run: |
+          W="vendor/bin/wp --path=$WP_DIR"
+          $W option update home "$BASE_URL" && $W option update siteurl "$BASE_URL"
+          $W plugin activate noblen-corporate-core && $W theme activate noblen-corporate
+          $W rewrite structure '/%postname%/' --hard
+          $W eval-file tests-e2e/wp-env/seed-e2e.php
+          PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8100 -t "$WP_DIR" > "$RUNNER_TEMP/php-server.log" 2>&1 &
+          sleep 3; curl -fsS "$BASE_URL/" >/dev/null
+      - name: Home page section order, visibility and partnerships (theme settings)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/home-sections-test.php
+      - name: Record facts panel (escaping, empty values)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/record-facts-test.php
+      - name: SEO helpers (snippets, Organization data)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/seo-test.php
+      - name: Site Health configuration checks (every rule and the roll-up)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/site-health-test.php
+      - name: Brand settings persistence and resistance to bad stored values (theme switch, CSS injection, no settings)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/brand-persistence-test.php
+      - name: 'Operator WP-CLI commands (wp noblen audit and migrate: capability checks, JSON export, backup confirmation)'
+        env:
+          WP_DIR: ${{ runner.temp }}/wp
+        run: bash tests-cli/noblen-cli-test.sh
+      - name: Pending or failed upgrade notice in the administration
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/migration-notice-test.php
+      - name: Install browser tooling
+        working-directory: tests-e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Front-end smoke at 360, 768, 1280 px (C13, C18-001, C12-001)
+        working-directory: tests-e2e
+        run: mkdir -p "$RUNNER_TEMP/shots" && node smoke.js "$RUNNER_TEMP/shots"
+      - name: WordPress admin workflow (C06, C09, C10, C24 in a real browser)
+        working-directory: tests-e2e
+        env:
+          CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
+        run: node admin.js
+      - name: All five content types through the admin UI (C06-001, C06-002)
+        working-directory: tests-e2e
+        env:
+          CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
+        run: node content-types.js
+      - name: Gallery media picker in a real browser (choose, dedupe, remove, no-JavaScript fallback)
+        working-directory: tests-e2e
+        run: node gallery.js
+      - name: Classic Editor, Configuration B (C21)
+        working-directory: tests-e2e
+        env:
+          CONFIG: B
+          CLEAR_LOCKS_CMD: 'mysql -h127.0.0.1 -uroot -proot -e "DELETE FROM noblen_e2e.wp_postmeta WHERE meta_key=''_edit_lock''"'
+        run: node classic-editor.js
+      - name: Site crawl for placeholder tokens (C12-001; the built-in server cannot serve sitemaps)
+        working-directory: tests-e2e
+        run: node crawl.js
+      - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
+        working-directory: tests-e2e
+        run: node a11y.js
+      - name: SEO and document structure (descriptions, structured data, headings)
+        working-directory: tests-e2e
+        run: node seo.js
+      - name: Brand Identity in the Customizer (every colour and state, appearance, presets, restore, publish, persistence)
+        working-directory: tests-e2e
+        run: node brand-customizer.js
+      - name: Logo management and palette suggestions (uploads, hostile SVG, ratios, sizes, alt text, fallback, dark logo, axe contrast)
+        working-directory: tests-e2e
+        run: node brand-logo.js
+      - name: Upgrade comparison on a code-built schema-1 fixture (C26-003 to C26-005 tooling; destroys this disposable site's Noblen data, so it runs last)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+          NOBLEN_UPGRADE_FIXTURE_RESET: '1'
+        run: php tests-cli/upgrade-comparison.php
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: screenshots
+          path: ${{ runner.temp }}/shots
+
+  we:
+    name: WE, wp-env (WordPress 6.4.3, PHP 8.3), WP-CLI, browser, admin, accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CI: 'true'
+      BASE_URL: http://localhost:8888
+      WE_ROOT: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install tooling (wp-env 12.1.0, Playwright, axe-core pinned in the lockfile)
+        working-directory: tests-e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Start wp-env
+        run: |
+          tests-e2e/node_modules/.bin/wp-env start
+          tests-e2e/node_modules/.bin/wp-env run cli wp core version
+      - name: Record container image digests (evidence of what ran; wp-env chooses these images, they are not pinned by this repository)
+        run: |
+          {
+            echo "### Container images used by wp-env"
+            for img in $(docker ps --format '{{.Image}}' | sort -u); do
+              echo "- \`$img\` -> $(docker image inspect --format '{{join .RepoDigests ", "}}' "$img" 2>/dev/null)"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Assert and record the WE environment (WordPress 6.4.3, PHP 8.3, inside wp-env)
+        run: |
+          WPENV=tests-e2e/node_modules/.bin/wp-env
+          wpv=$($WPENV run cli wp core version 2>/dev/null | tr -d '\r' | tail -1)
+          phpv=$($WPENV run cli wp eval 'echo PHP_VERSION;' 2>/dev/null | tr -d '\r' | tail -1)
+          dbv=$($WPENV run cli wp eval 'global $wpdb; echo $wpdb->db_version();' 2>/dev/null | tr -d '\r' | tail -1)
+          envv=$(node -p "require('./tests-e2e/node_modules/@wordpress/env/package.json').version")
+          {
+            echo "### WE environment (wp-env)"
+            echo "- wp-env: $envv"
+            echo "- WordPress: $wpv"
+            echo "- PHP: $phpv"
+            echo "- Database server: $dbv (wp-env uses MariaDB; MySQL 8.4 is covered by the PHPUnit job)"
+            echo "- Site: $BASE_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$wpv" = "6.4.3" ] || { echo "::error::WordPress is '$wpv', expected 6.4.3"; exit 1; }
+          case "$phpv" in 8.3.*) ;; *) echo "::error::PHP is '$phpv', expected 8.3.x"; exit 1;; esac
+      - name: Activate and verify the Noblen theme and plugin (wp-env does not activate themes)
+        run: tests-cli/we-site-state.sh
+      - name: Set permalinks
+        run: tests-e2e/node_modules/.bin/wp-env run cli wp rewrite structure '/%postname%/' --hard
+      - name: WE empty and partial data on a pristine site (C11-001, C11-002)
+        run: tests-cli/partial-data.sh
+      - name: Seed fixtures
+        run: |
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/seed-e2e.php
+          curl -fsS "$BASE_URL/" >/dev/null
+      - name: WE WP-CLI and HTTP integration (C01, C02, C03, C04, C24, C26)
+        run: tests-cli/we-integration.sh
+      - name: Front-end smoke at 360, 768, 1280 px (C13, C18-001, C12-001)
+        working-directory: tests-e2e
+        run: mkdir -p "$RUNNER_TEMP/shots" && node smoke.js "$RUNNER_TEMP/shots"
+      - name: WordPress admin workflow in a real browser (C06, C09, C10, C24)
+        working-directory: tests-e2e
+        env:
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node admin.js
+      - name: All five content types through the admin UI (C06-001, C06-002)
+        working-directory: tests-e2e
+        env:
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node content-types.js
+      - name: Gallery media picker in a real browser (choose, dedupe, remove, no-JavaScript fallback)
+        working-directory: tests-e2e
+        run: node gallery.js
+      - name: Classic Editor, Configuration B (C21-006 to C21-010, C21-012, C21-014, C21-016, C21-018, C21-020)
+        working-directory: tests-e2e
+        env:
+          CONFIG: B
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node classic-editor.js
+      - name: 'Accessibility: axe, contrast, keyboard (C14, C15)'
+        working-directory: tests-e2e
+        run: node a11y.js
+      - name: SEO and document structure (descriptions, structured data, headings)
+        working-directory: tests-e2e
+        run: node seo.js
+      - name: Brand Identity in the Customizer (every colour and state, appearance, presets, restore, publish, persistence)
+        working-directory: tests-e2e
+        run: node brand-customizer.js
+      - name: Logo management and palette suggestions (uploads, hostile SVG, ratios, sizes, alt text, fallback, dark logo, axe contrast)
+        working-directory: tests-e2e
+        run: node brand-logo.js
+      - name: Site crawl including the core sitemap (C12-001)
+        working-directory: tests-e2e
+        env:
+          CRAWL_REQUIRE_SITEMAP: '1'
+        run: node crawl.js
+      - name: Collect diagnostics (debug log, container state and container logs)
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/diag"
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/print-log.php > "$RUNNER_TEMP/diag/wp-debug.log" 2>&1 || echo "(wp-env was not running, so no debug log could be read)" > "$RUNNER_TEMP/diag/wp-debug.log"
+          docker ps -a --format '{{.Names}}  {{.Image}}  {{.Status}}' > "$RUNNER_TEMP/diag/containers.txt" 2>&1 || true
+          for c in $(docker ps -aq); do docker logs --tail 300 "$c" > "$RUNNER_TEMP/diag/container-$c.log" 2>&1 || true; done
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: we-artifacts
+          path: |
+            ${{ runner.temp }}/shots
+            ${{ runner.temp }}/diag
+      - name: WE result summary
+        if: always()
+        run: |
+          {
+            echo "### WE job result: ${{ job.status }}"
+            echo "Only a green WE job counts as WE evidence. A skipped, cancelled or failed job is not."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Stop wp-env
+        if: always()
+        # Directory mappings only (see .wp-env.json): a mapped single file made Docker create a root-owned parent directory in the
+        # checkout, which the runner user could not remove. Failure here must never mask a test result, but is no longer expected.
+        run: tests-e2e/node_modules/.bin/wp-env destroy --force || true
+
+  we-classic-editor-a:
+    name: WE Configuration A, pinned Classic Editor (C21-021, C21-022; non-blocking until the pin is verified)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # The pin in tests-e2e/wp-env/classic-editor.pin.json is verified, so this job blocks. Strict mode requires the pinned
+    # SHA-256, the pinned version and WordPress.org's per-file checksums. scripts/check-pins.sh fails if this job is made
+    # non-blocking while the pin is verified.
+    env:
+      CI: 'true'
+      BASE_URL: http://localhost:8888
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install tooling
+        working-directory: tests-e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Start wp-env
+        run: |
+          tests-e2e/node_modules/.bin/wp-env start
+          tests-e2e/node_modules/.bin/wp-env run cli wp rewrite structure '/%postname%/' --hard
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/seed-e2e.php
+          curl -fsS "$BASE_URL/" >/dev/null
+      - name: Record container image digests (evidence of what ran; wp-env chooses these images, they are not pinned by this repository)
+        run: |
+          {
+            echo "### Container images used by wp-env"
+            for img in $(docker ps --format '{{.Image}}' | sort -u); do
+              echo "- \`$img\` -> $(docker image inspect --format '{{join .RepoDigests ", "}}' "$img" 2>/dev/null)"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Activate and verify the Noblen theme and plugin (wp-env does not activate themes)
+        run: tests-cli/we-site-state.sh
+      - name: Install the pinned Classic Editor and check C21-021 and C21-022
+        env:
+          CAPTURE: ${{ github.event.inputs.capture_classic_editor_hash }}
+        run: |
+          if [ "$CAPTURE" = "true" ]; then
+            tests-cli/classic-editor-config-a.sh install --capture
+          else
+            tests-cli/classic-editor-config-a.sh install
+          fi
+      - name: Classic Editor, Configuration A suite (C21-001 to C21-005, C21-011, C21-013, C21-015, C21-017, C21-019)
+        working-directory: tests-e2e
+        env:
+          CONFIG: A
+          CLEAR_LOCKS_CMD: cd ${{ github.workspace }} && tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/clear-locks.php
+        run: node classic-editor.js
+      - name: Restore Configuration B
+        if: always()
+        run: tests-cli/classic-editor-config-a.sh cleanup
+      - name: Collect diagnostics (debug log, container state and container logs)
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/diag"
+          tests-e2e/node_modules/.bin/wp-env run cli wp eval-file wp-content/noblen-e2e/probes/print-log.php > "$RUNNER_TEMP/diag/wp-debug.log" 2>&1 || echo "(wp-env was not running, so no debug log could be read)" > "$RUNNER_TEMP/diag/wp-debug.log"
+          docker ps -a --format '{{.Names}}  {{.Image}}  {{.Status}}' > "$RUNNER_TEMP/diag/containers.txt" 2>&1 || true
+          for c in $(docker ps -aq); do docker logs --tail 300 "$c" > "$RUNNER_TEMP/diag/container-$c.log" 2>&1 || true; done
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: classic-editor-record
+          path: |
+            tests-e2e/wp-env/downloads/classic-editor-record.json
+            ${{ runner.temp }}/diag
+          if-no-files-found: ignore
+
+  packages:
+    name: Package build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - run: scripts/build-packages.sh "$RUNNER_TEMP/dist"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: packages
+          path: ${{ runner.temp }}/dist

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "tokens": [
+    { "key": "primary", "label": "Primary brand colour", "group": "core", "default": "#0a1b3d", "help": "The dominant identity colour: hero, footer and dark areas." },
+    { "key": "secondary", "label": "Secondary brand colour", "group": "core", "default": "#1f6bff", "help": "Highlights, focus rings and calls to action." },
+    { "key": "accent", "label": "Accent colour", "group": "core", "default": "#177443", "help": "A restrained accent used for badges and small details." },
+    { "key": "heading", "label": "Heading colour", "group": "core", "default": "#0a1b3d", "help": "Headings and card titles." },
+    { "key": "text", "label": "Body text colour", "group": "core", "default": "#1a2438", "help": "Paragraphs and general text." },
+    { "key": "bg", "label": "Main background colour", "group": "core", "default": "#ffffff", "help": "The page background." },
+    { "key": "surface", "label": "Card and surface background", "group": "core", "default": "#ffffff", "help": "Cards, inputs and panels." },
+    { "key": "header_bg", "label": "Header background", "group": "chrome", "default": "#ffffff", "help": "The site header and the mobile menu panel." },
+    { "key": "header_text", "label": "Header text", "group": "chrome", "default": "#1a2438", "help": "Header and navigation text." },
+    { "key": "footer_bg", "label": "Footer background", "group": "chrome", "default": "#0a1b3d", "help": "The site footer." },
+    { "key": "footer_text", "label": "Footer text", "group": "chrome", "default": "#b9c8ee", "help": "Footer text and links." },
+    { "key": "link", "label": "Link colour", "group": "links", "default": "#1553c9", "help": "Links in content." },
+    { "key": "link_hover", "label": "Link hover colour", "group": "links", "default": "#0a1b3d", "help": "Links while the pointer is over them." },
+    { "key": "link_active", "label": "Link active colour", "group": "links", "default": "#0a1b3d", "help": "Links while being pressed." },
+    { "key": "button_bg", "label": "Button background", "group": "links", "default": "#1f6bff", "help": "Primary buttons." },
+    { "key": "button_text", "label": "Button text", "group": "links", "default": "#ffffff", "help": "Text on primary buttons." },
+    { "key": "button_hover", "label": "Button hover background", "group": "links", "default": "#1553c9", "help": "Buttons while the pointer is over them." },
+    { "key": "button_active", "label": "Button active background", "group": "links", "default": "#0f3f9e", "help": "Buttons while being pressed." }
+  ],
+  "presets": [
+    { "id": "noblen", "label": "Noblen default (navy, blue, green accent)", "colors": {} },
+    { "id": "noblen-teal", "label": "Noblen with teal accent", "colors": { "accent": "#0b6e69" } },
+    { "id": "deep-navy", "label": "Deep navy", "colors": { "primary": "#07142e", "heading": "#07142e", "footer_bg": "#07142e", "link_hover": "#07142e", "link_active": "#07142e", "secondary": "#2563eb", "button_bg": "#2563eb", "link": "#1d4ed8", "button_hover": "#1d4ed8", "button_active": "#1e3a8a" } },
+    { "id": "slate", "label": "Slate and blue", "colors": { "primary": "#1f2937", "heading": "#111827", "text": "#1f2937", "header_text": "#1f2937", "footer_bg": "#111827", "footer_text": "#c7ced9", "link_hover": "#111827", "link_active": "#111827", "accent": "#0f766e", "secondary": "#2563eb", "button_bg": "#2563eb", "link": "#1d4ed8", "button_hover": "#1d4ed8", "button_active": "#1e3a8a" } }
+  ],
+  "appearance_modes": { "light": "Light", "dark": "Dark", "auto": "Follow the visitor's device" },
+  "contrast": { "text": 4.5, "ui": 3.0 }
+}

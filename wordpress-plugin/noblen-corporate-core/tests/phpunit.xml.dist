@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<phpunit bootstrap="bootstrap.php" colors="false" beStrictAboutTestsThatDoNotTestAnything="true" failOnWarning="true" failOnRisky="true" convertDeprecationsToExceptions="false">
+	<testsuites>
+		<testsuite name="noblen-core">
+			<directory suffix="Test.php">Unit</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
