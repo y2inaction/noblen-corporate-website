@@ -415,7 +415,7 @@ C = {
  31: ('Cache invalidation', 'partial', 'partial', 'C31-M01 (owner)', [], ['Core object cache only; no persistent object-cache drop-in test; purge action asserted per trigger, not "exactly once"']),
  32: ('Ineligible content is not served through supported public interfaces', 'automated_complete', 'local_full', None, [], ['In-process queries as an anonymous user; REST has no routes by design; get_posts() with suppress_filters bypasses the read-time filter (documented limit)']),
  33: ('Required and optional relationship behaviour', 'partial', 'partial', None, [], ['Presentation of the grace state is covered by the exposure test only']),
- 34: ('Audit key: missing, invalid, rotation and recovery', 'partial', 'partial', 'C34-M01 (owner)', [], ['Wrong-key-for-historical-segment, compromise rotation and old-key-available are not each tested']),
+ 34: ('Audit key: missing, invalid, rotation and recovery', 'automated_complete', 'local_full', 'C34-M01 (owner)', ['tests-cli/key-custody-rehearsal.py (disposable site, real WP-CLI): 69/69, covering wrong, missing and invalid keys, planned, interrupted and compromise rotation, loss and recovery, old-key-available, restore from backup and tamper detection; also run in hosted CI from run 64'], ['Supplementary automated evidence only: the rehearsal is not the owner record C34-M01. No human has rehearsed rotation or recovery']),
 }
 
 _missing = [n for n in REQUIRED_SUBS if n not in C]
