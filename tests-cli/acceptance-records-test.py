@@ -5,9 +5,9 @@ What it enforces (it never creates or completes a record):
   * exactly the 17 manual records exist (the `-M` items of the frozen plan; C17-S01 is a CI status item, not a record),
     each with the sections and fields the template defines;
   * each record's executor matches the frozen CI acceptance plan (reviewer or owner);
-  * a PENDING record has EVERY fill-in field still at the placeholder, every declaration unticked and no signature;
+  * a PENDING record has EVERY fill-in field still at the placeholder, no declaration text and no signature;
   * a record that claims ACCEPTED or NOT ACCEPTED has every field genuinely filled in (date, performer, a 40-hex commit,
-    environment, evidence reference, signature reference, findings) and every declaration ticked, so a half-completed or
+    environment, evidence reference, signature reference, findings) and a private declaration reference, so a half-completed or
     inferred record is rejected;
   * the index agrees with the records, and no record claims an acceptance the index does not show;
   * the designation file is valid and names the same reviewer everywhere, and its independence status is not "verified"
@@ -24,7 +24,7 @@ PLACEHOLDER = '[not yet completed]'
 EXPECTED = ['C01-M01', 'C02-M01', 'C03-M01', 'C06-M01', 'C10-M01', 'C12-M01', 'C13-M01', 'C14-M01', 'C15-M01', 'C17-M01',
             'C19-M01', 'C20-M01', 'C20-M02', 'C25-M01', 'C27-M01', 'C31-M01', 'C34-M01']
 SECTIONS = ['## 1. Purpose', '## 2. Prerequisites', '## 3. Procedure and expected results', '## 4. Overall expected result',
-            '## 5. Evidence to keep', '## 6. Who performs and reviews', '## 7. Independence and qualification declaration',
+            '## 5. Evidence to keep', '## 6. Who performs and reviews', '## 7. Independence and qualification (held privately)',
             '## 8. Findings', '## 9. Decision']
 DECISIONS = {'PENDING', 'ACCEPTED', 'NOT ACCEPTED'}
 passed = failed = 0
@@ -73,9 +73,10 @@ def main():
     ok(not os.path.exists(os.path.join(rdir, 'C17-S01.md')), 'C17-S01 (a CI status item) is not a record')
 
     designation = read(os.path.join(docs, 'review-designation.yml'))
-    name_m = re.search(r'^\s+name:\s*"([^"]+)"', designation, re.M)
+    name_m = re.search(r'^\s+role_label:\s*"([^"]+)"', designation, re.M)
     designated = name_m.group(1) if name_m else None
-    ok(bool(designated), 'the designation file names a reviewer')
+    ok(bool(designated), 'the designation file gives the reviewer a role label')
+    ok(re.search(r'^\s+name:', designation, re.M) is None and 'identity_held_privately: true' in designation, 'no personal name is recorded in the public designation file')
     ok('designated_by: owner' in designation, 'the designation says it was made by the owner')
     ok(re.search(r'instruction_recorded:\s*"\d{4}-\d{2}-\d{2}"', designation) is not None, 'the designation records the date the instruction was received')
     state_lines = re.findall(r'state:\s*(\w+)', designation)
@@ -88,8 +89,8 @@ def main():
     ok('contact_details_recorded: false' in designation, 'no contact details are recorded for the reviewer')
 
     index = read(os.path.join(rdir, 'README.md'))
-    ok(designated is not None and designated in index, 'the index names the designated reviewer')
-    ok(designated is not None and designated in read(os.path.join(docs, 'REVIEW-PLAN.md')), 'the review plan names the designated reviewer')
+    ok(designated is not None and designated in index, 'the index names the reviewer role')
+    ok(designated is not None and designated in read(os.path.join(docs, 'REVIEW-PLAN.md')), 'the review plan names the reviewer role')
 
     completed = []
     for rid in EXPECTED:
@@ -110,7 +111,7 @@ def main():
         else:
             ok(pe is not None and ex == pe, f'{rid}: executor "{ex}" matches the frozen plan ("{pe}")')
         ok(all(s in t for s in SECTIONS), f'{rid}: has every template section')
-        ok(designated is not None and designated in t, f'{rid}: names the designated reviewer')
+        ok(designated is not None and designated in t, f'{rid}: names the reviewer role')
         dec = field(t, 'Decision')
         status_field = field(t, 'Status')
         ok(dec in DECISIONS, f'{rid}: decision is one of the allowed values', str(dec))
@@ -119,11 +120,13 @@ def main():
         ok(len(proc) >= 4, f'{rid}: has a numbered procedure with expected results ({len(proc)} steps)')
         results = [[c.strip() for c in re.split(r'(?<!\\)\|', l)[1:-1]] for l in proc]
         ok(all(len(c) == 5 and c[2] != '' for c in results), f'{rid}: every step has an action and an expected result')
-        decls = re.findall(r'^\| (I .*?|I have.*?|I do.*?|I hold.*?|I am.*?) \| \[( |x|X)\] \|$', t, re.M)
-        ticks = [d[1].lower() == 'x' for d in decls]
-        ok(len(decls) == 5, f'{rid}: five independence and qualification declarations are present', str(len(decls)))
+        sec7 = t.split('## 7.', 1)[1].split('## 8.', 1)[0] if '## 7.' in t else ''
+        ok(not re.search(r'\[( |x|X)\]', sec7) and 'I hold no' not in sec7 and 'qualification' in sec7.lower() and 'not** recorded in this public repository' in sec7,
+           f'{rid}: personal declarations and qualifications are not recorded in the public file (private reference only)')
+        ok(field(t, 'Independence state (from review-designation.yml)') == 'NOT VERIFIED', f'{rid}: independence is shown as NOT VERIFIED')
         fill_labels = ['Date and time performed (UTC)', 'Commit checked (40-character SHA)', 'Environment (address, WordPress, PHP, browser, devices)',
-                       'Evidence reference', 'Decision date (UTC)', 'Signature or signature reference']
+                       'Evidence reference', 'Decision date (UTC)', 'Signature or signature reference',
+                       'Private declaration reference (identifier only; no personal details)']
         if ex == 'owner':
             fill_labels += ['Performed by (the owner, as the frozen plan requires)', 'Independent verification performed by the designated reviewer', 'Independent verification outcome']
         else:
@@ -133,16 +136,14 @@ def main():
         if dec == 'PENDING':
             ok(all(v == PLACEHOLDER for v in vals.values()), f'{rid}: PENDING, every fill-in field is still the placeholder', str({k: v for k, v in vals.items() if v != PLACEHOLDER}))
             ok(all(c[3] == PLACEHOLDER and c[4] == PLACEHOLDER for c in results), f'{rid}: PENDING, no step has a recorded result or note')
-            ok(not any(ticks), f'{rid}: PENDING, no declaration is ticked')
             ok(findings == PLACEHOLDER, f'{rid}: PENDING, findings are empty')
         else:
             completed.append(rid)
-            required = [k for k in fill_labels if not (ex == 'owner' and k.startswith('Independent verification'))]
+            required = [k for k in fill_labels if not (ex == 'owner' and (k.startswith('Independent verification') or k.startswith('Private declaration')))]
             ok(all(vals[k] not in (None, '', PLACEHOLDER) for k in required), f'{rid}: a completed record has every required field filled in', str([k for k in required if vals[k] in (None, '', PLACEHOLDER)]))
             ok(bool(re.fullmatch(r'[0-9a-f]{40}', vals['Commit checked (40-character SHA)'] or '')), f'{rid}: a completed record names a 40-hex commit')
             ok(bool(re.match(r'\d{4}-\d{2}-\d{2}', vals['Date and time performed (UTC)'] or '')) and bool(re.match(r'\d{4}-\d{2}-\d{2}', vals['Decision date (UTC)'] or '')), f'{rid}: a completed record has real dates')
             ok(all(c[3] in ('PASS', 'FAIL') for c in results), f'{rid}: a completed record has PASS or FAIL for every step')
-            ok(all(ticks) and len(ticks) == 5, f'{rid}: a completed record has every declaration ticked')
             ok(findings not in ('', PLACEHOLDER), f'{rid}: a completed record has findings (write "none" if there are none)')
             if dec == 'ACCEPTED':
                 ok(all(c[3] == 'PASS' for c in results), f'{rid}: ACCEPTED requires every step to PASS')

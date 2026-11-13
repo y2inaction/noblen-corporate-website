@@ -7,7 +7,9 @@
 schema_version: 1
 
 designated_reviewer:
-  name: "Sultan Zakariya"
+  # Role label only. The person's name and any personal declarations are held privately by the owner, not in this public repository.
+  role_label: "Nominated independent reviewer"
+  identity_held_privately: true
   designated_by: owner
   # The date the owner's instruction was received in the delegated development session. It is not a review date.
   instruction_recorded: "2026-11-13"
@@ -54,4 +56,4 @@ independence:
       state: missing
       note: "Not provisioned."
 
-public_repository_note: "The repository is public. The name is recorded here only because the owner instructed it. Earlier project guidance prefers role labels for private individuals; the owner may ask for the name to be replaced by a role label."
+public_repository_note: "The repository is public. The reviewer is identified here by role only; the owner holds the name, declarations and qualification information privately (owner decision, 2026-11-13). The name appeared in earlier commits and stays in git history."

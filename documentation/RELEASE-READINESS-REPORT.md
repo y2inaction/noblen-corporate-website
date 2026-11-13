@@ -15,7 +15,7 @@ The authoritative list is [REMAINING-WORK-REGISTER.md](REMAINING-WORK-REGISTER.m
 | Plugin | Gallery media picker with fallback, Site Health configuration validation, languages folder | Partner record type (owner decision) |
 | M2-D | Upgrade manifest, code-built schema-1 fixture and comparison, attestation and binding checker | C26-003 to C26-006 not satisfied: needs registered source and target, independent reviewer, approved attestation, authorised hosted run |
 | Documentation | Deployment, customization (rewritten for brand identity), administrator guide, acceptance-records guide, upgrade verification, security review, backup and rollback, owner checklist | Recovery not rehearsed (owner or reviewer) |
-| Acceptance and review | Reviewer designated by the owner: **Sultan Zakariya**. [REVIEW-PLAN.md](REVIEW-PLAN.md) assigns responsibilities and records the independence assessment. All 17 manual records are prepared as PENDING in [acceptance-records/](acceptance-records/README.md) (14 reviewer-run, 3 owner-run); operator WP-CLI commands and an upgrade notice make C25-M01 and C27-M01 performable by a person | **None of the 17 has been performed, signed or accepted.** Independence is NOT VERIFIED (8 open checks). C21-021, C21-022, C21-M01 pending; `accepted_count` is 0 |
+| Acceptance and review | A nominated independent reviewer (role label; the identity is held privately by the owner). [REVIEW-PLAN.md](REVIEW-PLAN.md) assigns responsibilities and records the independence assessment. All 17 manual records are prepared as PENDING in [acceptance-records/](acceptance-records/README.md) (14 reviewer-run, 3 owner-run); operator WP-CLI commands and an upgrade notice make C25-M01 and C27-M01 performable by a person | **None of the 17 has been performed, signed or accepted.** Independence is NOT VERIFIED (8 open checks). C21-021, C21-022, C21-M01 pending; `accepted_count` is 0 |
 
 ## 2. Theme and brand quality
 
@@ -72,15 +72,15 @@ Exact hosted results, read from GitHub:
 
 The 17 manual records are prepared and **all PENDING** ([acceptance-records/](acceptance-records/README.md)). None has been performed, signed or accepted, and none contains a result, signature, date or finding.
 
-- **Designated reviewer:** Sultan Zakariya, designated by the owner. He performs the 14 reviewer-run records (C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01).
+- **Nominated independent reviewer** (designated by the owner; identity and declarations held privately): performs the 14 reviewer-run records (C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01).
 - **Owner-run (the frozen plan assigns these to the owner):** C17-M01, C31-M01, C34-M01. The reviewer may add an independent verification only.
-- **Independence is NOT VERIFIED.** The repository shows no commit authored by him, but his GitHub login, role overlap, conflict-of-interest declaration, qualifications, signature route and access are all unconfirmed. See the assessment and the flagged conflicts in [REVIEW-PLAN.md](REVIEW-PLAN.md).
+- **Independence is NOT VERIFIED.** The repository history shows no commit authored by the nominee, but the nominee's GitHub login, role overlap, conflict declaration, qualifications, signature route and access are all unconfirmed. See the assessment and the flagged conflicts in [REVIEW-PLAN.md](REVIEW-PLAN.md).
 - **Corrections:** `C17-S01` is a CI status item, not a record; `C27-M01` is not in the frozen plan; the earlier guide wrongly gave `C31-M01` to the reviewer.
 - Owner decisions: C21-021, C21-022, C21-M01, all pending.
 
 ## 10. Owner-provided content and decisions outstanding
 
-See [OWNER-CONTENT-REQUIREMENTS.md](OWNER-CONTENT-REQUIREMENTS.md), items 1 to 23 and 20a. For the reviewer: his declarations, qualification statement, GitHub login (if he approves the C26-006 attestation), staging access and test accounts, the signature route, and whether his name may stay in this public repository. Changed by the brand work: the **master logo file** can now simply be uploaded by an administrator in Site Identity (no code), and the **default colours** (navy and blue dominant, restrained green accent) are for the owner to confirm. Still the owner's: verified content for every section, contact details, legal pages, the audit key, the naming scan, named reviewers, hosting and domain choices, the sector icons and values, the partner record type, and the C26 registration.
+See [OWNER-CONTENT-REQUIREMENTS.md](OWNER-CONTENT-REQUIREMENTS.md), items 1 to 23 and 20a. For the reviewer, supplied privately to the owner: declarations, qualification statement, GitHub login (if approving the C26-006 attestation), staging access and test accounts, and the signature route. Changed by the brand work: the **master logo file** can now simply be uploaded by an administrator in Site Identity (no code), and the **default colours** (navy and blue dominant, restrained green accent) are for the owner to confirm. Still the owner's: verified content for every section, contact details, legal pages, the audit key, the naming scan, named reviewers, hosting and domain choices, the sector icons and values, the partner record type, and the C26 registration.
 
 ## 11. Production deployment prerequisites
 

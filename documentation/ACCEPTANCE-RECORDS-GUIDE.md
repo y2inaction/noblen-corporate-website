@@ -6,7 +6,7 @@
 
 | Who | Records |
 |-----|---------|
-| **Designated reviewer: Sultan Zakariya** (designated by the owner; independence **not yet verified**) | The 14 reviewer-run records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01 |
+| **Nominated independent reviewer** (designated by the owner; independence **NOT VERIFIED**) | The 14 reviewer-run records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01 |
 | **The owner** (the frozen plan assigns these to the owner) | C17-M01, C31-M01, C34-M01. The reviewer may add an independent verification of the owner's evidence; it does not replace the owner's record. |
 | **The owner only** | C21-021, C21-022 and C21-M01, decided in [owner-acceptance-decisions.yml](owner-acceptance-decisions.yml). All three are pending. |
 
@@ -22,7 +22,7 @@ Corrections made when these records were prepared:
 - It names the **commit SHA** checked, the date and time (UTC), the environment and the performer's name and role.
 - It records PASS or FAIL for each step, and keeps the evidence **outside the public repository** (it may show private data). Only a reference to the evidence goes in the record. No secret, key, private term list or personal data goes in it.
 - A failed step is reported as a failure. Nothing is smoothed over.
-- Every declaration of independence and competence in the record is ticked only if it is true. An unticked box is a statement not made.
+- Declarations of independence and competence, and qualification information, are given privately to the owner and are never written in the public record. The record carries only an identifier that lets the owner find them.
 - A decision other than PENDING needs every field filled in. `tests-cli/acceptance-records-test.py` rejects a half-completed record, and CI runs it.
 - The implementer never fills in a record, a result, a date or a signature for someone else.
 

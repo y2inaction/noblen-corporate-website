@@ -6,13 +6,13 @@
 
 | Item | Value |
 |------|-------|
-| Designated reviewer | **Sultan Zakariya** |
+| Designated reviewer | **Nominated independent reviewer** (role label; the owner holds the identity privately) |
 | Designated by | The owner |
 | Instruction recorded | 2026-11-13, from the owner's instruction to the delegated development session (this is the date the instruction was received, not a review date) |
 | Scope | The outstanding manual acceptance and review records (17), within the limits in section 3 |
 | Machine-readable form | [review-designation.yml](review-designation.yml) |
 
-The designation does not record contact details, qualifications, a signature or any decision. The repository is public, so the name is recorded only because the owner instructed it; the owner may ask for it to be replaced by a role label.
+The designation does not record contact details, qualifications, a signature or any decision. The repository is public, so by the owner's decision of 2026-11-13 the name, personal declarations and qualification information are kept out of public files; a role label is used. An earlier commit in git history still contains the name. Removing it would need a history rewrite on a shared branch, which is not done without separate approval.
 
 ## 2. What the frozen plans require
 
@@ -53,7 +53,7 @@ Each requirement is marked with what the repository can and cannot show. **No ch
 | I7 | An agreed route for the signed record (E7) | Frozen plan | **Missing** | Not decided. Options for the owner to choose: a signed document held outside the repository with a reference recorded in the record; a signed message; or, for repository work, a review by the reviewer's own GitHub account. |
 | I8 | Access to a staging site, test accounts, the release packages and real devices | Records' prerequisites | **Missing** | Not provisioned. |
 
-**Conclusion:** the designation is the owner's decision and is recorded. It **cannot be called independent yet**. The repository shows no authorship conflict, but identity, role, interest, competence, signature route and access are all unconfirmed. Until the reviewer supplies the declarations in each record (section 7 of every record) and the owner has judged the qualification, any record the reviewer completes should be treated as **an unverified review**, and no record should be used to accept a criterion.
+**Conclusion:** the designation is the owner's decision and is recorded. It **cannot be called independent yet**. The repository shows no authorship conflict, but identity, role, interest, competence, signature route and access are all unconfirmed. Until the reviewer gives the declarations privately to the owner (each record carries only a private reference, section 7) and the owner has judged the qualification, any record the reviewer completes should be treated as **an unverified review**, and no record should be used to accept a criterion.
 
 ## 5. Conflicts and gaps flagged
 
@@ -72,10 +72,10 @@ Each requirement is marked with what the repository can and cannot show. **No ch
 
 1. The performer sets up the staging environment described in the record and works through the procedure from their own observation.
 2. They fill in every field, keep the evidence **outside the public repository** (it may show private data) and write only a reference to it in the record.
-3. They tick the declarations that are true. An unticked declaration is a statement not made.
+3. They give their independence declaration, conflict declaration and qualification information privately to the owner, and write only an identifier for them in section 7. None of that personal information goes in the public repository.
 4. They set the decision to ACCEPTED or NOT ACCEPTED and sign by the route the owner agreed.
 5. The record is committed by whoever holds it, in its own commit, so the history shows who changed it.
-6. `tests-cli/acceptance-records-test.py` rejects a record that is half completed, ticks no declaration but claims a decision, or whose fields do not match its status.
+6. `tests-cli/acceptance-records-test.py` rejects a record that is half completed, gives no private declaration reference but claims a decision, or whose fields do not match its status.
 
 Nobody, including the implementer, fills in a record, a result, a date or a signature on someone else's behalf.
 
