@@ -51,8 +51,8 @@ Lighthouse figures above. The brand tokens add about 1.3 KB of inline CSS (no ex
 | Brand Identity in the Customizer (browser) | 51, repeated runs stable | local and hosted (run 52) |
 | Logo management and suggestions (browser) | 62, repeated runs stable | local and hosted |
 | Operator WP-CLI commands | 30 | local and hosted (run 62) |
-| Key custody rehearsal (disposable site: backup, rotation, interruption, compromise, loss, recovery, restore, tamper) | 69; three mutants caught | local; hosted result pending (run 64) |
-| Register and records against the frozen plans | 144 | local; hosted result pending (run 64) |
+| Key custody rehearsal (disposable site: backup, rotation, interruption, compromise, loss, recovery, restore, tamper) | 69; three mutants caught | local and hosted (run 64) |
+| Register and records against the frozen plans | 144 | local and hosted (run 64) |
 | Upgrade notice in the administration | 9 | local and hosted (run 62) |
 | Acceptance records and reviewer designation (fail-closed) | 270 and 35; three fabricated-record mutants rejected | local and hosted (earlier counts, run 62); current counts pending |
 | Home sections, record facts, SEO helpers, SEO structure, Site Health, gallery, upgrade comparison, attestation checker | as listed in the register | local and hosted |
@@ -67,7 +67,7 @@ Exact hosted results, read from GitHub:
 - **Run 54** (CI, push, `4646b30`): completed, success. Run 55 (pull request event, same commit) and Validate run 31: success.
 - **Run 56** (CI, push, `b8147f3`, the WP-CLI commands): completed, success.
 - **Runs 58, 60, 61, 62, 63 and Validate 35 verified** (completed, success): run 58 (`eda7389`), run 60 (`fe5b565`), run 61 (pull request event), run 62 (push, `9f342d6`) and run 63 (pull request event, `9f342d6`). In run 62 the steps "Reviewer designation and manual records" (both static jobs), "Operator WP-CLI commands" and "Pending or failed upgrade notice" (disposable-site job) executed and passed.
-- **Not yet verified:** run 64 (`28bbdbd`: key commands, rehearsal, plan-register test). Confirm it on the pull request before relying on this report.
+- **Run 64** (push, `28bbdbd`): completed, success, 11 of 11 jobs. The key custody rehearsal step ran and passed in both host WP-CLI jobs (PHP 8.3 and 8.4) and the plan-register test step ran in both static jobs. Run 65 (pull request event) and Validate 36: success. **Run 66** (push, `6f7434a`), run 67 and Validate 37: success.
 - Earlier commits verified green in all 11 jobs: `663c356`, `f2fe4de`, `a71cbd4`, `7146586`, `06caca5`, `c1ae25a`, `c9dbf7a`, `3289081`, `6f97f56`, `d8fc8a5`, `d2ae0a1`, `eeb4738`, `63586a7`, `c0823a2`, `0a9291b`.
 - The Configuration A job name is unchanged by decision.
 
