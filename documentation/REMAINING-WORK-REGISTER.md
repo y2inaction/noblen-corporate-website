@@ -34,14 +34,14 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 | D2 | Release packaging reproducibility, checksums, fresh-install and package-install tests. | partly done; extend |
 | D3 | Upgrade test from an earlier real release. None exists; a fixture must be described as a fixture. | owner |
 | D4 | Container images used by the browser tests are not pinned (wp-env 12.1.0 offers no pinning). Record digests and document the exception. | open |
-| D5 | Deployment, customisation, administrator, troubleshooting and rollback documents. `DEPLOYMENT.md` and `CUSTOMIZATION.md` are stubs. | open |
+| D5 | Deployment, customisation, administrator, troubleshooting and rollback documents. `DEPLOYMENT.md` and `CUSTOMIZATION.md` are stubs. | written: DEPLOYMENT.md, CUSTOMIZATION.md, ADMINISTRATOR-GUIDE.md (roles, workflow, troubleshooting, security, maintenance), and backup, restore and rollback sections in RECOVERY.md. The recovery procedure is documented but not rehearsed (C20-M02, owner or reviewer). |
 | D6 | Fresh install on a real WordPress.org download is unverified from this sandbox (the host is blocked). The hosted CI downloads it. | evidence from hosted CI only |
 
 ## D. Acceptance and owner inputs
 
 | ID | Requirement | Status |
 |----|-------------|--------|
-| A1 | 17 manual acceptance records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C17-M01, C17-S01 (owner), C19-M01, C20-M01, C20-M02, C25-M01, C27-M01, C31-M01, C34-M01 (owner). None exist and none may be created by the implementer. Human-verification instructions are to be prepared. | owner |
+| A1 | 17 manual acceptance records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C17-M01, C17-S01 (owner), C19-M01, C20-M01, C20-M02, C25-M01, C27-M01, C31-M01, C34-M01 (owner). None exist and none may be created by the implementer. Human-verification instructions are to be prepared. | instructions prepared in ACCEPTANCE-RECORDS-GUIDE.md (what to check, evidence to keep, blank template). No record exists and none was created. Each must be produced by the named reviewer or owner. |
 | A2 | C21-021, C21-022 and C21-M01 stay pending until the owner decides. `accepted_count` stays 0. | owner |
 | A3 | Owner naming scan (`scripts/naming-scan.sh`) to be run by the owner. | owner |
 | A4 | Owner content: see `OWNER-CONTENT-REQUIREMENTS.md`. No corporate claims, people, addresses or contact details are invented. | owner |

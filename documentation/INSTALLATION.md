@@ -42,4 +42,4 @@ Deactivating or deleting the plugin **keeps all data** by default. Data is remov
 
 ## Compatibility
 
-Tested locally on PHP 8.3 and MariaDB 10.11 with WordPress 6.4.3. MySQL 8.4 and PHP 8.4 are covered by the CI workflow, which has not yet run on GitHub.
+Tested locally on PHP 8.3 and MariaDB 10.11 with WordPress 6.4.3, and in hosted CI on PHP 8.3 and 8.4 with MySQL 8.4 and WordPress 6.4.3. PHP 8.5 is checked informationally. Other WordPress versions are not tested.
