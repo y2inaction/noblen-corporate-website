@@ -74,7 +74,7 @@ wp noblen migrate status
 wp noblen migrate confirm-backup --user=<administrator login>
 ```
 
-Only the Publication Approver role may read the audit trail. Key rotation and recovery after loss are not available as commands or screens; see [REVIEW-PLAN.md](REVIEW-PLAN.md) section 5.
+Only the Publication Approver role may read the audit trail. Key rotation and recovery after loss are now available as `wp noblen key ...` commands ([RECOVERY.md](RECOVERY.md), "Audit key custody"); there is still no administration screen for them. See [REVIEW-PLAN.md](REVIEW-PLAN.md) section 5.
 
 ## The owner naming scan
 

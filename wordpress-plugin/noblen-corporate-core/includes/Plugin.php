@@ -27,6 +27,7 @@ final class Plugin {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( 'noblen audit', Cli\AuditCommand::class );
 			\WP_CLI::add_command( 'noblen migrate', Cli\MigrateCommand::class );
+			\WP_CLI::add_command( 'noblen key', Cli\KeyCommand::class );
 		}
 
 		if ( is_admin() ) {

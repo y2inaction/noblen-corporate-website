@@ -39,4 +39,20 @@ Rehearse these on staging; until the owner has done so the procedure is document
 - `wp noblen audit export --user=<approver login> --file=<new file>` writes the audit chain with its chain head. Export before any recovery step and keep the file in secure custody; it is the independent record that recovery compares against.
 - `wp noblen migrate status` shows whether a database upgrade is pending and whether a backup is confirmed.
 
-Key rotation and recovery after loss are not available as commands. They are developer-run today.
+## Audit key custody: rotation and recovery after loss
+
+Operator commands run with `--user=<login>` (an administrator or a Publication Approver). They never create, derive or print a key: **you place every key in `wp-config.php` first**, and the commands only read what is configured. Only key identifiers and short fingerprints are shown.
+
+| Situation | Command (all under `wp noblen key`) | What it does |
+|-----------|-------------------------------------|--------------|
+| See the state | `status` (and `wp noblen audit status`) | Integrity state, configured key ids with fingerprints, counts of custody events |
+| Suspected exposure | `suspend --reason="..."` | Blocks approvals at once. `resume --yes` lifts it |
+| Planned rotation | `rotate --new-key-id=<id> --confirm-new-key-id=<id>` | Records the change, signed by the old and then the new key. Then set `NOBLEN_AUDIT_KEY_ID` to the new id and keep the old key configured as a verification key. Until you switch, the state is `key_invalid` on purpose |
+| Compromise | `rotate ... --reason=compromise --suspect-from=<id> --suspect-to=<id>` | Allowed while approvals are suspended; records the suspect range |
+| Rotation interrupted | `complete-rotation` or `abandon-rotation --reason="..."` | State `rotation_incomplete` until one of these |
+| Every key lost | `recover --sign-off-ref=<ref> --reason="..." --authority-user=<other person> --confirm="ESTABLISH NEW KEY" [--last-export=<file> --export-ref=<ref>]`, then `complete-recovery --completion-ref=<ref>` | Needs the new key already configured, a recovery authority who is a different person, and the owner's references. Approvals stay blocked (`recovery_incomplete`) until completion. Earlier entries are reported as unverifiable and never rewritten |
+| An old key turns up | `old-key-available --key-id=<id>` | Records it; entries it signed then verify |
+
+Before any of these: export the audit trail (`wp noblen audit export`) and take a database backup. **A database backup cannot be verified without the key that signed it**, so the key custody copies matter as much as the backup.
+
+The procedure is rehearsed automatically on a disposable site in CI (`tests-cli/key-custody-rehearsal.py`: 69 checks covering backup, planned, interrupted and compromise rotation, loss and recovery, restore, tamper detection, wrong and missing keys and the refusals). That proves the commands behave as documented. It is **not** the owner's record C34-M01: a person must still rehearse this on staging with throwaway keys ([C34-M01](acceptance-records/C34-M01.md)). Never use the production key in a rehearsal.

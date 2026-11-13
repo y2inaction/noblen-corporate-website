@@ -76,7 +76,7 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 | ID | Requirement | Status |
 |----|-------------|--------|
 | R1 | Designation of the reviewer, assignment of responsibilities, independence assessment and flagged conflicts: REVIEW-PLAN.md, review-designation.yml. Validated by `tests-cli/review-designation-test.py` (33 checks) and `tests-cli/acceptance-records-test.py` (269 checks, three mutants caught). The register generator reports the designation and never lets a record change `accepted_count`. | done; independence NOT VERIFIED |
-| R2 | Operator WP-CLI commands so that the manual records can be performed by a person: `wp noblen audit status|list|export`, `wp noblen migrate status|confirm-backup|run`. `tests-cli/noblen-cli-test.sh` (30 checks). Key rotation and recovery after loss still have no screen or command. | done locally; hosted result pending |
+| R2 | Operator WP-CLI commands so that the manual records can be performed by a person: `wp noblen audit status|list|export`, `wp noblen migrate status|confirm-backup|run`. `tests-cli/noblen-cli-test.sh` (30 checks). `wp noblen key status|suspend|resume|rotate|complete-rotation|abandon-rotation|recover|complete-recovery|old-key-available` close the key-rotation and recovery gap (no administration screen). `tests-cli/key-custody-rehearsal.py`: 69 checks on a disposable site, three mutants caught. Not the owner's C34-M01. | done locally (rehearsal 69/69); hosted result pending |
 | R3 | Decision needed: how a completed record feeds the register (REVIEW-PLAN.md section 7). | owner |
 
 ## E. Reserved gates (not executed)

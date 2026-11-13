@@ -62,7 +62,7 @@ wp noblen audit export --user=<approver login> --file=<a new file name>
 wp noblen migrate status
 ```
 
-`audit status` shows the integrity state, the key identifier and a fingerprint (never the key) and verifies the whole chain. `audit list` and `audit export` are only for the Publication Approver role; the export includes the chain head and an existing file is never overwritten, so keep each export in secure custody. Before any plugin upgrade that changes the database, take a backup, check it, then run `wp noblen migrate confirm-backup --user=<administrator login>` and `wp noblen migrate run --user=<administrator login>`; the upgrade refuses to run until a backup is confirmed. Key rotation and recovery after loss have no command or screen: follow [RECOVERY.md](RECOVERY.md) and involve a developer.
+`audit status` shows the integrity state, the key identifier and a fingerprint (never the key) and verifies the whole chain. `audit list` and `audit export` are only for the Publication Approver role; the export includes the chain head and an existing file is never overwritten, so keep each export in secure custody. Before any plugin upgrade that changes the database, take a backup, check it, then run `wp noblen migrate confirm-backup --user=<administrator login>` and `wp noblen migrate run --user=<administrator login>`; the upgrade refuses to run until a backup is confirmed. Key rotation, suspension and recovery after loss use `wp noblen key ...` (there is no screen for them): follow the table in [RECOVERY.md](RECOVERY.md), "Audit key custody". You place every key in `wp-config.php` first; the commands never create or print a key.
 
 ## Checking the configuration
 

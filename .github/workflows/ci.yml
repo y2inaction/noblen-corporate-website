@@ -194,6 +194,23 @@ jobs:
           WP: ${{ github.workspace }}/vendor/bin/wp
           WP_SRC: ${{ runner.temp }}/wp
         run: tests-cli/package-install.sh
+      - name: 'Audit key custody rehearsal on a disposable site (backup, rotation, interruption, compromise, loss, recovery, restore, tamper, wrong and missing keys; automated, not the owner record C34-M01)'
+        env:
+          NOBLEN_REHEARSAL_DISPOSABLE: 'yes'
+          WP_SRC: ${{ runner.temp }}/wp
+          WP_CLI: ${{ github.workspace }}/vendor/bin/wp
+          REHEARSAL_DB_HOST: 127.0.0.1
+          REHEARSAL_DB_USER: root
+          REHEARSAL_DB_PASS: root
+          REHEARSAL_EVIDENCE: ${{ runner.temp }}/rehearsal-evidence-${{ matrix.php }}
+        run: python3 -I tests-cli/key-custody-rehearsal.py
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: key-custody-rehearsal-evidence-php${{ matrix.php }}
+          path: ${{ runner.temp }}/rehearsal-evidence-${{ matrix.php }}/rehearsal-report.json
+          if-no-files-found: ignore
+          retention-days: 14
 
   parity-browser:
     name: Non-WE parity, browser suites on PHP built-in server (informational)
