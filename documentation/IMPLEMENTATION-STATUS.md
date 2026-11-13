@@ -1,8 +1,8 @@
 # M2 Implementation Status
 
-Branch `feature/m2-implementation` (pushed; no pull request). Baseline `5739f75`. Specification: [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) Revision 5.1 and the frozen [CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md). Per-criterion detail: [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml), generated from the actual test results.
+Branch `feature/m2-implementation` (pushed; draft pull request #2 to `main`, open and unmerged, a review vehicle only). Baseline `5739f75`. Specification: [M2-IMPLEMENTATION-PLAN.md](M2-IMPLEMENTATION-PLAN.md) Revision 5.1 and the frozen [CI-ACCEPTANCE-TEST-PLAN.md](CI-ACCEPTANCE-TEST-PLAN.md). Per-criterion detail: [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml), generated from the actual test results.
 
-Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. Six CI runs and one Classic Editor capture run exist on this branch (below). CI run 6 (`ec38d89`) is fully green, including the strict Configuration A job. **C21-021 and C21-022 are evidenced and awaiting owner acceptance.**
+Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. Hosted CI runs and one Classic Editor capture run exist on this branch; the runs examined for this status are tabulated below, and the repository's Actions page is the current list. CI run 6 (`ec38d89`) was the first fully green run, including the strict Configuration A job, and the later runs examined (7 to 9, at the time of writing) concluded successfully. **C21-021 and C21-022 are evidenced and awaiting owner acceptance.**
 
 ## Local test evidence
 
@@ -55,7 +55,7 @@ Also corrected: root-owned mapping directories blocking cleanup, an empty diagno
 
 *Local verification of the PHP 8.4 correction* is listed in `UPSTREAM-PHP84-DEPRECATION.md`. It is not hosted evidence.
 
-## Fourth to sixth CI runs and the Classic Editor capture run
+## Fourth to ninth CI runs and the Classic Editor capture run
 
 | Run | Commit | Result |
 |-----|--------|--------|
@@ -63,6 +63,9 @@ Also corrected: root-owned mapping directories blocking cleanup, an empty diagno
 | CI run 5, 43286920209 | `cb211fc` | Green overall. Configuration A failed at the pin gate by design (pin unverified) |
 | Classic Editor capture run 1, 43286920565 | `cb211fc` | Success. Official package SHA-256 `7cc7799b0b7d820fbb7528dbff8027c736e52513992416cb37279f44d3d9dd77`; WP-CLI checksums verified; Configuration A suite 13/13; record `CAPTURE`, C21-021 NOT SATISFIED; artifact 13974709232 |
 | CI run 6, 43316091579 | `ec38d89` | **Fully green.** Strict Configuration A job passed (installer 14/14, suite 13/13); record artifact 13988531774 inspected by the owner: `STRICT`, C21-021 satisfied by this run. The wp-env job and all other jobs passed |
+| CI run 7, 43319851780 | `69b5c12` | Success overall (documentation commit recording the Classic Editor evidence). Not examined job by job here |
+| CI run 8, 43402018410 (push) | `b83c114` | **Success, 11 of 11 jobs.** Both static-analysis legs (PHP 8.3 and 8.4) passed the PyYAML check (hosted PyYAML 6.0.3) and the owner-acceptance regression tests (242 checks each). PHPUnit on PHP 8.3 and 8.4 with MySQL 8.4: 146 tests and 1,722 assertions each, with no failures, errors or skips (a fresh disposable WordPress site; a seeded development site reports more assertions for the same 146 tests). The blocking Configuration A job passed. Hosted per-criterion PHPUnit counts have not been independently verified, because the JUnit artifacts could not be retrieved from the review environment |
+| CI run 9, 43403469074 (pull request event) | `b83c114` | Success. The separate `Validate` workflow (run 43403469137, `theme` and `markdown-links`) also succeeded. All 24 check runs on the head commit (the push-event and pull-request-event runs together) were successful |
 
 The Classic Editor pin was verified by the reviewed change `ec38d89` after the independent review of 2026-11-12 (reference `NOBLEN-CORP-CE-INDEPENDENT-REVIEW-2026-11-12`). Known remaining limits: whole-ZIP stability seen on one day only, SVN revision not recorded, checksums URL reachability not independently confirmed. The Configuration A job name still reads "non-blocking until the pin is verified" although the job is blocking (cosmetic; unchanged by decision).
 
