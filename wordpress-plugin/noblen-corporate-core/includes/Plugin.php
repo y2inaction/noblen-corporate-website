@@ -24,6 +24,11 @@ final class Plugin {
 
 		require_once NOBLEN_CORE_DIR . 'includes/functions.php';
 
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			\WP_CLI::add_command( 'noblen audit', Cli\AuditCommand::class );
+			\WP_CLI::add_command( 'noblen migrate', Cli\MigrateCommand::class );
+		}
+
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( self::class, 'admin_init' ) );
 			Admin\Admin::register();

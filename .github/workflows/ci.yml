@@ -255,6 +255,10 @@ jobs:
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
         run: php tests-cli/brand-persistence-test.php
+      - name: 'Operator WP-CLI commands (wp noblen audit and migrate: capability checks, JSON export, backup confirmation)'
+        env:
+          WP_DIR: ${{ runner.temp }}/wp
+        run: bash tests-cli/noblen-cli-test.sh
       - name: Install browser tooling
         working-directory: tests-e2e
         run: |
