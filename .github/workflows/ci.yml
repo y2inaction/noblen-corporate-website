@@ -59,6 +59,8 @@ jobs:
         run: tests-cli/php-log-check-test.sh
       - name: Owner acceptance decisions (fail-closed generator and its regression tests)
         run: python3 tests-cli/acceptance-decisions-test.py
+      - name: PHPUnit per-criterion report regression tests (missing, empty, malformed and red JUnit output fail closed)
+        run: python3 tests-cli/phpunit-criteria-report-test.py
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)
@@ -109,6 +111,9 @@ jobs:
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
         run: phpunit -c phpunit.xml.dist --log-junit "$RUNNER_TEMP/junit-${{ matrix.php }}.xml"
+      - name: Per-criterion executed test cases (counted from the JUnit output; fails if it is missing, malformed or not clean)
+        if: always()
+        run: python3 scripts/phpunit-criteria-report.py "$RUNNER_TEMP/junit-${{ matrix.php }}.xml" --label "PHP ${{ matrix.php }}, MySQL 8.4" --baseline documentation/acceptance-criteria-traceability.yml
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
