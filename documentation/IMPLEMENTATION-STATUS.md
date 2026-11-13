@@ -120,9 +120,9 @@ Clicking Save Draft while WordPress's permalink request is still in flight is si
 - The WordPress download step cannot be exercised here (wordpress.org returns 403). Its checksum logic was tested against a local server for both a matching and a tampered checksum.
 - Hazard: `tests-cli/cli-integration.sh` runs `wp plugin uninstall`, which deletes the plugin directory. It copies the plugin into the target WordPress and refuses to run against a symlink, but running it against a development site replaces a symlinked plugin folder.
 
-## Manual records still required (none exist)
+## Manual records still required (prepared, all PENDING)
 
-C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01 (the acceptance test for criterion 14), C15-M01, C17-M01 and C17-S01 (owner), C19-M01, C20-M01 and C20-M02, C25-M01, C27-M01, C31-M01 and C34-M01 (owner).
+The 17 manual records (the `-M` items) are prepared in [acceptance-records/](acceptance-records/README.md) and are all **PENDING**: none has been performed, signed or accepted. The owner designated **Sultan Zakariya** as reviewer; his independence is **not verified** (see [REVIEW-PLAN.md](REVIEW-PLAN.md)). 14 records are reviewer-run (C01, C02, C03, C06, C10, C12, C13, C14, C15, C19, C20-M01, C20-M02, C25, C27) and 3 are owner-run (C17-M01, C31-M01, C34-M01). `C17-S01` is a CI status item, not a record, and `C27-M01` is not in the frozen CI plan.
 
 ## Owner inputs
 

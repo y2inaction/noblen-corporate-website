@@ -42,6 +42,28 @@ Everything is in **Appearance, Customize** and needs no code; see [CUSTOMIZATION
 5. **Go back:** **Restore Noblen defaults**, then Publish.
 6. **Check readability:** the **Contrast check** lists any pair of colours that is hard to read. Warnings are advice, not blocks.
 
+## Audit trail and database upgrades (command line)
+
+There is no administration screen for the audit trail. Use WP-CLI on the server, with `--user=<login>` so that the same permissions apply as on the website:
+
+```bash
+wp noblen audit status
+```
+
+```bash
+wp noblen audit list --user=<approver login> --limit=20
+```
+
+```bash
+wp noblen audit export --user=<approver login> --file=<a new file name>
+```
+
+```bash
+wp noblen migrate status
+```
+
+`audit status` shows the integrity state, the key identifier and a fingerprint (never the key) and verifies the whole chain. `audit list` and `audit export` are only for the Publication Approver role; the export includes the chain head and an existing file is never overwritten, so keep each export in secure custody. Before any plugin upgrade that changes the database, take a backup, check it, then run `wp noblen migrate confirm-backup --user=<administrator login>` and `wp noblen migrate run --user=<administrator login>`; the upgrade refuses to run until a backup is confirmed. Key rotation and recovery after loss have no command or screen: follow [RECOVERY.md](RECOVERY.md) and involve a developer.
+
 ## Checking the configuration
 
 Open Tools, Site Health. The **Noblen configuration** test reports, in plain language, whether the audit chain verifies, the database schema is current, errors are hidden from visitors, HTTPS and pretty permalinks are on, the theme is active, separation of duties is enforced, data is kept on uninstall, and search engines are allowed. **Critical** items block approvals or risk data and should be fixed first; **recommended** items are advice (for example, search engines should stay discouraged only until launch). The test only reads; it changes nothing.

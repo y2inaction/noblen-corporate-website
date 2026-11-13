@@ -70,6 +70,10 @@ jobs:
         run: php tests-cli/svg-test.php
       - name: Logo palette analysis and suggestions (synthetic logos, property test)
         run: php tests-cli/palette-test.php
+      - name: 'Reviewer designation and manual records (fail-closed: no fabricated or half-completed record; a record never accepts a criterion)'
+        run: |
+          python3 -I tests-cli/acceptance-records-test.py
+          python3 -I tests-cli/review-designation-test.py
 
   php85-informational:
     name: PHP 8.5 compatibility (informational, C16-006)

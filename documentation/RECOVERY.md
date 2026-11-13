@@ -32,3 +32,11 @@ Take a full backup before any install, upgrade or release, and again after it su
 | Unwanted publication | Revoke or unpublish the record, then purge caches from the listed addresses. |
 
 Rehearse these on staging; until the owner has done so the procedure is documented but not rehearsed.
+
+## Operator commands that help recovery
+
+- `wp noblen audit status` shows whether the audit chain verifies and which key identifier is in use.
+- `wp noblen audit export --user=<approver login> --file=<new file>` writes the audit chain with its chain head. Export before any recovery step and keep the file in secure custody; it is the independent record that recovery compares against.
+- `wp noblen migrate status` shows whether a database upgrade is pending and whether a backup is confirmed.
+
+Key rotation and recovery after loss are not available as commands. They are developer-run today.

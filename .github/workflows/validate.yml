@@ -44,7 +44,7 @@ jobs:
       - name: Check relative links in docs
         run: |
           status=0
-          for f in README.md documentation/*.md; do
+          for f in README.md documentation/*.md documentation/acceptance-records/*.md; do
             dir=$(dirname "$f")
             grep -oE '\]\(([^)#:]+)\)' "$f" | sed -E 's/\]\((.*)\)/\1/' | while read -r link; do
               [ -e "$dir/$link" ] || { echo "Broken link in $f: $link"; exit 1; }

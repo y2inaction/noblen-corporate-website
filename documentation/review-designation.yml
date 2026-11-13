@@ -1,0 +1,57 @@
+# Reviewer designation for the manual acceptance records.
+#
+# Hand-maintained. This file records WHO the owner has designated and what is still unverified about that designation.
+# It records no review result, no signature, no approval and no acceptance, and nothing in it changes any acceptance status.
+# The traceability generator (scripts/build-traceability.py) reads it and reports it in the register summary.
+# See documentation/REVIEW-PLAN.md for the plan, the independence assessment and the flagged conflicts.
+schema_version: 1
+
+designated_reviewer:
+  name: "Sultan Zakariya"
+  designated_by: owner
+  # The date the owner's instruction was received in the delegated development session. It is not a review date.
+  instruction_recorded: "2026-11-13"
+  scope:
+    reviewer_run_records: 14   # the frozen plan assigns these to the reviewer
+    owner_run_records: 3       # the frozen plan assigns these to the owner; the reviewer's role is additional verification only
+  contact_details_recorded: false
+
+# Whether the designation satisfies the independence requirements. "not_verified" is the honest state until the declarations
+# and identity facts below are supplied by the people concerned. Nothing here may be changed to "verified" by the implementer.
+independence:
+  status: not_verified
+  checks:
+    - id: I1
+      requirement: "Did not write, commit or approve the work being reviewed (frozen plan: a reviewer examines evidence; an approver of an attestation is not its author)"
+      state: evidenced_by_git_history_only
+      note: "No commit in the repository history is authored by the designated reviewer. This does not show who operates the GitHub account that pushed the work."
+    - id: I2
+      requirement: "Is not the operator of the GitHub account that authored the pull request (a protected repository review cannot be given by the pull request's own author account)"
+      state: unknown
+      note: "The reviewer's GitHub login has not been supplied."
+    - id: I3
+      requirement: "Does not hold a Noblen operational role (Content Editor, Clearance Officer, Publication Approver) on the site being reviewed, and does not act as the owner's technical representative on the decisions being reviewed"
+      state: unknown
+      note: "To be declared."
+    - id: I4
+      requirement: "Owner-run records (C17-M01, C31-M01, C34-M01) are performed by the owner, as the frozen plan requires"
+      state: conflict_flagged
+      note: "The designation cannot replace the owner on these three records. The reviewer may add an independent verification of the owner's evidence."
+    - id: I5
+      requirement: "A declaration of no conflicting interest (employment, financial or personal relationship with the implementer, a hosting or software supplier, or a person whose work is reviewed)"
+      state: missing
+      note: "No declaration exists."
+    - id: I6
+      requirement: "Competence for the review: WordPress administration, keyboard and screen-reader accessibility testing, testing on real devices, backup and restore, reading an audit trail"
+      state: missing
+      note: "No qualification statement exists. It is to be supplied by the reviewer and judged by the owner; it is not assumed."
+    - id: I7
+      requirement: "An agreed signature route for the signed record (frozen plan evidence class E7)"
+      state: missing
+      note: "Not decided."
+    - id: I8
+      requirement: "Access to a staging environment, test accounts and the release packages"
+      state: missing
+      note: "Not provisioned."
+
+public_repository_note: "The repository is public. The name is recorded here only because the owner instructed it. Earlier project guidance prefers role labels for private individuals; the owner may ask for the name to be replaced by a role label."

@@ -75,6 +75,8 @@ ap = _Parser()
 ap.add_argument('junit'); ap.add_argument('--cli'); ap.add_argument('--pkg'); ap.add_argument('--admin'); ap.add_argument('--a11y'); ap.add_argument('--smoke'); ap.add_argument('--content'); ap.add_argument('--classic'); ap.add_argument('--crawl'); ap.add_argument('--partial'); ap.add_argument('--we'); ap.add_argument('--classic-a')
 ap.add_argument('--out', default='documentation/acceptance-criteria-traceability.yml')
 ap.add_argument('--decisions', default='documentation/owner-acceptance-decisions.yml')
+ap.add_argument('--designation', default='documentation/review-designation.yml')
+ap.add_argument('--records', default='documentation/acceptance-records')
 a = ap.parse_args()
 
 counts, failed = collections.Counter(), collections.Counter()
@@ -240,6 +242,104 @@ def _pin_acceptance():
     return f"C21-021: EVIDENCED, {one('C21-021')}. C21-022: EVIDENCED, {one('C21-022')}"
 
 
+
+# ---- Reviewer designation and manual records: hand-maintained inputs, never generated, fail-closed. ---------------
+# The designation names who the owner designated and what is still unverified. It never changes an acceptance status.
+# The records folder is only COUNTED here: a record's decision is read from its Decision row, and no record is created or
+# completed by this script. A completed record is evidence; it does not make anything accepted.
+EXPECTED_RECORDS = ['C01-M01', 'C02-M01', 'C03-M01', 'C06-M01', 'C10-M01', 'C12-M01', 'C13-M01', 'C14-M01', 'C15-M01', 'C17-M01',
+                    'C19-M01', 'C20-M01', 'C20-M02', 'C25-M01', 'C27-M01', 'C31-M01', 'C34-M01']
+RECORD_DECISIONS = ('PENDING', 'ACCEPTED', 'NOT ACCEPTED')
+
+
+def load_review(designation_path, records_dir):
+    def fail(msg):
+        die(f'review-designation: {msg}')
+    try:
+        with open(designation_path, encoding='utf-8') as fh:
+            raw = yaml.load(fh, Loader=_StrictLoader)
+    except FileNotFoundError:
+        fail(f'{designation_path} is missing; it is required')
+    except OSError as e:
+        fail(f'cannot read {designation_path}: {e.strerror or e}')
+    except (yaml.YAMLError, ValueError, RecursionError) as e:
+        fail(f'cannot parse {designation_path}: {e}')
+    try:
+        if not isinstance(raw, dict) or not all(isinstance(k, str) for k in raw):
+            fail('the top level must be a mapping with string keys')
+        if type(raw.get('schema_version')) is not int or raw['schema_version'] != 1:
+            fail('schema_version must be the integer 1')
+        dr = raw.get('designated_reviewer')
+        if not isinstance(dr, dict):
+            fail("'designated_reviewer' must be a mapping")
+        name = dr.get('name')
+        if not isinstance(name, str) or not name.strip():
+            fail('designated_reviewer.name must be a non-empty string')
+        if dr.get('designated_by') != 'owner':
+            fail("designated_reviewer.designated_by must be 'owner'")
+        when = dr.get('instruction_recorded')
+        if isinstance(when, datetime.date) and not isinstance(when, datetime.datetime):
+            when = when.isoformat()
+        if not (isinstance(when, str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}', when)):
+            fail('designated_reviewer.instruction_recorded must be a YYYY-MM-DD date')
+        try:
+            day = datetime.date.fromisoformat(when)
+        except ValueError:
+            fail(f'instruction_recorded {when!r} is not a real date')
+        if day > datetime.datetime.now(datetime.timezone.utc).date():
+            fail(f'instruction_recorded {when} is in the future')
+        scope = dr.get('scope')
+        if not isinstance(scope, dict) or type(scope.get('reviewer_run_records')) is not int or type(scope.get('owner_run_records')) is not int:
+            fail('designated_reviewer.scope must give integer reviewer_run_records and owner_run_records')
+        if scope['reviewer_run_records'] + scope['owner_run_records'] != len(EXPECTED_RECORDS):
+            fail(f'the scope must add up to {len(EXPECTED_RECORDS)} records')
+        if dr.get('contact_details_recorded') is not False:
+            fail('contact_details_recorded must be false: no contact details are recorded in this repository')
+        ind = raw.get('independence')
+        if not isinstance(ind, dict) or ind.get('status') not in ('not_verified', 'verified'):
+            fail("independence.status must be 'not_verified' or 'verified'")
+        checks = ind.get('checks')
+        if not isinstance(checks, list) or not checks:
+            fail('independence.checks must be a non-empty list')
+        ids = set()
+        for i, c in enumerate(checks):
+            if not isinstance(c, dict) or set(c) != {'id', 'requirement', 'state', 'note'} or not all(isinstance(v, str) and v.strip() for v in c.values()):
+                fail(f'independence.checks[{i}] must have exactly the non-empty string keys id, requirement, state and note')
+            if c['id'] in ids:
+                fail(f"independence.checks[{i}]: duplicate id {c['id']}")
+            ids.add(c['id'])
+        open_checks = [c['id'] for c in checks if c['state'] != 'verified']
+        if ind['status'] == 'verified' and open_checks:
+            fail(f"independence.status cannot be 'verified' while checks are open: {open_checks}")
+        # The records: exactly the expected files; each Decision row is read, nothing else is trusted.
+        try:
+            present = sorted(f[:-3] for f in os.listdir(records_dir) if f.endswith('.md') and f != 'README.md')
+        except OSError as e:
+            fail(f'cannot read the records folder {records_dir}: {e.strerror or e}')
+        if present != sorted(EXPECTED_RECORDS):
+            fail(f'the records folder must hold exactly the {len(EXPECTED_RECORDS)} expected records; found {present}')
+        tally = collections.Counter()
+        for rid in EXPECTED_RECORDS:
+            with open(os.path.join(records_dir, rid + '.md'), encoding='utf-8') as fh:
+                m = re.search(r'^\| Decision \| (PENDING|ACCEPTED|NOT ACCEPTED) \|$', fh.read(), re.M)
+            if not m:
+                fail(f'record {rid} has no valid Decision row')
+            tally[m.group(1)] += 1
+        return {'name': name.strip(), 'when': when, 'open_checks': open_checks, 'independence': ind['status'], 'tally': tally,
+                'reviewer_run': scope['reviewer_run_records'], 'owner_run': scope['owner_run_records']}
+    except SystemExit:
+        raise
+    except Exception as e:
+        fail(f'unexpected problem while validating ({type(e).__name__}: {e}); the file is rejected')
+
+
+REVIEW = load_review(a.designation, a.records)
+_done = REVIEW['tally']['ACCEPTED'] + REVIEW['tally']['NOT ACCEPTED']
+MANUAL_REVIEW = (f"Designated reviewer: {REVIEW['name']}, designated by the owner (instruction recorded {REVIEW['when']}). "
+                 + ('Independence: VERIFIED.' if REVIEW['independence'] == 'verified' else f"Independence: NOT VERIFIED ({len(REVIEW['open_checks'])} independence checks are open; see documentation/REVIEW-PLAN.md).")
+                 + f" Manual records prepared in documentation/acceptance-records/: {len(EXPECTED_RECORDS)} ({REVIEW['reviewer_run']} reviewer-run, {REVIEW['owner_run']} owner-run); "
+                 + f"completed: {_done}; pending: {REVIEW['tally']['PENDING']}. A completed record is evidence, not acceptance, and does not change accepted_count.")
+
 SUB_TOTAL = sum(len(v) for v in REQUIRED_SUBS.values())
 SUB_ACCEPTED = sum(1 for v in REQUIRED_SUBS.values() for sid in v if sub_status(sid)['status'] == 'accepted')
 G21_021 = f'C21-021 (version and source match the verified pin): EVIDENCED by hosted strict run 43316091579. {_owner("C21-021")}'
@@ -318,7 +418,8 @@ lines = [
  f'  accepted_count: {ACCEPTED_COUNT}',
  '  owner_acceptance_decisions: "documentation/owner-acceptance-decisions.yml (hand-maintained by the owner; an entry that is absent is pending; evidence entries are audit references that the generator does not verify)"',
  f'  classic_editor_pin: "verified (1.7.0; independent review 2026-11-12, reference NOBLEN-CORP-CE-INDEPENDENT-REVIEW-2026-11-12; strict hosted run 43316091579 passed). {_pin_acceptance()}"',
- '  c26_003_to_c26_006: "deferred to M2-D by owner decision; not implemented; not waived; not accepted"',
+ '  c26_003_to_c26_006: "M2-D tooling is implemented and tested (documentation/UPGRADE-VERIFICATION.md); the criteria are NOT satisfied, not waived and not accepted: they need a registered source and target, an independent reviewer, an approved attestation and an authorised hosted run"',
+ f'  manual_review: {json.dumps(MANUAL_REVIEW)}',
  'criteria:',
 ]
 for n in sorted(C):

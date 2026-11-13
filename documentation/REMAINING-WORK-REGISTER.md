@@ -66,10 +66,18 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 
 | ID | Requirement | Status |
 |----|-------------|--------|
-| A1 | 17 manual acceptance records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C17-M01, C17-S01 (owner), C19-M01, C20-M01, C20-M02, C25-M01, C27-M01, C31-M01, C34-M01 (owner). None exist and none may be created by the implementer. Human-verification instructions are to be prepared. | instructions prepared in ACCEPTANCE-RECORDS-GUIDE.md (what to check, evidence to keep, blank template). No record exists and none was created. Each must be produced by the named reviewer or owner. |
+| A1 | 17 manual acceptance records: C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C17-M01, C17-S01 (owner), C19-M01, C20-M01, C20-M02, C25-M01, C27-M01, C31-M01, C34-M01 (owner). None exist and none may be created by the implementer. Human-verification instructions are to be prepared. | 17 manual records (the 17 `-M` items; `C17-S01` is a CI status item, not a record) are prepared in `documentation/acceptance-records/` for the designated reviewer Sultan Zakariya and the owner, all PENDING; none performed, signed or accepted. 14 are reviewer-run, 3 owner-run (C17-M01, C31-M01, C34-M01). C27-M01 is not in the frozen plan. Independence is NOT VERIFIED (8 open checks) and is flagged in REVIEW-PLAN.md. |
 | A2 | C21-021, C21-022 and C21-M01 stay pending until the owner decides. `accepted_count` stays 0. | owner |
 | A3 | Owner naming scan (`scripts/naming-scan.sh`) to be run by the owner. | owner |
 | A4 | Owner content: see `OWNER-CONTENT-REQUIREMENTS.md`. No corporate claims, people, addresses or contact details are invented. | owner |
+
+## D2. Reviewer designation and operator interface
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| R1 | Designation of the reviewer, assignment of responsibilities, independence assessment and flagged conflicts: REVIEW-PLAN.md, review-designation.yml. Validated by `tests-cli/review-designation-test.py` (33 checks) and `tests-cli/acceptance-records-test.py` (269 checks, three mutants caught). The register generator reports the designation and never lets a record change `accepted_count`. | done; independence NOT VERIFIED |
+| R2 | Operator WP-CLI commands so that the manual records can be performed by a person: `wp noblen audit status|list|export`, `wp noblen migrate status|confirm-backup|run`. `tests-cli/noblen-cli-test.sh` (30 checks). Key rotation and recovery after loss still have no screen or command. | done locally; hosted result pending |
+| R3 | Decision needed: how a completed record feeds the register (REVIEW-PLAN.md section 7). | owner |
 
 ## E. Reserved gates (not executed)
 
