@@ -27,6 +27,7 @@ final class Plugin {
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( self::class, 'admin_init' ) );
 			Admin\Admin::register();
+			Admin\SiteHealth::register();
 		}
 	}
 

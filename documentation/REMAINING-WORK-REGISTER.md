@@ -32,6 +32,12 @@ Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10
 |----|-------------|--------|
 | Q1 | SEO fundamentals and performance: meta description, Open Graph, Organization data from owner-entered settings only, archive heading order. Lighthouse 12.8.2 on the local dev site (home, archive, record; Chromium, local server, no compression): accessibility 100, best practices 100, SEO 100, performance 99 to 100, LCP 1.7 s, CLS 0, TBT 0 ms. Tests: tests-e2e/seo.js (51 checks), tests-cli/seo-test.php (12 checks). Real-local evidence on fixture content; re-measure on staging with real hosting and compression. | done locally; hosted result pending |
 
+## B3. Configuration validation
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| V1 | Operator-facing configuration validation in Tools, Site Health (audit key and chain, migration, debug display, HTTPS, permalinks, theme, separation of duties, uninstall data removal, search visibility). Read-only. tests-cli/site-health-test.php: 39 checks. Confirmed visible on the real Site Health screen locally. | done locally; hosted result pending |
+
 ## C. M2-D, packaging and release
 
 | ID | Requirement | Status |

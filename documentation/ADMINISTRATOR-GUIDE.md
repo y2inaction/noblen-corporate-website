@@ -31,6 +31,10 @@ Noblen, Settings holds the company name, contact details, social links and home 
 
 Approvals are signed into a tamper-evident audit chain using a key defined in `wp-config.php`. If the key is missing or invalid, approvals are blocked and published content stays available. Keep the key in secure custody and follow [RECOVERY.md](RECOVERY.md) for rotation or loss. Never generate a replacement silently.
 
+## Checking the configuration
+
+Open Tools, Site Health. The **Noblen configuration** test reports, in plain language, whether the audit chain verifies, the database schema is current, errors are hidden from visitors, HTTPS and pretty permalinks are on, the theme is active, separation of duties is enforced, data is kept on uninstall, and search engines are allowed. **Critical** items block approvals or risk data and should be fixed first; **recommended** items are advice (for example, search engines should stay discouraged only until launch). The test only reads; it changes nothing.
+
 ## Troubleshooting
 
 | Symptom | Likely cause and action |

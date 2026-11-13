@@ -240,6 +240,10 @@ jobs:
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
         run: php tests-cli/seo-test.php
+      - name: Site Health configuration checks (every rule and the roll-up)
+        env:
+          NOBLEN_WP_PATH: ${{ runner.temp }}/wp
+        run: php tests-cli/site-health-test.php
       - name: Install browser tooling
         working-directory: tests-e2e
         run: |
