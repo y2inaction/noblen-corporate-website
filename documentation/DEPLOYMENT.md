@@ -49,6 +49,16 @@ Follow [INSTALLATION.md](INSTALLATION.md) on a **staging copy** first. Productio
 
 See [RECOVERY.md](RECOVERY.md). In short: for a failed theme, rename the theme folder so WordPress falls back to a default theme; for a failed plugin, rename the plugin folder or deactivate it; for a failed database upgrade, restore the pre-upgrade backup. Content stays in the database throughout.
 
+## Host hardening to decide before launch
+
+Found during the final assurance review ([SECURITY-OPERATIONAL-ASSURANCE.md](SECURITY-OPERATIONAL-ASSURANCE.md)); these depend on the real host and are the owner's decisions:
+
+- **User names are public by WordPress default.** `/wp-json/wp/v2/users` and `/?author=1` reveal login names. Restrict them at the host (or accept the risk) before relying on the approval roles' logins being private. Use strong unique passwords and, if available, two-factor sign-in for all privileged roles.
+- **XML-RPC is enabled by WordPress default.** The publication gate still applies to it (tested), but unless a client needs it, block `xmlrpc.php` at the host.
+- **Security headers** (frame policy, HSTS, a Content-Security-Policy that allows the inline brand style block) are set at the host or CDN.
+- **Hide PHP details** (`X-Powered-By`) and keep `WP_DEBUG_DISPLAY` off.
+- **Key custody rehearsal.** Before go-live the owner rehearses rotation and recovery once on staging with throwaway keys (record [C34-M01](acceptance-records/C34-M01.md)). Never use the production key in a rehearsal.
+
 ## What the repository cannot verify
 
 - Downloading WordPress from wordpress.org is blocked in the authoring sandbox; hosted CI performs it and checks the checksum.

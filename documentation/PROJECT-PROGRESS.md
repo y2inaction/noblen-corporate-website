@@ -1,6 +1,6 @@
 # Project Progress
 
-Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence). Branch: `claude/cool-feynman-6n4u7n`. Draft PR #1 (not merged).
+Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence). Current development branch: `feature/m2-implementation`; draft pull request #2 to `main` (open, unmerged, a review vehicle only). M1 history: branch `claude/cool-feynman-6n4u7n` and draft PR #1 (kept as history). The authoritative current state is [RELEASE-READINESS-REPORT.md](RELEASE-READINESS-REPORT.md).
 
 ## Milestone status
 
@@ -18,7 +18,7 @@ Repository: `y2inaction/noblen-corporate-website` (public, proprietary licence).
 | G0b, documentation-only commit of the approved plan | **Complete** (commit `8f920ff`) |
 | Documentation-only commit of the CI and acceptance-test planning reference | One commit authorised. Push requires a separate decision |
 | G1, dependency installation | Authorised by the execution directive; completed locally from the signed Ubuntu archive |
-| G2, implementation branch and local commits | Authorised. Branch `feature/m2-implementation`, local only. **Pushing is not authorised** |
+| G2, implementation branch and local commits | Authorised. Branch `feature/m2-implementation`. The push and the draft pull request #2 were later authorised and done (historical note: this row once read "local only, pushing not authorised"). **Merge is not authorised** |
 | SG-A, SG-B, SG-C, SG-D | Not authorised |
 | G5, final release | Not authorised |
 

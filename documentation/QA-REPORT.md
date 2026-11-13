@@ -1,5 +1,7 @@
 # QA Report
 
+> **Historical record.** This report describes the state when it was written (M1, PR #1). The current quality position is in [FINAL-QA-REPORT.md](FINAL-QA-REPORT.md) and [RELEASE-READINESS-REPORT.md](RELEASE-READINESS-REPORT.md).
+
 Scope: **M1 (documentation and planning).** M2 test evidence (146 PHPUnit tests, 20 real WP-CLI checks, 12 package checks, 21 browser admin checks, 43 accessibility checks) is in [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md) and [acceptance-criteria-traceability.yml](acceptance-criteria-traceability.yml). All of it is local. There is no code, theme or website to test yet, so page, form, responsive, accessibility and performance testing start in M2 and run through M9.
 
 ## M1 checks

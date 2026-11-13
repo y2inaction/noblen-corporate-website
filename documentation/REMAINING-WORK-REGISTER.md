@@ -1,6 +1,6 @@
 # Remaining-work register
 
-Established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10d00` (branch `feature/m2-implementation`, clean tree, local tip equal to remote tip), the frozen M2 plan (Rev 5.1) and the frozen CI acceptance plan. Hosted CI at that commit was green (CI run 14 and 15, Validate run 11). This register replaces no frozen document and records no owner acceptance. Status values: **open**, **in progress**, **done (evidence)**, **owner** (needs the owner or another human), **reserved** (separate approval gate).
+**Current status of this register: see [FINAL-IMPLEMENTATION-REPORT.md](FINAL-IMPLEMENTATION-REPORT.md) and [OWNER-DECISION-REGISTER.md](OWNER-DECISION-REGISTER.md); rows below marked "hosted result pending" were confirmed in hosted CI at the later commits listed in [RELEASE-READINESS-REPORT.md](RELEASE-READINESS-REPORT.md).** Originally established from the repository at commit `2901ceba929acb64a4c1a64f9e6ef49a58c10d00` (branch `feature/m2-implementation`, clean tree, local tip equal to remote tip), the frozen M2 plan (Rev 5.1) and the frozen CI acceptance plan. Hosted CI at that commit was green (CI run 14 and 15, Validate run 11). This register replaces no frozen document and records no owner acceptance. Status values: **open**, **in progress**, **done (evidence)**, **owner** (needs the owner or another human), **reserved** (separate approval gate).
 
 ## A. Theme (M2 section 8)
 
