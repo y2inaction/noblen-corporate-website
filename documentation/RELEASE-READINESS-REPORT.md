@@ -2,7 +2,7 @@
 
 **Classification: NOT READY for production.** The technically achievable work is largely complete and verified, including the brand and logo management system. Required inputs, human acceptance records and the unmet criteria C26-003 to C26-006 still stand between this branch and a release. Nothing here records owner acceptance, authorises a merge, or authorises a deployment.
 
-Code evidence commit: `fe5b565c6678709402d6882dfd97637a2bf9e99e` on `feature/m2-implementation` (base `main` at `da432a6531f2239cc2d04437af5d002a3c38c95a`). Pull request 2 stays an open draft. This report is a documentation-only commit on top of that commit.
+Code evidence commit: `28bbdbded3f1c6a681546babb7db6444c43f5ea7` (hosted result for this commit: see section 8) on `feature/m2-implementation` (base `main` at `da432a6531f2239cc2d04437af5d002a3c38c95a`). Pull request 2 stays an open draft. This report is a documentation-only commit on top of that commit.
 
 ## 1. Requirements: completed and remaining
 
@@ -50,9 +50,11 @@ Lighthouse figures above. The brand tokens add about 1.3 KB of inline CSS (no ex
 | Brand persistence and bad stored values | 23 | local and hosted |
 | Brand Identity in the Customizer (browser) | 51, repeated runs stable | local and hosted (run 52) |
 | Logo management and suggestions (browser) | 62, repeated runs stable | local and hosted |
-| Operator WP-CLI commands | 30 | local; hosted result pending for the newest commits |
-| Upgrade notice in the administration | 9 | local; hosted result pending |
-| Acceptance records and reviewer designation (fail-closed) | 269 and 33; three fabricated-record mutants rejected | local; hosted result pending |
+| Operator WP-CLI commands | 30 | local and hosted (run 62) |
+| Key custody rehearsal (disposable site: backup, rotation, interruption, compromise, loss, recovery, restore, tamper) | 69; three mutants caught | local; hosted result pending (run 64) |
+| Register and records against the frozen plans | 144 | local; hosted result pending (run 64) |
+| Upgrade notice in the administration | 9 | local and hosted (run 62) |
+| Acceptance records and reviewer designation (fail-closed) | 270 and 35; three fabricated-record mutants rejected | local and hosted (earlier counts, run 62); current counts pending |
 | Home sections, record facts, SEO helpers, SEO structure, Site Health, gallery, upgrade comparison, attestation checker | as listed in the register | local and hosted |
 | Accessibility, smoke, crawl, admin, content types | pass | local and hosted |
 | Manual acceptance records | none exist | owner or reviewer |
@@ -64,7 +66,8 @@ Exact hosted results, read from GitHub:
 - **Run 52** (CI, push, `a2bdb1f`, the extended brand tests): **completed, success, 11 of 11 jobs.** The Customizer suite ran about 17 seconds and the logo suite about 43 seconds, both passing, in the wp-env job and in the disposable-site job. Its PHP 8.3 PHPUnit job executed 146 cases, with a per-criterion table identical to the committed register. Run 53 (pull request event, same commit) and Validate run 30: success.
 - **Run 54** (CI, push, `4646b30`): completed, success. Run 55 (pull request event, same commit) and Validate run 31: success.
 - **Run 56** (CI, push, `b8147f3`, the WP-CLI commands): completed, success.
-- **Not yet verified when this was written:** run 58 (`eda7389`, designation, plan and records) and run 60 (`fe5b565`, the upgrade notice) were in progress, and so is the run for the commit containing this report. Confirm them on the pull request before relying on this report.
+- **Runs 58, 60, 61, 62, 63 and Validate 35 verified** (completed, success): run 58 (`eda7389`), run 60 (`fe5b565`), run 61 (pull request event), run 62 (push, `9f342d6`) and run 63 (pull request event, `9f342d6`). In run 62 the steps "Reviewer designation and manual records" (both static jobs), "Operator WP-CLI commands" and "Pending or failed upgrade notice" (disposable-site job) executed and passed.
+- **Not yet verified:** run 64 (`28bbdbd`: key commands, rehearsal, plan-register test). Confirm it on the pull request before relying on this report.
 - Earlier commits verified green in all 11 jobs: `663c356`, `f2fe4de`, `a71cbd4`, `7146586`, `06caca5`, `c1ae25a`, `c9dbf7a`, `3289081`, `6f97f56`, `d8fc8a5`, `d2ae0a1`, `eeb4738`, `63586a7`, `c0823a2`, `0a9291b`.
 - The Configuration A job name is unchanged by decision.
 
@@ -75,6 +78,8 @@ The 17 manual records are prepared and **all PENDING** ([acceptance-records/](ac
 - **Nominated independent reviewer** (designated by the owner; identity and declarations held privately): performs the 14 reviewer-run records (C01-M01, C02-M01, C03-M01, C06-M01, C10-M01, C12-M01, C13-M01, C14-M01, C15-M01, C19-M01, C20-M01, C20-M02, C25-M01, C27-M01).
 - **Owner-run (the frozen plan assigns these to the owner):** C17-M01, C31-M01, C34-M01. The reviewer may add an independent verification only.
 - **Independence is NOT VERIFIED.** The repository history shows no commit authored by the nominee, but the nominee's GitHub login, role overlap, conflict declaration, qualifications, signature route and access are all unconfirmed. See the assessment and the flagged conflicts in [REVIEW-PLAN.md](REVIEW-PLAN.md).
+- **Key custody:** `wp noblen key ...` commands now cover suspension, rotation, recovery after loss and old-key recording (no administration screen). An automated rehearsal on a disposable site passes locally (69 checks); it is not the owner's C34-M01, which the owner must rehearse on staging with throwaway keys. See [RECOVERY.md](RECOVERY.md).
+- **C27-M01** is outside both frozen plans; provenance and options are in [C27-M01-PROVENANCE.md](C27-M01-PROVENANCE.md). It stays supplementary until the owner decides.
 - **Corrections:** `C17-S01` is a CI status item, not a record; `C27-M01` is not in the frozen plan; the earlier guide wrongly gave `C31-M01` to the reviewer.
 - Owner decisions: C21-021, C21-022, C21-M01, all pending.
 
