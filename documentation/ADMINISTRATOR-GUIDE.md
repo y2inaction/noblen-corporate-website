@@ -12,6 +12,10 @@ For the people who run the site day to day. Installation is in [INSTALLATION.md]
 
 The standard WordPress Publish button cannot publish these records.
 
+## Setting up the website (Website Setup)
+
+Installing the theme and plugin does not create pages, menus or records. Use **Noblen, Website Setup** to prepare them as drafts, review them, and then activate what you have reviewed. It never overwrites existing content, never publishes a business record and never assigns a menu to a destination that is not public. Full guide: [WEBSITE-SETUP.md](WEBSITE-SETUP.md).
+
 ## Publishing a record
 
 1. **Edit** the record (Business Units, Industries, Services, Products, Projects). Fill the structured fields. A section appears publicly only when it is filled in and marked "Verified and approved for display".

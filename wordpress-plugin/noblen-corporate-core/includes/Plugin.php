@@ -28,12 +28,14 @@ final class Plugin {
 			\WP_CLI::add_command( 'noblen audit', Cli\AuditCommand::class );
 			\WP_CLI::add_command( 'noblen migrate', Cli\MigrateCommand::class );
 			\WP_CLI::add_command( 'noblen key', Cli\KeyCommand::class );
+			\WP_CLI::add_command( 'noblen setup', Cli\SetupCommand::class );
 		}
 
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( self::class, 'admin_init' ) );
 			Admin\Admin::register();
 			Admin\SiteHealth::register();
+			Setup\SetupPage::register();
 		}
 	}
 

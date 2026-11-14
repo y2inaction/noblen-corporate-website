@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Noblen Corporate Core
  * Description: Content architecture, CMS and publication controls for the Noblen corporate website. Independent of any theme.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Requires PHP: 8.3
  * Requires at least: 6.4
  * Author: Noblen Technologies Limited
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NOBLEN_CORE_VERSION', '0.1.0' );
+define( 'NOBLEN_CORE_VERSION', '0.2.0' );
 define( 'NOBLEN_CORE_API_VERSION', 1 );
 define( 'NOBLEN_CORE_FILE', __FILE__ );
 define( 'NOBLEN_CORE_DIR', plugin_dir_path( __FILE__ ) );
