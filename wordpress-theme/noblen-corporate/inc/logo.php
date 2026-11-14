@@ -82,7 +82,8 @@ function noblen_logo_html(): string {
 	$logo = noblen_logo_data();
 	$link = '<a class="brand" href="' . esc_url( home_url( '/' ) ) . '" rel="home">';
 	if ( ! $logo ) {
-		return $link . '<span class="brand__text">' . esc_html( get_bloginfo( 'name' ) ) . '</span></a>';
+		// No logo uploaded: the original Noblen monogram beside the site name, until the administrator uploads one.
+		return '<a class="brand brand--with-mark" href="' . esc_url( home_url( '/' ) ) . '" rel="home">' . noblen_brand_mark() . '<span class="brand__text">' . esc_html( get_bloginfo( 'name' ) ) . '</span></a>';
 	}
 	$dark = noblen_logo_data( 'noblen_logo_dark' );
 	$img  = static function ( array $d, string $class, string $alt ): string {

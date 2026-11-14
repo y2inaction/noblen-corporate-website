@@ -12,24 +12,20 @@ $noblen_social = array_filter( $noblen_social );
 </main>
 <footer class="site-footer">
 	<div class="wrap site-footer__grid">
-		<div>
+		<div class="site-footer__about">
 			<p class="site-footer__name"><?php echo esc_html( noblen_company_name() ); ?></p>
-			<?php
-			if ( noblen_setting( 'tagline' ) ) :
-				?>
-				<p><?php echo esc_html( noblen_setting( 'tagline' ) ); ?></p><?php endif; ?>
-			<?php
-			if ( noblen_setting( 'contact_address' ) ) :
-				?>
-				<p><?php echo nl2br( esc_html( noblen_setting( 'contact_address' ) ) ); ?></p><?php endif; ?>
-			<?php
-			if ( noblen_setting( 'contact_email' ) ) :
-				?>
-				<p><a href="mailto:<?php echo esc_attr( noblen_setting( 'contact_email' ) ); ?>"><?php echo esc_html( noblen_setting( 'contact_email' ) ); ?></a></p><?php endif; ?>
-			<?php
-			if ( noblen_setting( 'contact_phone' ) ) :
-				?>
-				<p><?php echo esc_html( noblen_setting( 'contact_phone' ) ); ?></p><?php endif; ?>
+			<p><?php echo esc_html( '' !== noblen_setting( 'tagline' ) ? noblen_setting( 'tagline' ) : 'Technology, innovation and impact.' ); ?></p>
+			<ul class="site-footer__contact">
+				<?php if ( noblen_setting( 'contact_email' ) ) : ?>
+					<li><span class="icon icon--mail" aria-hidden="true"></span><a href="mailto:<?php echo esc_attr( noblen_setting( 'contact_email' ) ); ?>"><?php echo esc_html( noblen_setting( 'contact_email' ) ); ?></a></li>
+				<?php endif; ?>
+				<?php if ( noblen_setting( 'contact_phone' ) ) : ?>
+					<li><span class="icon icon--phone" aria-hidden="true"></span><a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', noblen_setting( 'contact_phone' ) ) ); ?>"><?php echo esc_html( noblen_setting( 'contact_phone' ) ); ?></a></li>
+				<?php endif; ?>
+				<?php if ( noblen_setting( 'contact_address' ) ) : ?>
+					<li><span class="icon icon--pin" aria-hidden="true"></span><span><?php echo nl2br( esc_html( noblen_setting( 'contact_address' ) ) ); ?></span></li>
+				<?php endif; ?>
+			</ul>
 		</div>
 		<?php if ( has_nav_menu( 'footer' ) ) : ?>
 		<nav aria-label="Footer"><p class="site-footer__head">Explore</p>
@@ -45,6 +41,11 @@ $noblen_social = array_filter( $noblen_social );
 			?>
 		</nav>
 		<?php endif; ?>
+		<nav aria-label="Business areas"><p class="site-footer__head">Business areas</p><ul class="menu">
+			<?php foreach ( array( 'AI', 'Property', 'Media', 'Energy', 'Cloud' ) as $noblen_area ) : ?>
+				<li><a href="<?php echo esc_url( noblen_page_url( 'our-businesses', home_url( '/' ) ) ); ?>#<?php echo esc_attr( strtolower( $noblen_area ) ); ?>">Noblen <?php echo esc_html( $noblen_area ); ?></a></li>
+			<?php endforeach; ?>
+		</ul></nav>
 		<?php if ( $noblen_social ) : ?>
 		<nav aria-label="Social"><p class="site-footer__head">Follow</p><ul class="menu">
 			<?php

@@ -117,10 +117,18 @@ function noblen_render_home_section( string $id ): void {
 		if ( '' === $cta ) {
 			$cta = 'Let’s turn your next idea into meaningful progress.';
 		}
-		if ( '' === $email ) {
-			$email = 'sales@noblenai.com';
+		// The button goes to the contact email when one is set, otherwise to the published Contact page; with neither, nothing is shown.
+		$href = '' !== $email ? 'mailto:' . $email : '';
+		if ( '' === $href ) {
+			$contact = get_page_by_path( 'contact', OBJECT, 'page' );
+			if ( $contact && 'publish' === $contact->post_status ) {
+				$href = (string) get_permalink( $contact );
+			}
 		}
-		echo '<section class="section section--cta" id="contact"><div class="wrap"><span class="eyebrow">Start a conversation</span><h2>' . esc_html( $cta ) . '</h2><p>Tell us what you want to build, improve or make possible.</p><p><a class="btn" href="mailto:' . esc_attr( $email ) . '">Talk to Noblen</a></p></div></section>';
+		if ( '' === $href ) {
+			return;
+		}
+		echo '<section class="section section--cta" id="contact"><div class="wrap"><span class="eyebrow">Start a conversation</span><h2>' . esc_html( $cta ) . '</h2><p>Tell us what you want to build, improve or make possible.</p><p><a class="btn" href="' . esc_url( $href, array( 'http', 'https', 'mailto' ) ) . '">Talk to Noblen</a></p></div></section>';
 	}
 }
 
