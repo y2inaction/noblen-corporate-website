@@ -7,11 +7,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NOBLEN_THEME_VERSION', '0.1.0' );
+define( 'NOBLEN_THEME_VERSION', '0.2.0' );
 
 require_once get_template_directory() . '/inc/compat.php';
 require_once get_template_directory() . '/inc/core-bridge.php';
 require_once get_template_directory() . '/inc/home-sections.php';
+require_once get_template_directory() . '/inc/content.php';
 require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/brand.php';
 require_once get_template_directory() . '/inc/logo.php';
@@ -23,6 +24,7 @@ add_action(
 	static function () {
 		add_theme_support( 'title-tag' );
 		add_theme_support( 'post-thumbnails' );
+		add_post_type_support( 'page', 'excerpt' );
 		add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ) );
 		add_theme_support(
 			'custom-logo',
@@ -49,6 +51,7 @@ add_action(
 		$dir = get_template_directory_uri() . '/assets';
 		wp_enqueue_style( 'noblen-tokens', $dir . '/css/tokens.css', array(), NOBLEN_THEME_VERSION );
 		wp_enqueue_style( 'noblen-main', $dir . '/css/main.css', array( 'noblen-tokens' ), NOBLEN_THEME_VERSION );
+		wp_enqueue_style( 'noblen-components', $dir . '/css/components.css', array( 'noblen-main' ), NOBLEN_THEME_VERSION );
 		wp_enqueue_script(
 			'noblen-main',
 			$dir . '/js/main.js',

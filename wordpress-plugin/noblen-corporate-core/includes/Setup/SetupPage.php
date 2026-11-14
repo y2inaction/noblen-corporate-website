@@ -20,6 +20,8 @@ final class SetupPage {
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ), 20 );
 		add_action( 'admin_post_noblen_setup_prepare', array( __CLASS__, 'handle_prepare' ) );
 		add_action( 'admin_post_noblen_setup_activate', array( __CLASS__, 'handle_activate' ) );
+		add_action( 'admin_post_noblen_setup_quickstart', array( __CLASS__, 'handle_quickstart' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 	}
 
@@ -84,7 +86,7 @@ final class SetupPage {
 				}
 			}
 		}
-		foreach ( array( 'front_page', 'replace_front_page', 'posts_page', 'replace_posts_page', 'hero_defaults' ) as $flag ) {
+		foreach ( array( 'front_page', 'replace_front_page', 'posts_page', 'replace_posts_page', 'hero_defaults', 'sample_settings' ) as $flag ) {
 			$o[ $flag ] = ! empty( $post[ $flag ] );
 		}
 		return $o;
@@ -135,13 +137,41 @@ final class SetupPage {
 		foreach ( array( 'publish', 'adopt', 'assign', 'replace_location' ) as $g ) {
 			$raw[ $g ] = isset( $_POST[ $g ] ) && is_array( $_POST[ $g ] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST[ $g ] ) ) : array();
 		}
-		foreach ( array( 'front_page', 'replace_front_page', 'posts_page', 'replace_posts_page', 'hero_defaults' ) as $f ) {
+		foreach ( array( 'front_page', 'replace_front_page', 'posts_page', 'replace_posts_page', 'hero_defaults', 'sample_settings' ) as $f ) {
 			$raw[ $f ] = ! empty( $_POST[ $f ] );
 		}
 		self::finish( Setup::activate( self::parse_options( $raw ) ) );
 	}
 
+	/**
+	 * Handle "Install the complete website".
+	 */
+	public static function handle_quickstart(): void {
+		$ok = self::authorize( 'noblen_setup_quickstart', isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['_wpnonce'] ) ) : '' );
+		if ( is_wp_error( $ok ) ) {
+			wp_die( esc_html( $ok->get_error_message() ), 403 );
+		}
+		if ( empty( $_POST['confirm_quickstart'] ) ) {
+			self::finish( new \WP_Error( 'noblen_confirm', 'Tick the confirmation to create and publish the website.' ) );
+		}
+		self::finish( Setup::quickstart() );
+	}
+
 	// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+	/**
+	 * A one-line pointer on Noblen screens until the setup has been run.
+	 */
+	public static function notice(): void {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! Setup::can() || ! $screen || ( 'dashboard' !== $screen->id && false === strpos( (string) $screen->id, 'noblen' ) ) || false !== strpos( (string) $screen->id, self::SLUG ) ) {
+			return;
+		}
+		if ( '' !== Setup::state()['prepared_at'] ) {
+			return;
+		}
+		echo '<div class="notice notice-info"><p><strong>Your Noblen website has not been created yet.</strong> Open <a href="' . esc_url( admin_url( 'admin.php?page=' . self::SLUG ) ) . '">Noblen, Website Setup</a> to create the pages, menus and navigation in one step. Nothing existing is overwritten.</p></div>';
+	}
 
 	/**
 	 * A small status badge.
@@ -175,6 +205,7 @@ final class SetupPage {
 
 		self::render_result( $result );
 
+		self::render_quickstart( $prepared );
 		echo '<h2>Configuration</h2><ul class="noblen-checks">';
 		foreach ( $st['checks'] as $c ) {
 			echo '<li class="' . ( $c['ok'] ? 'ok' : 'warn' ) . '"><span>' . ( $c['ok'] ? 'Ready' : ( $c['blocking'] ? 'Blocking' : 'Needs attention' ) ) . '</span> ' . esc_html( (string) $c['label'] );
@@ -204,12 +235,50 @@ final class SetupPage {
 		echo '</form></div>';
 
 		self::render_overview( $st );
+		self::render_review();
 
 		// Step 2.
 		self::render_activation( $st, $prepared );
 
 		self::render_log( $st );
 		echo '</div>';
+	}
+
+	/**
+	 * The one-step installer.
+	 *
+	 * @param bool $prepared Whether preparation has already run.
+	 */
+	private static function render_quickstart( bool $prepared ): void {
+		echo '<div class="noblen-step noblen-step--quick"><h2>Install the complete website</h2>';
+		echo '<p>One step creates every page with professionally written, editable content, builds the Primary and Footer navigation, sets the Home page as the front page and Insights as the posts page (only if you have not chosen others), and fills the <em>empty</em> homepage and business details with clearly marked samples. <strong>The Privacy Policy and Terms pages stay drafts</strong> until they have been legally reviewed. Nothing you already have is overwritten or deleted, and business records stay drafts for the normal approval workflow.</p>';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="noblen_setup_quickstart">';
+		wp_nonce_field( 'noblen_setup_quickstart' );
+		echo '<p><label><input type="checkbox" name="confirm_quickstart" value="1"> I understand this will publish the website pages and use sample business details that I will review and replace.</label></p>';
+		submit_button( $prepared ? 'Install or complete the website' : 'Install the complete website', 'primary large', 'submit', false );
+		echo '</form></div>';
+	}
+
+	/**
+	 * The content the owner should review or replace.
+	 */
+	private static function render_review(): void {
+		$rows = Setup::review_list();
+		if ( ! $rows ) {
+			return;
+		}
+		echo '<h2>Content to review and replace</h2><p>The pages are complete and ready to read, but the items below use sample or generic information. Replace them with verified information.</p>';
+		echo '<table class="widefat striped"><thead><tr><th>Item</th><th>What to review</th><th>Status</th></tr></thead><tbody>';
+		foreach ( $rows as $r ) {
+			echo '<tr><td>';
+			if ( '' !== $r['edit'] ) {
+				echo '<a href="' . esc_url( $r['edit'] ) . '">' . esc_html( $r['item'] ) . '</a>';
+			} else {
+				echo esc_html( $r['item'] );
+			}
+			echo '</td><td>' . esc_html( $r['what'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
 	}
 
 	/**
@@ -225,7 +294,11 @@ final class SetupPage {
 			echo '<div class="notice notice-error"><p>' . esc_html( (string) $result['error'] ) . '</p></div>';
 			return;
 		}
-		$stage = 'activate' === ( $result['stage'] ?? '' ) ? 'Activation' : 'Preparation';
+		$stages = array(
+			'activate'   => 'Activation',
+			'quickstart' => 'Website installation',
+		);
+		$stage  = $stages[ $result['stage'] ?? '' ] ?? 'Preparation';
 		echo '<div class="notice notice-success"><p><strong>' . esc_html( $stage ) . ' finished.</strong> This is a record of what happened, not a sign that the website is complete.</p>';
 		if ( isset( $result['counts'] ) ) {
 			echo '<p>';
@@ -269,10 +342,10 @@ final class SetupPage {
 		}
 		echo '</tbody></table>';
 
-		echo '<h2>Sections served by record archives</h2><p>These five sections already have their own addresses from Noblen Core. No duplicate page is created. They appear in navigation once at least one record of the type is approved and published.</p>';
-		echo '<table class="widefat striped"><thead><tr><th>Section</th><th>Content type</th><th>Status</th></tr></thead><tbody>';
+		echo '<h2>Record archives</h2><p>Detailed records (business units, industries, services, projects, products) have their own addresses from Noblen Core and fill as records are approved and published. The pages above are the navigation destinations.</p>';
+		echo '<table class="widefat striped"><thead><tr><th>Archive</th><th>Content type</th><th>Status</th></tr></thead><tbody>';
 		foreach ( $st['archives'] as $a ) {
-			echo '<tr><td>' . esc_html( (string) $a['label'] ) . '</td><td><code>' . esc_html( (string) $a['type'] ) . '</code></td><td>' . ( 'public' === $a['class'] ? self::badge( 'public' ) : '<span class="noblen-badge noblen-badge--generated_draft">Waiting for a published record</span>' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
+			echo '<tr><td>' . esc_html( (string) $a['label'] ) . '</td><td><code>' . esc_html( (string) $a['type'] ) . '</code></td><td>' . ( 'public' === $a['class'] ? self::badge( 'public' ) : '<span class="noblen-badge noblen-badge--generated_draft">No published record yet</span>' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 		echo '</tbody></table>';
 
@@ -359,6 +432,7 @@ final class SetupPage {
 		echo '<h3>Reading settings</h3><ul class="noblen-options">';
 		echo '<li><label><input type="checkbox" name="front_page" value="1"> Use the published <strong>Home</strong> page as the front page</label> <label><input type="checkbox" name="replace_front_page" value="1"> replace a different static front page if one is set</label></li>';
 		echo '<li><label><input type="checkbox" name="posts_page" value="1"> Use the published <strong>Insights</strong> page as the posts page</label> <label><input type="checkbox" name="replace_posts_page" value="1"> replace a different posts page if one is set</label></li>';
+		echo '<li><label><input type="checkbox" name="sample_settings" value="1"> Fill the <em>empty</em> company name, tagline and contact details with clearly marked samples (existing values are kept)</label></li>';
 		echo '<li><label><input type="checkbox" name="hero_defaults" value="1"> Fill the <em>empty</em> homepage headline and introduction with "' . esc_html( Blueprint::PROMISE ) . '" and "' . esc_html( Blueprint::COMPANY ) . ', an ' . esc_html( Blueprint::POSITIONING ) . '." (existing text is kept)</label></li>';
 		echo '</ul>';
 

@@ -109,7 +109,7 @@ class SetupTest extends NoblenTestCase {
 		$res = $this->prepare();
 		$this->assertSame( 0, $res['counts']['error'] );
 		$pages = Blueprint::pages();
-		$this->assertCount( 7, $pages );
+		$this->assertCount( 12, $pages );
 		foreach ( $pages as $key => $def ) {
 			$id = $this->page_id( $key );
 			$this->assertGreaterThan( 0, $id, "{$key} page created" );
@@ -130,18 +130,17 @@ class SetupTest extends NoblenTestCase {
 		$this->assertSame( 0, (int) get_option( 'page_on_front' ) );
 	}
 
-	public function test_the_ten_site_sections_are_all_accounted_for(): void {
+	public function test_the_ten_site_sections_and_the_legal_pages_all_have_pages(): void {
 		$titles = array();
 		foreach ( Blueprint::pages() as $p ) {
 			$titles[] = $p['title'];
 		}
-		foreach ( Blueprint::archives() as $a ) {
-			$titles[] = $a['title'];
-		}
-		foreach ( array( 'Home', 'About Noblen', 'Our Group', 'Industries', 'Solutions & Services', 'Portfolio', 'Products & Platforms', 'Insights', 'Partnerships', 'Contact' ) as $t ) {
+		foreach ( array( 'Home', 'About Noblen', 'Our Businesses', 'Industries', 'Solutions & Services', 'Portfolio', 'Products & Platforms', 'Insights', 'Partnerships', 'Contact' ) as $t ) {
 			$this->assertContains( $t, $titles, "{$t} is provided" );
 		}
-		// A page at an archive address would never be reached, so the archive sections do not create pages.
+		$this->assertContains( 'Privacy Policy', $titles );
+		$this->assertContains( 'Terms and Conditions', $titles );
+		// A page at an archive address would never be reached, so no page may use one.
 		foreach ( array( 'group', 'industries', 'solutions', 'projects', 'products' ) as $reserved ) {
 			foreach ( Blueprint::pages() as $p ) {
 				$this->assertNotSame( $reserved, $p['slug'], "no page duplicates the /{$reserved}/ archive" );
@@ -164,7 +163,7 @@ class SetupTest extends NoblenTestCase {
 		$this->assertSame( $before['records'], array_sum( array_map( fn( $t ) => count( $this->owned_ids( $t ) ), Types::all() ) ) );
 		$this->assertSame( $before['menus'], count( get_terms( array( 'taxonomy' => 'nav_menu', 'hide_empty' => false, 'meta_key' => Setup::META ) ) ) );
 		$this->assertSame( 3, $before['menus'] );
-		$this->assertSame( 7, $before['pages'] );
+		$this->assertSame( 12, $before['pages'] );
 	}
 
 	public function test_an_existing_page_is_preserved_and_reported_as_a_conflict(): void {
@@ -246,7 +245,7 @@ class SetupTest extends NoblenTestCase {
 		$this->assertSame( 'created', $o['menu:footer'] );
 		$this->assertSame( 'existing', $o['page:about'] );
 		$this->assertSame( '<p>Edited by the owner.</p>', get_post( $about )->post_content, 'an existing page is never overwritten on a rerun' );
-		$this->assertCount( 7, $this->owned_ids( 'page' ) );
+		$this->assertCount( 12, $this->owned_ids( 'page' ) );
 	}
 
 	public function test_a_failure_part_way_is_reported_and_a_rerun_completes_it(): void {
@@ -263,7 +262,7 @@ class SetupTest extends NoblenTestCase {
 		$this->assertGreaterThan( 0, $this->page_id( 'about' ), 'the other pages were still created' );
 		$second = $this->prepare();
 		$this->assertSame( 'created', $this->outcomes( $second )['page:contact'] );
-		$this->assertCount( 7, $this->owned_ids( 'page' ), 'no duplicates after recovery' );
+		$this->assertCount( 12, $this->owned_ids( 'page' ), 'no duplicates after recovery' );
 	}
 
 	public function test_records_are_name_only_drafts_with_no_clearance_or_approval(): void {
@@ -365,21 +364,22 @@ class SetupTest extends NoblenTestCase {
 
 	public function test_a_page_with_placeholders_is_never_published(): void {
 		$this->prepare();
-		$res = $this->activate( array( 'publish' => array( 'about' => true, 'contact' => true, 'home' => true, 'insights' => true ) ) );
+		$res = $this->activate( array( 'publish' => array( 'privacy' => true, 'terms' => true, 'about' => true, 'contact' => true, 'home' => true, 'insights' => true ) ) );
 		$o   = array();
 		foreach ( $res['items'] as $i ) {
 			$o[ $i['label'] ] = $i['outcome'];
 		}
-		$this->assertSame( 'blocked', $o['About Noblen'] );
-		$this->assertSame( 'blocked', $o['Contact'] );
-		$this->assertSame( 'draft', get_post_status( $this->page_id( 'about' ) ) );
-		$this->assertSame( 'published', $o['Home'], 'the home page has no body to complete' );
-		$this->assertSame( 'published', $o['Insights'] );
-		// Once the owner replaces the placeholders, it can be published.
-		$this->complete_page( 'about' );
-		$res = $this->activate( array( 'publish' => array( 'about' => true ) ) );
-		$this->assertSame( 'publish', get_post_status( $this->page_id( 'about' ) ) );
-		$this->assertIsArray( $res );
+		$this->assertSame( 'blocked', $o['Privacy Policy'] );
+		$this->assertSame( 'blocked', $o['Terms and Conditions'] );
+		$this->assertSame( 'draft', get_post_status( $this->page_id( 'privacy' ) ) );
+		$this->assertSame( 'draft', get_post_status( $this->page_id( 'terms' ) ) );
+		foreach ( array( 'About Noblen', 'Contact', 'Home', 'Insights' ) as $label ) {
+			$this->assertSame( 'published', $o[ $label ], "{$label} is complete and can be published" );
+		}
+		// Once the owner replaces the placeholder, the legal page can be published.
+		$this->complete_page( 'privacy' );
+		$this->activate( array( 'publish' => array( 'privacy' => true ) ) );
+		$this->assertSame( 'publish', get_post_status( $this->page_id( 'privacy' ) ) );
 	}
 
 	public function test_only_pages_the_setup_created_can_be_published_by_it(): void {
@@ -392,19 +392,17 @@ class SetupTest extends NoblenTestCase {
 	public function test_menus_never_link_to_unpublished_destinations(): void {
 		$this->prepare();
 		$this->activate( array( 'assign' => array( 'primary' => true, 'footer' => true, 'legal' => true ) ) );
-		$locs = get_nav_menu_locations();
-		$this->assertArrayNotHasKey( 'footer', array_filter( $locs ), 'a menu with no public destination is not assigned' );
-		$this->assertArrayNotHasKey( 'legal', array_filter( $locs ) );
+		$this->assertSame( array(), array_filter( get_nav_menu_locations() ), 'no menu is assigned while nothing is public' );
+		$this->complete_page( 'about' );
+		$this->activate( array( 'publish' => array( 'about' => true ), 'assign' => array( 'primary' => true, 'footer' => true, 'legal' => true ) ) );
+		$locs = array_filter( get_nav_menu_locations() );
+		$this->assertArrayNotHasKey( 'legal', $locs, 'the legal menu has no public destination, so it is not assigned' );
 		$primary = (int) ( $locs['primary'] ?? 0 );
 		$this->assertSame( $this->menu_term( 'primary' ), $primary );
 		foreach ( wp_get_nav_menu_items( $primary ) as $item ) {
-			if ( 'post_type' === $item->type ) {
-				$this->assertSame( 'publish', get_post_status( (int) $item->object_id ), 'every page entry is public' );
-			}
-			$this->assertNotSame( 'draft', get_post_status( (int) $item->object_id ) );
+			$this->assertSame( 'publish', get_post_status( (int) $item->object_id ), 'every entry is public' );
 		}
-		$titles = wp_list_pluck( wp_get_nav_menu_items( $primary ), 'title' );
-		$this->assertSame( array( 'Home' ), array_values( $titles ), 'only the destinations that are public appear' );
+		$this->assertSame( array( 'About' ), array_values( wp_list_pluck( wp_get_nav_menu_items( $primary ), 'title' ) ), 'only the destinations that are public appear' );
 	}
 
 	public function test_entries_appear_as_destinations_become_public_and_never_duplicate(): void {
@@ -413,25 +411,23 @@ class SetupTest extends NoblenTestCase {
 		$this->complete_page( 'contact' );
 		$this->activate( array( 'publish' => array( 'about' => true, 'contact' => true ), 'assign' => array( 'primary' => true, 'footer' => true ) ) );
 		$primary = $this->menu_term( 'primary' );
-		$first   = wp_list_pluck( wp_get_nav_menu_items( $primary ), 'title' );
-		$this->assertEqualsCanonicalizing( array( 'Home', 'About Noblen', 'Contact' ), $first );
+		$this->assertEqualsCanonicalizing( array( 'About', 'Contact' ), wp_list_pluck( wp_get_nav_menu_items( $primary ), 'title' ) );
 		$this->activate( array( 'assign' => array( 'primary' => true, 'footer' => true ) ) );
 		$this->activate( array( 'assign' => array( 'primary' => true, 'footer' => true ) ) );
-		$this->assertCount( 3, wp_get_nav_menu_items( $primary ), 'repeated activation adds no duplicate entries' );
+		$this->assertCount( 2, wp_get_nav_menu_items( $primary ), 'repeated activation adds no duplicate entries' );
 		$this->assertCount( 2, wp_get_nav_menu_items( $this->menu_term( 'footer' ) ) );
-		// An archive appears only once a record of its type is approved and published.
-		$this->assertNotContains( 'Our Group', wp_list_pluck( wp_get_nav_menu_items( $primary ), 'title' ) );
-		$this->published_company( 'Noblen Setup Test Unit' );
-		$this->activate( array( 'assign' => array( 'primary' => true ) ) );
-		$this->assertContains( 'Our Group', wp_list_pluck( wp_get_nav_menu_items( $primary ), 'title' ) );
-		$this->assertCount( 4, wp_get_nav_menu_items( $primary ) );
+		$this->complete_page( 'portfolio' );
+		$this->activate( array( 'publish' => array( 'portfolio' => true ), 'assign' => array( 'primary' => true ) ) );
+		$this->assertContains( 'Portfolio', wp_list_pluck( wp_get_nav_menu_items( $primary ), 'title' ) );
+		$this->assertCount( 3, wp_get_nav_menu_items( $primary ) );
 	}
 
 	public function test_a_location_that_already_has_a_menu_is_kept_unless_replacing(): void {
 		$mine = wp_create_nav_menu( 'My existing header' );
 		set_theme_mod( 'nav_menu_locations', array( 'primary' => $mine ) );
 		$this->prepare();
-		$res = $this->activate( array( 'assign' => array( 'primary' => true ) ) );
+		$this->complete_page( 'about' );
+		$res = $this->activate( array( 'publish' => array( 'about' => true ), 'assign' => array( 'primary' => true ) ) );
 		$this->assertSame( $mine, (int) get_nav_menu_locations()['primary'] );
 		$kinds = array();
 		foreach ( $res['items'] as $i ) {
@@ -455,7 +451,7 @@ class SetupTest extends NoblenTestCase {
 	}
 
 	public function test_a_draft_existing_page_cannot_be_adopted(): void {
-		wp_insert_post( array( 'post_type' => 'page', 'post_title' => 'Privacy Policy', 'post_name' => 'privacy-policy', 'post_status' => 'draft' ) );
+		wp_insert_post( array( 'post_type' => 'page', 'post_title' => 'Privacy Policy', 'post_name' => 'privacy', 'post_status' => 'draft' ) );
 		$this->prepare();
 		$res = $this->activate( array( 'adopt' => array( 'privacy' => true ) ) );
 		$this->assertSame( 'blocked', $res['items'][0]['outcome'] );
@@ -479,10 +475,9 @@ class SetupTest extends NoblenTestCase {
 	public function test_status_classes_distinguish_existing_draft_ready_and_public(): void {
 		$this->prepare();
 		$s = Setup::status();
-		$this->assertSame( 'generated_draft', $s['pages']['about']['class'], 'placeholders remain' );
-		$this->assertSame( 'ready_for_review', $s['pages']['home']['class'], 'no body to complete' );
-		$this->complete_page( 'about' );
-		$this->assertSame( 'ready_for_review', Setup::status()['pages']['about']['class'] );
+		$this->assertSame( 'generated_draft', $s['pages']['privacy']['class'], 'placeholders remain' );
+		$this->assertSame( 'ready_for_review', $s['pages']['home']['class'], 'a complete page is ready for review' );
+		$this->assertSame( 'ready_for_review', $s['pages']['about']['class'] );
 		$this->activate( array( 'publish' => array( 'about' => true ) ) );
 		$this->assertSame( 'public', Setup::status()['pages']['about']['class'] );
 		$this->assertSame( 'generated_draft', Setup::status()['records'][ 'record:' . Types::COMPANY . ':noblen-ai-solutions' ]['class'] );
@@ -545,8 +540,107 @@ class SetupTest extends NoblenTestCase {
 		$this->assertStringContainsString( 'Autonomous Operating Systems Provider', Blueprint::pages()['about']['content'] );
 		$this->assertStringContainsString( 'AI That Gets Things Done', Blueprint::pages()['about']['content'] );
 		// Every page that needs facts the repository does not hold carries an editable placeholder.
-		foreach ( array( 'about', 'partnerships', 'contact', 'privacy', 'terms' ) as $k ) {
-			$this->assertSame( 1, preg_match( Blueprint::PLACEHOLDER, Blueprint::pages()[ $k ]['content'] ), "{$k} has a labelled placeholder" );
+		foreach ( Blueprint::pages() as $k => $def ) {
+			$has = 1 === preg_match( Blueprint::PLACEHOLDER, $def['content'] );
+			$this->assertSame( empty( $def['auto'] ), $has, "{$k}: only pages that are not published automatically carry a placeholder" );
 		}
+		foreach ( array( 'privacy', 'terms' ) as $k ) {
+			$this->assertFalse( Blueprint::pages()[ $k ]['auto'], "{$k} is never published automatically" );
+		}
+	}
+
+	public function test_quickstart_publishes_the_complete_site_and_keeps_legal_pages_as_drafts(): void {
+		$this->admin();
+		$res = Setup::quickstart();
+		$this->assertIsArray( $res, is_wp_error( $res ) ? $res->get_error_message() : '' );
+		foreach ( Blueprint::pages() as $key => $def ) {
+			$expected = empty( $def['auto'] ) ? 'draft' : 'publish';
+			$this->assertSame( $expected, get_post_status( $this->page_id( $key ) ), "{$key} is {$expected}" );
+		}
+		$this->assertSame( 'page', get_option( 'show_on_front' ) );
+		$this->assertSame( $this->page_id( 'home' ), (int) get_option( 'page_on_front' ) );
+		$this->assertSame( $this->page_id( 'insights' ), (int) get_option( 'page_for_posts' ) );
+		$locs = array_filter( get_nav_menu_locations() );
+		$this->assertSame( $this->menu_term( 'primary' ), (int) $locs['primary'] );
+		$this->assertSame( $this->menu_term( 'footer' ), (int) $locs['footer'] );
+		$this->assertArrayNotHasKey( 'legal', $locs, 'the legal menu waits for reviewed legal pages' );
+		$primary = wp_list_pluck( wp_get_nav_menu_items( $this->menu_term( 'primary' ) ), 'title' );
+		$this->assertSame( array( 'About', 'Our Businesses', 'Industries', 'Solutions', 'Portfolio', 'Products', 'Insights', 'Contact' ), array_values( $primary ) );
+		$s = Settings::all();
+		$this->assertNotSame( '', $s['hero_headline'] );
+		$this->assertSame( 'Noblen Technologies Limited', $s['company_name'] );
+		foreach ( Types::all() as $type ) {
+			foreach ( $this->owned_ids( $type ) as $id ) {
+				$this->assertSame( 'draft', get_post_status( $id ), 'records are never published by the setup' );
+			}
+		}
+	}
+
+	public function test_quickstart_is_repeatable_and_never_overwrites_owner_edits(): void {
+		$this->admin();
+		Setup::quickstart();
+		$about = $this->page_id( 'about' );
+		wp_update_post( array( 'ID' => $about, 'post_content' => '<p>Rewritten by the owner.</p>' ) );
+		$pages = count( $this->owned_ids( 'page' ) );
+		$items = count( wp_get_nav_menu_items( $this->menu_term( 'primary' ) ) );
+		$again = Setup::quickstart();
+		$this->assertIsArray( $again );
+		$this->assertSame( 0, $again['counts']['created'] );
+		$this->assertSame( $pages, count( $this->owned_ids( 'page' ) ) );
+		$this->assertSame( $items, count( wp_get_nav_menu_items( $this->menu_term( 'primary' ) ) ) );
+		$this->assertSame( '<p>Rewritten by the owner.</p>', get_post( $about )->post_content );
+	}
+
+	public function test_quickstart_keeps_existing_homepage_settings_and_business_details(): void {
+		$front = wp_insert_post( array( 'post_type' => 'page', 'post_title' => 'My front', 'post_status' => 'publish', 'post_content' => 'front' ) );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $front );
+		Settings::save( array_merge( Settings::all(), array( 'contact_email' => 'owner@example.test', 'hero_headline' => 'Owner headline' ) ) );
+		$this->admin();
+		Setup::quickstart();
+		$this->assertSame( $front, (int) get_option( 'page_on_front' ), 'a chosen front page is kept' );
+		$s = Settings::all();
+		$this->assertSame( 'owner@example.test', $s['contact_email'], 'existing contact details are kept' );
+		$this->assertSame( 'Owner headline', $s['hero_headline'] );
+	}
+
+	public function test_quickstart_requires_the_capability(): void {
+		$this->as_user( $this->editor() );
+		$this->assertWPError( Setup::quickstart() );
+		$this->assertCount( 0, $this->owned_ids( 'page' ) );
+	}
+
+	public function test_the_content_review_list_names_what_the_owner_must_replace(): void {
+		$this->admin();
+		Setup::quickstart();
+		$rows  = Setup::review_list();
+		$items = wp_list_pluck( $rows, 'item' );
+		foreach ( array( 'Portfolio', 'Privacy Policy', 'Terms and Conditions', 'Contact' ) as $t ) {
+			$this->assertContains( $t, $items, "{$t} is on the review list" );
+		}
+		$this->assertContains( 'Business details (sample)', $items );
+	}
+
+	public function test_every_internal_link_in_the_blueprint_points_to_a_blueprint_page(): void {
+		$slugs = array( 'contact' => true );
+		foreach ( Blueprint::pages() as $def ) {
+			$slugs[ $def['slug'] ] = true;
+		}
+		$all = '';
+		foreach ( Blueprint::pages() as $def ) {
+			$all .= $def['content'];
+		}
+		$all .= $this->home_markup();
+		preg_match_all( '#href="/([a-z0-9-]*)/?(?:\#[a-z-]+)?"#', $all, $m );
+		$this->assertNotEmpty( $m[1] );
+		foreach ( array_unique( $m[1] ) as $slug ) {
+			$this->assertArrayHasKey( $slug, $slugs, "/{$slug}/ is a page the setup creates" );
+		}
+		$this->assertDoesNotMatchRegularExpression( '#href=""|href="\#"#', $all, 'no empty links' );
+	}
+
+	/** The home page markup, via the page definition of the front page. */
+	private function home_markup(): string {
+		return (string) Blueprint::pages()['home']['content'];
 	}
 }

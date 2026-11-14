@@ -94,9 +94,23 @@ t( ! str_contains( $out, '<script>' ), 'partner titles are escaped' );
 t( ! str_contains( $out, 'No link' ), 'a partner without a URL is ignored' );
 t( 1 === substr_count( $out, 'class="card ' ), 'only the one valid partner is rendered' );
 
-// Call to action needs both a headline and a contact email.
-if ( '' === noblen_setting( 'cta_headline' ) || '' === noblen_setting( 'contact_email' ) ) {
-	t( '' === render( 'cta' ), 'the call to action renders nothing without a headline and an email' );
+// Call to action: the contact email when set, else the published Contact page, else nothing. No built-in fallback address.
+$cta_out = render( 'cta' );
+t( ! str_contains( $cta_out, 'noblenai' ), 'the call to action never contains a built-in fallback address' );
+$cta_contact = get_page_by_path( 'contact', OBJECT, 'page' );
+if ( '' === noblen_setting( 'contact_email' ) && ! ( $cta_contact && 'publish' === $cta_contact->post_status ) ) {
+	t( '' === $cta_out, 'the call to action renders nothing without a contact email or a published Contact page' );
+} else {
+	t( str_contains( $cta_out, 'class="btn" href="' ), 'the call to action links to the contact email or the Contact page' );
+}
+
+// The group section links to About only when an About page is published (never a link to a page that does not exist).
+$about_page = get_page_by_path( 'about', OBJECT, 'page' );
+$group_out  = render( 'group' );
+if ( $about_page && 'publish' === $about_page->post_status ) {
+	t( str_contains( $group_out, 'Discover Noblen' ), 'the group section links to the published About page' );
+} else {
+	t( ! str_contains( $group_out, '/about/' ) && ! str_contains( $group_out, 'Discover Noblen' ), 'the group section has no link while there is no published About page' );
 }
 
 reset_mods();

@@ -333,6 +333,9 @@ jobs:
       - name: Website Setup screen (prepare as drafts, repeat safety, nonces, capability, public site unchanged, axe)
         working-directory: tests-e2e
         run: node setup.js
+      - name: Populated website (one-step install, every page at three widths, no console errors, no broken images or links, navigation, axe)
+        working-directory: tests-e2e
+        run: node populated.js
       - name: Upgrade comparison on a code-built schema-1 fixture (C26-003 to C26-005 tooling; destroys this disposable site's Noblen data, so it runs last)
         env:
           NOBLEN_WP_PATH: ${{ runner.temp }}/wp
@@ -443,6 +446,9 @@ jobs:
       - name: Website Setup screen (prepare as drafts, repeat safety, nonces, capability, public site unchanged, axe)
         working-directory: tests-e2e
         run: node setup.js
+      - name: Populated website (one-step install, every page at three widths, no console errors, no broken images or links, navigation, axe)
+        working-directory: tests-e2e
+        run: node populated.js
       - name: Site crawl including the core sitemap (C12-001)
         working-directory: tests-e2e
         env:

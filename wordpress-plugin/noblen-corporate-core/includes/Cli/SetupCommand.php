@@ -62,6 +62,26 @@ final class SetupCommand {
 	}
 
 	/**
+	 * Create and publish the complete website in one step: prepare, publish every complete page (not the legal pages), assign the
+	 * menus, set the front and posts pages if none is set, and fill empty business details with samples. Nothing existing is replaced.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp noblen setup quickstart --user=admin
+	 *
+	 * @param array<int,string>   $args       Positional arguments.
+	 * @param array<string,mixed> $assoc_args Named arguments.
+	 */
+	public function quickstart( $args, $assoc_args ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+		$res = Setup::quickstart();
+		if ( is_wp_error( $res ) ) {
+			\WP_CLI::error( $res->get_error_message() . ' Use --user=<administrator login>.' );
+		}
+		\WP_CLI\Utils\format_items( 'table', $res['items'], array( 'kind', 'label', 'outcome', 'note' ) );
+		\WP_CLI::success( 'Website installed. Review the "Content to review and replace" list under Noblen, Website Setup.' );
+	}
+
+	/**
 	 * Stage 2: activate reviewed items. Nothing is changed unless you pass the matching option.
 	 *
 	 * ## OPTIONS
@@ -90,6 +110,9 @@ final class SetupCommand {
 	 * [--hero-defaults]
 	 * : Fill the empty homepage headline and introduction (existing text is kept).
 	 *
+	 * [--sample-settings]
+	 * : Fill empty business details with clearly marked samples (existing values are kept).
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp noblen setup activate --user=admin --publish=about,contact --assign=primary
@@ -116,6 +139,7 @@ final class SetupCommand {
 				'posts_page'         => isset( $assoc_args['posts-page'] ),
 				'replace_posts_page' => isset( $assoc_args['replace-posts-page'] ),
 				'hero_defaults'      => isset( $assoc_args['hero-defaults'] ),
+				'sample_settings'    => isset( $assoc_args['sample-settings'] ),
 			)
 		);
 		$res  = Setup::activate( $opts );

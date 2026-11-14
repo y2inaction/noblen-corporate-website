@@ -49,10 +49,11 @@ final class Setup {
 		$s = is_array( $s ) ? $s : array();
 		return array_merge(
 			array(
-				'prepared_at'  => '',
-				'activated_at' => '',
-				'adopted'      => array(),
-				'log'          => array(),
+				'prepared_at'     => '',
+				'activated_at'    => '',
+				'adopted'         => array(),
+				'log'             => array(),
+				'sample_settings' => array(),
 			),
 			$s
 		);
@@ -129,6 +130,15 @@ final class Setup {
 				'note'     => '' !== (string) get_option( 'permalink_structure', '' ) ? '' : 'Choose a permalink structure under Settings, Permalinks.',
 			),
 		);
+	}
+
+	/**
+	 * Make root-relative links in blueprint content work on a site installed in a sub-directory.
+	 *
+	 * @param string $html Content.
+	 */
+	public static function localise( string $html ): string {
+		return str_replace( 'href="/', 'href="' . untrailingslashit( home_url() ) . '/', $html );
 	}
 
 	/* ---------------------------------------------------------------- lookups */
@@ -444,7 +454,8 @@ final class Setup {
 			return 'Home';
 		}
 		if ( 0 === strpos( $dest, 'page:' ) ) {
-			return Blueprint::pages()[ substr( $dest, 5 ) ]['title'] ?? $dest;
+			$key = substr( $dest, 5 );
+			return Blueprint::nav_labels()[ $key ] ?? ( Blueprint::pages()[ $key ]['title'] ?? $dest );
 		}
 		return Blueprint::archives()[ substr( $dest, 8 ) ]['title'] ?? $dest;
 	}
@@ -625,7 +636,8 @@ final class Setup {
 						'post_title'   => $def['title'],
 						'post_name'    => $def['slug'],
 						'post_status'  => 'draft',
-						'post_content' => $def['content'],
+						'post_content' => self::localise( (string) $def['content'] ),
+						'post_excerpt' => (string) ( $def['excerpt'] ?? '' ),
 						'meta_input'   => array( self::META => 'page:' . $key ),
 					),
 					true
@@ -703,6 +715,80 @@ final class Setup {
 	/* ---------------------------------------------------------------- activate */
 
 	/**
+	 * One explicit action that prepares and then activates the whole site: every page that is complete and not a legal page is
+	 * published, the menus are assigned, the front and posts pages are set when none is set, and the empty homepage and business
+	 * settings are filled with the sample values. Legal pages are never published here. Nothing existing is replaced.
+	 *
+	 * @return array<string,mixed>|\WP_Error
+	 */
+	public static function quickstart() {
+		$prepared = self::prepare();
+		if ( is_wp_error( $prepared ) ) {
+			return $prepared;
+		}
+		$publish = array();
+		foreach ( Blueprint::pages() as $key => $def ) {
+			if ( ! empty( $def['auto'] ) ) {
+				$publish[ $key ] = true;
+			}
+		}
+		$assign = array();
+		foreach ( array_keys( Blueprint::menus() ) as $key ) {
+			$assign[ $key ] = true;
+		}
+		$activated = self::activate(
+			array(
+				'publish'         => $publish,
+				'assign'          => $assign,
+				'front_page'      => true,
+				'posts_page'      => true,
+				'hero_defaults'   => true,
+				'sample_settings' => true,
+			)
+		);
+		if ( is_wp_error( $activated ) ) {
+			return $activated;
+		}
+		return array(
+			'stage'  => 'quickstart',
+			'items'  => array_merge( $prepared['items'], $activated['items'] ),
+			'counts' => $prepared['counts'],
+		);
+	}
+
+	/**
+	 * Content the owner should review or replace, with where to do it. Read-only.
+	 *
+	 * @return array<int,array<string,string>>
+	 */
+	public static function review_list(): array {
+		$rows = array();
+		foreach ( Blueprint::pages() as $key => $def ) {
+			$review = (string) ( $def['review'] ?? '' );
+			if ( '' === $review ) {
+				continue;
+			}
+			$page   = self::page_for( $key );
+			$rows[] = array(
+				'item'   => $def['title'],
+				'what'   => $review,
+				'status' => $page ? ( 'publish' === $page->post_status ? 'Published' : 'Draft' ) : 'Not created',
+				'edit'   => $page ? (string) get_edit_post_link( $page->ID, 'raw' ) : '',
+			);
+		}
+		$samples = (array) ( self::state()['sample_settings'] ?? array() );
+		if ( $samples ) {
+			$rows[] = array(
+				'item'   => 'Business details (sample)',
+				'what'   => 'Sample values are in use for: ' . implode( ', ', $samples ) . '. Replace them with verified details.',
+				'status' => 'Published in the footer and header',
+				'edit'   => admin_url( 'admin.php?page=noblen-settings' ),
+			);
+		}
+		return $rows;
+	}
+
+	/**
 	 * Default activation options (everything off).
 	 *
 	 * @return array<string,mixed>
@@ -718,6 +804,7 @@ final class Setup {
 			'posts_page'         => false,
 			'replace_posts_page' => false,
 			'hero_defaults'      => false,
+			'sample_settings'    => false,
 		);
 	}
 
@@ -863,6 +950,27 @@ final class Setup {
 				$add( 'settings', 'Homepage text', 'applied', 'Filled the empty setting(s): ' . implode( ', ', $changed ) . '. Existing values were kept.' );
 			} else {
 				$add( 'settings', 'Homepage text', 'existing', 'The homepage text is already set and was kept.' );
+			}
+		}
+
+		// 6. Sample business details: only empty settings, and remembered so the content review checklist can list them.
+		if ( ! empty( $opts['sample_settings'] ) ) {
+			$cur     = Settings::all();
+			$changed = array();
+			foreach ( Blueprint::sample_settings() as $k => $v ) {
+				if ( array_key_exists( $k, $cur ) && '' === (string) $cur[ $k ] ) {
+					$cur[ $k ] = $v;
+					$changed[] = $k;
+				}
+			}
+			if ( $changed ) {
+				Settings::save( $cur );
+				$state                    = self::state();
+				$state['sample_settings'] = array_values( array_unique( array_merge( (array) ( $state['sample_settings'] ?? array() ), $changed ) ) );
+				self::save_state( $state );
+				$add( 'settings', 'Sample business details', 'applied', 'Filled the empty setting(s): ' . implode( ', ', $changed ) . '. They are samples: replace them under Noblen, Settings. Existing values were kept.' );
+			} else {
+				$add( 'settings', 'Sample business details', 'existing', 'Your business details are already set and were kept.' );
 			}
 		}
 

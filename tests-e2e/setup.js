@@ -33,7 +33,8 @@ const SETUP = `${base}/wp-admin/admin.php?page=noblen-setup`;
   R.check(/Preparation finished/.test(result) && /not a sign that the website is complete/i.test(result), 'preparation reports a record of what happened, not a finished site');
   const pagesTable = await page.locator('table').first().innerText();
   for (const t of ['About Noblen', 'Partnerships', 'Contact', 'Terms and Conditions']) { R.check(pagesTable.includes(t), `page listed: ${t}`); }
-  R.check(await page.locator('text=Waiting for a published record').count() >= 1, 'record archives wait for a published record before they appear in navigation');
+  R.check(await page.locator('text=Install the complete website').count() >= 1 || await page.locator('text=Install or complete the website').count() >= 1, 'the one-step website installation is offered');
+  R.check(await page.locator('text=Record archives').count() >= 1, 'record archives are explained as filling when records are approved');
   R.check(await page.locator('.noblen-chip').count() > 10, 'the proposed menu entries are previewed');
 
   // Public site unchanged by preparation.
@@ -50,8 +51,8 @@ const SETUP = `${base}/wp-admin/admin.php?page=noblen-setup`;
   R.check(await page.locator('.noblen-badge--generated_draft').count() === countBefore, 'no duplicate items after a second run');
 
   // The activation form: a page with placeholders cannot be selected, and an empty activation changes nothing public.
-  const aboutBox = page.locator('input[name="publish[about]"]');
-  R.check(await aboutBox.count() === 1 && await aboutBox.isDisabled(), 'a page that still has placeholders cannot be selected for publication');
+  const legalBox = page.locator('input[name="publish[privacy]"]');
+  R.check(await legalBox.count() === 1 && await legalBox.isDisabled(), 'a legal page that still has a placeholder cannot be selected for publication');
   await page.locator('input[name="confirm_review"]').check();
   await page.locator('input[value="Activate selected items"]').click();
   await page.waitForURL(/page=noblen-setup/);
