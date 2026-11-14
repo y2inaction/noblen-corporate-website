@@ -91,9 +91,10 @@ function noblen_render_home_section( string $id ): void {
 	}
 	if ( 'group' === $id ) {
 		$group = noblen_setting( 'group_intro' );
-		if ( '' !== $group ) {
-			echo '<section class="section section--tint" id="group"><div class="wrap prose"><span class="eyebrow">About the group</span><h2>The group</h2><p>' . esc_html( $group ) . '</p></div></section>';
+		if ( '' === $group ) {
+			$group = 'Noblen Technologies Limited brings together complementary capabilities across AI, Property, Media, Energy and Cloud. We connect ideas, people and technology to help organisations improve operations and move from plans to practical execution.';
 		}
+		echo '<section class="section section--tint" id="group"><div class="wrap prose"><span class="eyebrow">One group. Connected capabilities.</span><h2>Technology, innovation and impact</h2><p>' . esc_html( $group ) . '</p><p><a class="link-more" href="' . esc_url( home_url( '/about/' ) ) . '">Discover Noblen</a></p></div></section>';
 	} elseif ( 'insights' === $id ) {
 		$posts = get_posts(
 			array(
@@ -113,9 +114,13 @@ function noblen_render_home_section( string $id ): void {
 	} elseif ( 'cta' === $id ) {
 		$cta   = noblen_setting( 'cta_headline' );
 		$email = noblen_setting( 'contact_email' );
-		if ( '' !== $cta && '' !== $email ) {
-			echo '<section class="section section--cta" id="contact"><div class="wrap"><h2>' . esc_html( $cta ) . '</h2><p><a class="btn" href="mailto:' . esc_attr( $email ) . '">Contact us</a></p></div></section>';
+		if ( '' === $cta ) {
+			$cta = 'Let’s turn your next idea into meaningful progress.';
 		}
+		if ( '' === $email ) {
+			$email = 'sales@noblenai.com';
+		}
+		echo '<section class="section section--cta" id="contact"><div class="wrap"><span class="eyebrow">Start a conversation</span><h2>' . esc_html( $cta ) . '</h2><p>Tell us what you want to build, improve or make possible.</p><p><a class="btn" href="mailto:' . esc_attr( $email ) . '">Talk to Noblen</a></p></div></section>';
 	}
 }
 
