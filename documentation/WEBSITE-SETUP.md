@@ -1,15 +1,21 @@
 # Website Setup (Noblen Corporate Core 0.2.0)
 
-**Installing and activating the theme and the plugin does not create a finished website.** A new WordPress site has no Noblen pages, no navigation menus and no records. The Website Setup, under **Noblen, Website Setup** in the dashboard, creates that structure safely, in two deliberate stages, and never at the cost of existing content or of the content approval workflow.
+**Installing and activating the theme and the plugin does not create a finished website.** A new WordPress site has no Noblen pages, no navigation menus and no records. The Website Setup, under **Noblen, Website Setup** in the dashboard, creates the complete populated website in one action (**Quick start**), or in two deliberate stages, safely and never at the cost of existing content or of the content approval workflow.
 
-## What it does
+## Quick start (recommended)
+
+Under **Noblen, Website Setup**, tick the confirmation in **Install the complete website** and click the button. In one explicit action the setup prepares everything, publishes the ten complete pages, builds and assigns the Primary and Footer menus, sets Home as the front page and Insights as the posts page **only if none is set**, fills the empty homepage headline and introduction, and fills **empty** business details with sample values. Nothing existing is replaced. The same action is available as `wp noblen setup quickstart --user=<administrator login>`. The two legal pages are never published automatically. The result is the list **Content to review and replace** on the same screen.
+
+The two stages below remain available for owners who want to review each step.
+
+## What the stages do
 
 | Stage | What happens | What stays unchanged |
 |-------|--------------|----------------------|
-| **1. Prepare** | Creates seven pages as **drafts**, three menus **empty and unassigned**, and 26 **name-only draft records** | Nothing is public. No menu is shown. The homepage setting, existing pages, menus, records and settings are not touched |
-| **2. Activate** | Publishes only the **reviewed pages you select**, adds menu entries only for destinations the public can reach, assigns a menu to a theme location only if the location is free (or you choose to replace), and changes the front page or posts page only if you ask | Records are never published by the setup. Existing content is never overwritten or deleted |
+| **1. Prepare** | Creates twelve pages as **drafts**, three menus **empty and unassigned**, and 26 **name-only draft records** | Nothing is public. No menu is shown. The homepage setting, existing pages, menus, records and settings are not touched |
+| **2. Activate** | Publishes only the **pages you select** (a page with an `[Owner to complete: ...]` placeholder is blocked), adds menu entries only for destinations the public can reach, assigns a menu to a theme location only if the location is free (or you choose to replace), and changes the front page or posts page only if you ask | Records are never published by the setup. Existing content is never overwritten or deleted |
 
-The same actions are available from the command line: `wp noblen setup status|prepare|activate` (run with `--user=<administrator login>`).
+The same actions are available from the command line: `wp noblen setup status|prepare|quickstart|activate` (run with `--user=<administrator login>`).
 
 ## Prerequisites
 
@@ -20,15 +26,15 @@ The same actions are available from the command line: `wp noblen setup status|pr
 
 ## The structure it prepares
 
-**Pages (drafts):** Home (`/home/`), About Noblen (`/about/`), Insights (`/insights/`), Partnerships (`/partnerships/`), Contact (`/contact/`), Privacy Policy (`/privacy-policy/`), Terms and Conditions (`/terms-and-conditions/`). All use the theme's standard page template; nothing is added to the design system.
+**Pages:** Home (`/`), About Noblen (`/about/`), Our Businesses (`/our-businesses/`), Industries (`/industries-we-serve/`), Solutions & Services (`/solutions-and-services/`), Portfolio (`/portfolio/`), Products & Platforms (`/products-and-platforms/`), Partnerships (`/partnerships/`), Insights (`/insights/`, the posts page), Contact (`/contact/`), Privacy Policy (`/privacy/`) and Terms and Conditions (`/terms/`). The last two are drafts that are never published automatically. The content uses only the theme's own components (hero, tiles, split sections, call-to-action bands, illustrative sample cards), so it stays consistent and editable in the normal editor.
 
-**Sections served by record archives.** Our Group, Industries, Solutions & Services, Portfolio and Products & Platforms already have their own addresses from Noblen Core (`/group/`, `/industries/`, `/solutions/`, `/projects/`, `/products/`). A WordPress page at one of those addresses would never be reached, so **no duplicate page is created**. Navigation links to the archive once at least one record of that type is approved and published, so a menu never leads to an empty section.
+**Record archives.** Detailed records (business units, industries, services, projects, products) keep their own addresses from Noblen Core (`/group/`, `/industries/`, `/solutions/`, `/projects/`, `/products/`) and fill as records are approved and published. The page addresses above deliberately differ from them.
 
-**Menus:** Primary Navigation (Home, About Noblen, Our Group, Industries, Solutions & Services, Portfolio, Products & Platforms, Insights, Partnerships, Contact), Footer Navigation (About Noblen, Our Group, Portfolio, Insights, Partnerships, Contact) and Legal Navigation (Privacy Policy, Terms and Conditions). They are created empty; entries are added at activation.
+**Menus:** Primary Navigation (About, Our Businesses, Industries, Solutions, Portfolio, Products, Insights, Contact; a Contact button is added by the theme), Footer Navigation (About, Our Businesses, Portfolio, Partnerships, Insights, Contact) and Legal Navigation (Privacy Policy, Terms), which waits until those pages are published. Entries are added at activation for public destinations only.
 
-**Draft records (names only):** 3 business units (Noblen AI Solutions, Noblen Media Services, Noblen Property Limited), 5 industries (AI, Property, Media, Energy, Cloud), 8 services documented in the media brochure, 4 products and platforms (CIDU, OnlineMart, ArewaGo, Noblen AI Platform) and 6 institutional project titles documented in the content inventory. No client name, date, status, outcome or description is added. The setup reuses the existing starter-draft names rather than adding a second mechanism.
+**Draft records (names only):** 3 business units (Noblen AI Solutions, Noblen Media Services, Noblen Property Limited), 5 industries, 8 services documented in the media brochure, 4 products and platforms (CIDU, OnlineMart, ArewaGo, Noblen AI Platform) and 6 institutional project titles documented in the content inventory. No client name, date, status, outcome or description is added.
 
-**What is written as fact:** only what the owner has established: Noblen Technologies Limited as the parent company, the positioning "Autonomous Operating Systems Provider", the brand promise "AI That Gets Things Done", Noblen AI as the group's central intelligence and execution business, and the business areas AI, Property, Media, Energy and Cloud. Everything else is an editable placeholder written as **`[Owner to complete: ...]`**. No case study, testimonial, partner, statistic, award or outcome is generated.
+**What is written as fact:** only what the owner has established: Noblen Technologies Limited as the parent company; "technology, innovation and impact"; the mission of helping individuals and companies improve operations and scale their businesses through collective solutions; the business areas Noblen AI, Property, Media, Energy and Cloud; Noblen AI as the Autonomous Operating Systems Provider; and the promise "AI That Gets Things Done". Descriptions of services and sectors are drawn from the project's content inventory and are marked for owner confirmation. The Portfolio shows six **illustrative samples**, each labelled as such. Sample contact details are labelled as sample values. No case study, testimonial, partner, statistic, award or outcome is generated. The legal pages carry `[Owner to complete: ...]` markers and a "Draft for legal review" notice.
 
 ## Step by step
 
@@ -55,7 +61,7 @@ A successful preparation is **not** equivalent to a published website.
 
 The setup identifies its own items by a stable key stored with them. Anything else that is in the way is **kept and reported**:
 
-* **A page already at an address** (for example a page at `/about/`, or the draft "Privacy Policy" that WordPress creates on installation): the setup creates no second page and does not edit yours. To use it in navigation, make sure it is published, then tick *Use my existing published page* at activation; it is linked, not changed. Alternatively, edit your page's address.
+* **A page already at an address** (for example a page of your own at `/about/`): the setup creates no second page and does not edit yours. To use it in navigation, make sure it is published, then tick *Use my existing published page* at activation; it is linked, not changed. Alternatively, edit your page's address.
 * **A menu with the same name:** kept; the setup creates no second menu and never adds to it.
 * **A location that already has another menu:** kept unless you tick *replace* for that location.
 * **A different static front page or posts page:** kept unless you tick the matching *replace* choice.
@@ -84,4 +90,4 @@ Everything the setup creates is a draft, an empty menu or a menu entry. To undo:
 
 ## Technical notes
 
-Items carry the meta key `_noblen_setup_key` (menus carry it as term meta; menu entries as post meta). Progress is kept in the option `noblen_core_setup_state`. Tests: `wordpress-plugin/noblen-corporate-core/tests/Unit/SetupTest.php` (29 tests: first run, repeat runs, existing page, menu and homepage preservation, conflicts, partial recovery, draft-only records, no workflow bypass, capability and nonce checks, invalid configuration, activation readiness, no menu entry for an unpublished page).
+Items carry the meta key `_noblen_setup_key` (menus carry it as term meta; menu entries as post meta). Progress is kept in the option `noblen_core_setup_state`. Tests: `wordpress-plugin/noblen-corporate-core/tests/Unit/SetupTest.php` (35 tests: quick start and its repeat and no-overwrite behaviour, first run, repeat runs, existing page, menu and homepage preservation, conflicts, partial recovery, draft-only records, no workflow bypass, capability and nonce checks, invalid configuration, activation readiness, no menu entry for an unpublished page).

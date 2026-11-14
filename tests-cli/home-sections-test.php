@@ -94,9 +94,14 @@ t( ! str_contains( $out, '<script>' ), 'partner titles are escaped' );
 t( ! str_contains( $out, 'No link' ), 'a partner without a URL is ignored' );
 t( 1 === substr_count( $out, 'class="card ' ), 'only the one valid partner is rendered' );
 
-// Call to action needs both a headline and a contact email.
-if ( '' === noblen_setting( 'cta_headline' ) || '' === noblen_setting( 'contact_email' ) ) {
-	t( '' === render( 'cta' ), 'the call to action renders nothing without a headline and an email' );
+// Call to action: the contact email when set, else the published Contact page, else nothing. No built-in fallback address.
+$cta_out = render( 'cta' );
+t( ! str_contains( $cta_out, 'noblenai' ), 'the call to action never contains a built-in fallback address' );
+$cta_contact = get_page_by_path( 'contact', OBJECT, 'page' );
+if ( '' === noblen_setting( 'contact_email' ) && ! ( $cta_contact && 'publish' === $cta_contact->post_status ) ) {
+	t( '' === $cta_out, 'the call to action renders nothing without a contact email or a published Contact page' );
+} else {
+	t( str_contains( $cta_out, 'class="btn" href="' ), 'the call to action links to the contact email or the Contact page' );
 }
 
 reset_mods();

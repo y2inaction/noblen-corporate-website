@@ -64,5 +64,14 @@ const used = new Set([...mainCss.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[
 const defined = new Set([...tokensCss.matchAll(/(--[a-z0-9-]+):/g)].map((m) => m[1]));
 const undefinedVars = [...used].filter((v) => !defined.has(v) && !['--logo-h'].includes(v));
 check(undefinedVars.length === 0, 'every custom property used in main.css is defined in tokens.css', undefinedVars.join(' '));
+// The same guards for the populated-site component styles (tiles, bands, hero art, sample cards).
+const compCss = fs.readFileSync(path.join(cssDir, 'components.css'), 'utf8');
+const compLiterals = (compCss.match(/#[0-9a-fA-F]{3,8}\b/g) || []).map((x) => x.toLowerCase()).filter((x) => !['#000', '#fff', '#000000', '#ffffff'].includes(x));
+check(compLiterals.length === 0, 'components.css has no colour literals other than neutral black and white', compLiterals.join(' '));
+check(def.tokens.map((t) => t.default).filter((h) => compCss.toLowerCase().includes(h)).length === 0, 'components.css contains none of the default brand colours');
+check(!/rgba?\(/i.test(compCss), 'components.css has no rgb() colour literals');
+const compUsed = new Set([...compCss.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
+const compUndefined = [...compUsed].filter((v) => !defined.has(v) && !used.has(v) && !['--logo-h', '--icon'].includes(v));
+check(compUndefined.length === 0, 'every custom property used in components.css is defined in tokens.css', compUndefined.join(' '));
 console.log(`\n${passes} passed, ${failures} failed`);
 process.exit(failures ? 1 : 0);
