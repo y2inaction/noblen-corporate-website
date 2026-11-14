@@ -405,6 +405,7 @@ final class Admin {
 		echo '</table>';
 		submit_button();
 		echo '</form>';
+		echo '<h2>Website setup</h2><p>To create the website pages, menus and draft records safely, use <a href="' . esc_url( admin_url( 'admin.php?page=noblen-setup' ) ) . '">Noblen, Website Setup</a>. It includes the starter drafts below and never overwrites existing content.</p>';
 		echo '<h2>Starter drafts</h2><p>Creates unpublished, names-only drafts for the three business units and four products named in the brief. No content or clearance is added.</p>';
 		echo '<p><a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=noblen_seed' ), 'noblen_seed' ) ) . '">Create starter drafts</a></p></div>';
 	}

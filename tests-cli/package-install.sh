@@ -31,6 +31,16 @@ W theme activate noblen-corporate >/dev/null;       eq "C19-002 theme activates 
 eq "C19-003 schema at current version" "$(W eval 'echo Noblen\Core\Database\Migrator::installed_version();')" "$(W eval 'echo Noblen\Core\Database\Schema::VERSION;')"
 eq "C19-003 front page renders from ZIP install" "$(W eval '$_SERVER["SERVER_NAME"]="localhost"; ob_start(); include get_template_directory()."/front-page.php"; echo strlen(ob_get_clean())>200?"rendered":"empty";')" "rendered"
 eq "C19-003 empty site shows no section headings" "$(W eval '$_SERVER["SERVER_NAME"]="localhost"; ob_start(); include get_template_directory()."/front-page.php"; $h=ob_get_clean(); echo preg_match("/Business units|Industries|Featured projects|Products and platforms/",$h)?"sections":"none";')" "none"
+# Website Setup from the packaged plugin: prepare creates drafts only, repeats without duplicates, and changes nothing public.
+W user create setup-admin setup-admin@example.test --role=administrator --user_pass=pkg-pass-only >/dev/null
+W noblen setup prepare --user=setup-admin >/dev/null
+# A fresh WordPress already holds a draft "Privacy Policy" at /privacy-policy/: the setup keeps it and reports a conflict, so six pages are created.
+eq "setup: six draft pages created (the default Privacy Policy page is kept as a conflict)" "$(W eval 'echo count(get_posts(array("post_type"=>"page","post_status"=>"draft","meta_key"=>"_noblen_setup_key","posts_per_page"=>-1,"fields"=>"ids")));')" "6"
+eq "setup: three menus, none assigned" "$(W eval 'echo count(get_terms(array("taxonomy"=>"nav_menu","hide_empty"=>false,"meta_key"=>"_noblen_setup_key"))), "|", count(array_filter(get_nav_menu_locations()));')" "3|0"
+eq "setup: records are drafts only" "$(W eval 'echo count(get_posts(array("post_type"=>Noblen\Core\Content\Types::all(),"post_status"=>"publish","meta_key"=>"_noblen_setup_key","posts_per_page"=>-1,"fields"=>"ids")));')" "0"
+W noblen setup prepare --user=setup-admin >/dev/null
+eq "setup: a second run creates no duplicates" "$(W eval 'echo count(get_posts(array("post_type"=>"page","post_status"=>"any","meta_key"=>"_noblen_setup_key","posts_per_page"=>-1,"fields"=>"ids")));')" "6"
+eq "setup: the stylesheet is in the package" "$([ -f "$SITE/wp-content/plugins/noblen-corporate-core/assets/admin-setup.css" ] && echo yes || echo no)" "yes"
 eq "C19-003 no PHP errors logged" "$(unexpected_php_errors)" "0"
 echo "$pass passed, $fail failed"; rm -rf "$WORK"
 [ "$fail" -eq 0 ]

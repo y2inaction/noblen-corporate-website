@@ -1,0 +1,32 @@
+/* Noblen Website Setup screen. Brand: deep navy and blue dominant, restrained green accent. Scoped to .noblen-setup. */
+.noblen-setup{--n-navy:#0a1b3d;--n-blue:#1f6bff;--n-green:#177443;--n-ink:#1a2438;--n-line:#d5dbe6;--n-soft:#eef2f9;max-width:1100px}
+.noblen-setup__hero{background:var(--n-navy);color:#fff;padding:22px 28px;border-radius:8px;margin:16px 0 18px;border-bottom:4px solid var(--n-green)}
+.noblen-setup__title{color:#fff;margin:0 0 4px;font-size:26px;font-weight:600;line-height:1.2}
+.noblen-setup__lead{margin:0;color:#dbe6ff;font-size:14px}
+.noblen-setup h2{color:var(--n-navy);margin-top:28px}
+.noblen-setup h3{color:var(--n-navy)}
+.noblen-step{background:#fff;border:1px solid var(--n-line);border-left:4px solid var(--n-blue);border-radius:6px;padding:4px 20px 18px;margin:22px 0}
+.noblen-step .button-primary{background:var(--n-blue);border-color:var(--n-blue)}
+.noblen-step .button-primary:hover,.noblen-step .button-primary:focus{background:var(--n-navy);border-color:var(--n-navy)}
+.noblen-badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.6;border:1px solid transparent}
+.noblen-badge--existing{background:#f0f1f3;color:#3a4252;border-color:#c9ced8}
+.noblen-badge--generated_draft{background:var(--n-soft);color:var(--n-navy);border-color:#b9c7e3}
+.noblen-badge--ready_for_review{background:#e3edff;color:#0b3a99;border-color:#8fb2ff}
+.noblen-badge--public{background:#e2f3ea;color:#0f5a33;border-color:#8cc9a6}
+.noblen-badge--conflict,.noblen-badge--trashed{background:#fbe9e9;color:#8a1f1f;border-color:#e3a5a5}
+.noblen-badge--missing{background:#fff;color:#3a4252;border-color:#c9ced8}
+.noblen-checks,.noblen-options,.noblen-result,.noblen-log{margin:8px 0 8px 0;padding:0;list-style:none}
+.noblen-checks li{padding:6px 10px;border:1px solid var(--n-line);border-radius:4px;margin-bottom:6px;background:#fff}
+.noblen-checks li span{display:inline-block;min-width:110px;font-weight:600}
+.noblen-checks li.ok span{color:var(--n-green)}
+.noblen-checks li.warn span{color:#8a1f1f}
+.noblen-options li{padding:6px 0;border-bottom:1px solid var(--n-soft)}
+.noblen-result li,.noblen-log li{padding:3px 0}
+.noblen-chip{display:inline-block;margin:2px 4px 2px 0;padding:1px 8px;border-radius:4px;font-size:12px;border:1px solid var(--n-line)}
+.noblen-chip.is-public{background:#e2f3ea;border-color:#8cc9a6;color:#0f5a33}
+.noblen-chip.is-waiting{background:#f6f7f9;color:#5b6477}
+.noblen-legend .noblen-badge{margin-right:6px}
+.noblen-setup .widefat th{color:var(--n-navy)}
+.noblen-setup a{color:#154fc4}
+.noblen-setup :focus-visible{outline:2px solid var(--n-blue);outline-offset:2px}
+@media (max-width:782px){.noblen-setup__hero{padding:16px}.noblen-step{padding:2px 12px 14px}}

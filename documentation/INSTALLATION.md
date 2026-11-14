@@ -25,6 +25,10 @@ Back up the files and the database. Backups that contain the plugin tables are c
 5. Open Noblen, Settings and enter only verified business details. Optionally use "Create starter drafts".
 6. Assign menus (Primary, Footer, Legal).
 
+## After installation: set up the website structure
+
+Activating the theme and plugin does not create a website. Open **Noblen, Website Setup** (administrator), prepare the draft structure, review and complete the pages, then activate. Existing content is never overwritten. See [WEBSITE-SETUP.md](WEBSITE-SETUP.md). The command-line form is `wp noblen setup status|prepare|activate`.
+
 ## WP-CLI equivalent
 
 ```bash

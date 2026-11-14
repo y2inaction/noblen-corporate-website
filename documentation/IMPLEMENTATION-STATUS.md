@@ -4,6 +4,10 @@ Branch `feature/m2-implementation` (pushed; draft pull request #2 to `main`, ope
 
 Planned, Implemented, Executed and Accepted are four independent statuses. **Accepted is false for all 34 criteria.** Almost every execution is local. Hosted CI runs and one Classic Editor capture run exist on this branch; the runs examined for this status are tabulated below, and the repository's Actions page is the current list. CI run 6 (`ec38d89`) was the first fully green run, including the strict Configuration A job, and the later runs examined (7 to 9, at the time of writing) concluded successfully. **C21-021 and C21-022 are evidenced and awaiting owner acceptance.**
 
+## Post-release addition: Website Setup (Noblen Corporate Core 0.2.0)
+
+Release 0.1.0 shipped without a way to create the website structure, so a new installation had no pages, menus or records. Core 0.2.0 adds **Noblen, Website Setup** ([WEBSITE-SETUP.md](WEBSITE-SETUP.md)): a two-stage, repeatable setup that prepares draft pages, empty menus and name-only draft records, then activates only what the administrator has reviewed. It reuses the existing starter-draft names, never overwrites or deletes content, never publishes a record, and leaves the content approval workflow unchanged. Evidence on this branch: `SetupTest.php` (29 tests), the full PHPUnit suite (175 tests, all passing on a fresh site), `tests-e2e/setup.js` (28 checks including axe), package install checks (17), and local PHPCS and compatibility checks. Hosted CI for this branch is recorded in its pull request. This does not change the acceptance position: the 17 manual records remain PENDING and `accepted_count` is 0.
+
 ## Local test evidence
 
 Environment: PHP 8.3.6, MariaDB 10.11, WordPress 6.4.3, WP-CLI 2.12.0, PHPUnit 9.6.17, Chromium with Playwright 1.63.0, axe-core 4.10.2, PHPCS with WPCS 3.x and PHPCompatibilityWP 2.1.

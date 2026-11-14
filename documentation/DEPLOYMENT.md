@@ -34,7 +34,7 @@ Follow [INSTALLATION.md](INSTALLATION.md) on a **staging copy** first. Productio
 4. Upload and activate **Noblen Corporate Core**, then the **Noblen Corporate** theme.
 5. Create the three roles' users (Content Editor, Clearance Officer, Publication Approver). The approver must differ from the last editor and the clearance officer.
 6. Enter only verified business details under Noblen, Settings.
-7. Assign the Primary, Footer and Legal menus; choose the home page sections (Customize, Home page sections).
+7. Run **Noblen, Website Setup** ([WEBSITE-SETUP.md](WEBSITE-SETUP.md)): prepare the draft pages, menus and records, complete the pages, then activate what is reviewed (this assigns the Primary, Footer and Legal menus when their destinations are public). Choose the home page sections in Customize, Home page sections.
 8. Verify (below). Remove maintenance mode only after verification passes.
 
 ## Post-deployment verification
