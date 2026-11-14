@@ -72,6 +72,17 @@ function noblen_partnership_items(): array {
 }
 
 /**
+ * A "Discover Noblen" link, shown only when the About page is published (never a link to a page that does not exist).
+ */
+function noblen_discover_link(): string {
+	$page = get_page_by_path( 'about', OBJECT, 'page' );
+	if ( ! $page || 'publish' !== $page->post_status ) {
+		return '';
+	}
+	return '<p><a class="link-more" href="' . esc_url( get_permalink( $page ) ) . '">Discover Noblen</a></p>';
+}
+
+/**
  * Render one home section by ID.
  *
  * @param string $id Section ID.
@@ -94,7 +105,7 @@ function noblen_render_home_section( string $id ): void {
 		if ( '' === $group ) {
 			$group = 'Noblen Technologies Limited brings together complementary capabilities across AI, Property, Media, Energy and Cloud. We connect ideas, people and technology to help organisations improve operations and move from plans to practical execution.';
 		}
-		echo '<section class="section section--tint" id="group"><div class="wrap prose"><span class="eyebrow">One group. Connected capabilities.</span><h2>Technology, innovation and impact</h2><p>' . esc_html( $group ) . '</p><p><a class="link-more" href="' . esc_url( home_url( '/about/' ) ) . '">Discover Noblen</a></p></div></section>';
+		echo '<section class="section section--tint" id="group"><div class="wrap prose"><span class="eyebrow">One group. Connected capabilities.</span><h2>Technology, innovation and impact</h2><p>' . esc_html( $group ) . '</p>' . noblen_discover_link() . '</div></section>';
 	} elseif ( 'insights' === $id ) {
 		$posts = get_posts(
 			array(

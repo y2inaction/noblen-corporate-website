@@ -33,7 +33,7 @@ After installation, **Noblen, Website Setup** shows a list titled **Content to r
 
 | Item | Why |
 |------|-----|
-| Contact details (email `info@noblen.org`, phone `+234 000 000 0000`, address, WhatsApp) | Sample values. Replace them under **Noblen, Settings** with the real details |
+| Contact details (email `info@noblen.org`, phone `+234 000 000 0000`, address) | Sample values. Replace them under **Noblen, Settings** with the real details |
 | Portfolio | The six entries are labelled "Illustrative sample". Replace them with real, cleared projects |
 | Our Businesses, Industries, Solutions & Services, Products & Platforms | Descriptions of the Energy and Cloud areas and the lists of services and industries are generic: confirm or correct them |
 | Partnerships | Describes areas of collaboration interest only: it names no partner |

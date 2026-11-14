@@ -104,6 +104,15 @@ if ( '' === noblen_setting( 'contact_email' ) && ! ( $cta_contact && 'publish' =
 	t( str_contains( $cta_out, 'class="btn" href="' ), 'the call to action links to the contact email or the Contact page' );
 }
 
+// The group section links to About only when an About page is published (never a link to a page that does not exist).
+$about_page = get_page_by_path( 'about', OBJECT, 'page' );
+$group_out  = render( 'group' );
+if ( $about_page && 'publish' === $about_page->post_status ) {
+	t( str_contains( $group_out, 'Discover Noblen' ), 'the group section links to the published About page' );
+} else {
+	t( ! str_contains( $group_out, '/about/' ) && ! str_contains( $group_out, 'Discover Noblen' ), 'the group section has no link while there is no published About page' );
+}
+
 reset_mods();
 echo "\n$pass passed, $fail failed\n";
 exit( $fail ? 1 : 0 );

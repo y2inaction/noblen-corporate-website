@@ -180,9 +180,9 @@ final class Blueprint {
 			array(
 				self::tile( 'mail', 'Email', 'For general enquiries, partnerships and project conversations.', 'mailto:info@noblen.org', 'info@noblen.org' ),
 				self::tile( 'phone', 'Phone', 'Call during normal business hours.', 'tel:+2340000000000', '+234 000 000 0000' ),
-				self::tile( 'whatsapp', 'WhatsApp', 'A quick way to start a conversation.', 'https://wa.me/2340000000000', 'Message us' ),
 				self::tile( 'pin', 'Office', 'Business address to be confirmed.', '', '' ),
-			)
+			),
+			'tiles--3'
 		);
 
 		return array(
@@ -379,13 +379,13 @@ final class Blueprint {
 				'title'   => 'Contact',
 				'slug'    => 'contact',
 				'role'    => 'content',
-				'purpose' => 'How to reach Noblen, with working email, phone and WhatsApp links.',
+				'purpose' => 'How to reach Noblen, with working email and phone links.',
 				'excerpt' => 'Tell us what you want to build, improve or make possible.',
 				'content' => '<p class="lead">We would like to hear from you. Choose the way that suits you best.</p>' . $contact
 					. '<h2>What to include</h2><ul><li>What you are trying to achieve</li><li>Who is involved and the timeline you have in mind</li><li>Any background that would help us prepare</li></ul>'
 					. '<p class="small">Contact details shown here are sample details and will be replaced with Noblen’s official details.</p>',
 				'auto'    => true,
-				'review'  => 'Sample contact details: replace the email, phone, WhatsApp and office address with verified details (Noblen, Settings, and this page).',
+				'review'  => 'Sample contact details: replace the email, phone and office address with verified details (Noblen, Settings, and this page).',
 			),
 			'privacy'      => array(
 				'title'   => 'Privacy Policy',
@@ -560,7 +560,6 @@ final class Blueprint {
 			'contact_email'   => 'info@noblen.org',
 			'contact_phone'   => '+234 000 000 0000',
 			'contact_address' => 'Business address to be confirmed',
-			'whatsapp_number' => '+234 000 000 0000',
 		);
 	}
 }

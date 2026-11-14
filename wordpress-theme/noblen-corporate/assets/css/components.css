@@ -36,7 +36,7 @@
 /* ---- header refinements ---------------------------------------------------- */
 .brand__mark{width:2rem;height:2rem;flex:none;color:var(--brand-primary)}
 .brand__mark .bm-bg{fill:var(--brand-primary)}.brand__mark .bm-n{stroke:var(--color-on-primary);fill:none}.brand__mark .bm-dot{fill:var(--brand-accent)}
-.brand--with-mark .brand__text{border-left:0;padding-left:0;font-size:1.25rem;letter-spacing:.04em}
+.brand--with-mark .brand__text{border-left-width:0;padding-left:0;font-size:1.25rem;letter-spacing:.04em}
 .site-nav .menu{gap:var(--sp-4)}
 .site-nav .menu>li>a{font-size:var(--fs-sm);white-space:nowrap}
 .site-nav .menu-cta>a{background:var(--color-button-bg);color:var(--color-button-text);padding:.55rem 1.1rem;border-radius:999px;border-bottom:0;font-weight:700}
